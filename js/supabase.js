@@ -177,32 +177,52 @@ function getSupabaseClient() {
 async function fetchSupabaseOrLocal(tableName, storageKey, fallbackDefault) {
   const raw = localStorage.getItem(storageKey);
   const localData = safeParse(raw, null);
-  const sb = getSupabaseClient();
 
-  if (!sb) {
-    return localData !== null ? localData : fallbackDefault;
-  }
-
-  // Remote fetch to sync cache
+  // Try backend Vercel API first for instant server-side cached response
   const remotePromise = (async () => {
     try {
-      const { data, error } = await sb.from(tableName).select('*');
-      if (data && !error && data.length > 0) {
-        localStorage.setItem(storageKey, JSON.stringify(data));
-        return data;
+      // Check if backend bundle API is available
+      const apiRes = await fetch('/api/data').catch(() => null);
+      if (apiRes && apiRes.ok) {
+        const bundle = await apiRes.json();
+        const keyMap = {
+          site_settings: 'settings',
+          about_settings: 'about',
+          modalities: 'modalities',
+          roster: 'roster',
+          staff: 'staff',
+          matches: 'matches',
+          trophies: 'trophies',
+          gallery: 'gallery',
+          social_feeds: 'social',
+          recent_tournaments: 'recentTournaments',
+          community_tournaments: 'communityTournaments'
+        };
+        const mappedKey = keyMap[tableName];
+        if (mappedKey && bundle[mappedKey]) {
+          const data = bundle[mappedKey];
+          localStorage.setItem(storageKey, JSON.stringify(data));
+          return data;
+        }
+      }
+
+      // Fallback to direct Supabase SDK if API endpoint is not active
+      const sb = getSupabaseClient();
+      if (sb) {
+        const { data, error } = await sb.from(tableName).select('*');
+        if (data && !error && data.length > 0) {
+          localStorage.setItem(storageKey, JSON.stringify(data));
+          return data;
+        }
       }
     } catch (e) {
-      console.warn(`[LykosDB] Supabase select error for ${tableName}:`, e);
+      console.warn(`[LykosDB] Backend fetch error for ${tableName}:`, e);
     }
     return null;
   })();
 
-  // Instant render if local cache exists, else fallback default
   const initialData = localData !== null ? localData : fallbackDefault;
-
-  // Fire-and-forget background sync from Supabase to fill cache for subsequent renders/visits
   remotePromise.then(() => {});
-
   return initialData;
 }
 
