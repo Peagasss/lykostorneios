@@ -228,16 +228,16 @@ async function fetchSupabaseOrLocal(tableName, storageKey, fallbackDefault) {
 
 async function saveSupabaseAndLocal(tableName, storageKey, fullList, singleItem) {
   localStorage.setItem(storageKey, JSON.stringify(fullList));
-  const sb = getSupabaseClient();
-  if (sb && singleItem) {
+  if (singleItem) {
     (async () => {
       try {
-        const { error } = await sb.from(tableName).upsert(singleItem);
-        if (error) {
-          console.error(`[LykosDB] Supabase upsert error on table '${tableName}':`, error);
-        }
+        await fetch('/api/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ entity: tableName, item: singleItem })
+        }).catch(() => null);
       } catch (e) {
-        console.warn(`[LykosDB] Supabase upsert exception for ${tableName}:`, e);
+        console.warn(`[LykosDB] Save error for ${tableName}:`, e);
       }
     })();
   }
@@ -245,16 +245,16 @@ async function saveSupabaseAndLocal(tableName, storageKey, fullList, singleItem)
 
 async function deleteSupabaseAndLocal(tableName, storageKey, fullList, itemId) {
   localStorage.setItem(storageKey, JSON.stringify(fullList));
-  const sb = getSupabaseClient();
-  if (sb && itemId) {
+  if (itemId) {
     (async () => {
       try {
-        const { error } = await sb.from(tableName).delete().eq('id', String(itemId));
-        if (error) {
-          console.error(`[LykosDB] Supabase delete error on table '${tableName}':`, error);
-        }
+        await fetch('/api/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ entity: tableName, id: itemId })
+        }).catch(() => null);
       } catch (e) {
-        console.warn(`[LykosDB] Supabase delete exception for ${tableName}:`, e);
+        console.warn(`[LykosDB] Delete error for ${tableName}:`, e);
       }
     })();
   }
@@ -316,42 +316,18 @@ window.LykosDB = {
     localStorage.setItem('lykos_settings', JSON.stringify(mergedSettings));
     window.dispatchEvent(new CustomEvent('lykos_branding_updated', { detail: mergedSettings }));
 
-    const sb = getSupabaseClient();
-    if (sb) {
+    (async () => {
       try {
-        // Only send columns that exist in the site_settings table schema
-        const supabasePayload = {
-          id: 1,
-          team_name: mergedSettings.team_name,
-          logo_url: mergedSettings.logo_url,
-          header_logo_url: mergedSettings.header_logo_url,
-          favicon_url: mergedSettings.favicon_url,
-          primary_color: mergedSettings.primary_color,
-          show_tournaments_tab: mergedSettings.show_tournaments_tab,
-          hero_title: mergedSettings.hero_title,
-          hero_subtitle: mergedSettings.hero_subtitle,
-          hero_image_url: mergedSettings.hero_image_url,
-          discord_url: mergedSettings.discord_url,
-          instagram_url: mergedSettings.instagram_url,
-          x_url: mergedSettings.x_url,
-          facebook_url: mergedSettings.facebook_url,
-          contact_socials_json: mergedSettings.contact_socials_json,
-          updated_at: nowIso
-        };
-        const { error } = await sb.from('site_settings').upsert(supabasePayload);
-        if (error) {
-          console.error("[LykosDB] Supabase saveSettings error:", error);
-          // If column missing, keep local data but show actionable message
-          if (error.message && error.message.includes("column")) {
-            alert('Supabase: coluna ausente no banco de dados.\n\nSolução: Execute o arquivo supabase_schema.sql no SQL Editor do Supabase para atualizar a estrutura da tabela.');
-          } else {
-            alert('Aviso do Supabase: ' + error.message);
-          }
-        }
+        await fetch('/api/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ entity: 'site_settings', item: mergedSettings })
+        }).catch(() => null);
       } catch (e) {
-        console.warn("[LykosDB] Supabase saveSettings exception:", e);
+        console.warn("[LykosDB] saveSettings error:", e);
       }
-    }
+    })();
+
     return mergedSettings;
   },
 
@@ -498,25 +474,17 @@ window.LykosDB = {
   },
   async saveAboutSettings(about) {
     localStorage.setItem('lykos_about', JSON.stringify(about));
-    const sb = getSupabaseClient();
-    if (sb) {
+    (async () => {
       try {
-        const { error } = await sb.from('about_settings').upsert({
-          id: 1,
-          history_text: about.history_text || '',
-          mission_text: about.mission_text || '',
-          stat_trophies: about.stat_trophies || '14+',
-          stat_winrate: about.stat_winrate || '78%',
-          stat_community: about.stat_community || '500K+',
-          about_image_url: about.about_image_url || ''
-        });
-        if (error) {
-          console.error("[LykosDB] Supabase saveAboutSettings error:", error);
-        }
+        await fetch('/api/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ entity: 'about_settings', item: about })
+        }).catch(() => null);
       } catch (e) {
-        console.warn("[LykosDB] Supabase saveAboutSettings error:", e);
+        console.warn("[LykosDB] saveAboutSettings error:", e);
       }
-    }
+    })();
     return about;
   },
 
@@ -632,21 +600,17 @@ window.LykosDB = {
     }
     localStorage.setItem('lykos_users', JSON.stringify(users));
 
-    const sb = getSupabaseClient();
-    if (sb) {
+    (async () => {
       try {
-        await sb.from('app_users').upsert({
-          id: String(user.id),
-          email: user.email,
-          fullName: user.fullName || '',
-          password: user.password,
-          permissions: user.permissions || [],
-          is_master: user.is_master || false
-        });
+        await fetch('/api/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ entity: 'app_users', item: user })
+        }).catch(() => null);
       } catch (e) {
-        console.warn("[LykosDB] Supabase saveUser error:", e);
+        console.warn("[LykosDB] saveUser error:", e);
       }
-    }
+    })();
     return user;
   },
   async saveUserRole(userId, newRole) {
@@ -662,12 +626,15 @@ window.LykosDB = {
     users = users.filter(u => String(u.id) !== String(id));
     localStorage.setItem('lykos_users', JSON.stringify(users));
 
-    const sb = getSupabaseClient();
-    if (sb) {
+    (async () => {
       try {
-        await sb.from('app_users').delete().eq('id', String(id));
+        await fetch('/api/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ entity: 'app_users', id })
+        }).catch(() => null);
       } catch (e) {}
-    }
+    })();
   },
 
   async getLoginLogs() {
