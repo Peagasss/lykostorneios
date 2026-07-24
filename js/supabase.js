@@ -233,28 +233,29 @@ window.LykosDB = {
 
     const sb = getSupabaseClient();
     if (sb) {
-      sb.from('site_settings').select('*').eq('id', 1).maybeSingle()
-        .then(({ data, error }) => {
-          if (data && !error) {
-            const localTime = localParsed.updated_at ? new Date(localParsed.updated_at).getTime() : 0;
-            const remoteTime = data.updated_at ? new Date(data.updated_at).getTime() : 0;
+      try {
+        const { data, error } = await sb.from('site_settings').select('*').eq('id', 1).maybeSingle();
+        if (data && !error) {
+          const localTime = localParsed.updated_at ? new Date(localParsed.updated_at).getTime() : 0;
+          const remoteTime = data.updated_at ? new Date(data.updated_at).getTime() : 0;
 
-            if (remoteTime >= localTime) {
-              let updated = false;
-              Object.keys(data).forEach(key => {
-                if (data[key] !== null && data[key] !== undefined && data[key] !== '' && currentSettings[key] !== data[key]) {
-                  currentSettings[key] = data[key];
-                  updated = true;
-                }
-              });
-              if (updated) {
-                localStorage.setItem('lykos_settings', JSON.stringify(currentSettings));
-                window.dispatchEvent(new CustomEvent('lykos_branding_updated', { detail: currentSettings }));
+          if (remoteTime >= localTime) {
+            let updated = false;
+            Object.keys(data).forEach(key => {
+              if (data[key] !== null && data[key] !== undefined && data[key] !== '' && currentSettings[key] !== data[key]) {
+                currentSettings[key] = data[key];
+                updated = true;
               }
+            });
+            if (updated) {
+              localStorage.setItem('lykos_settings', JSON.stringify(currentSettings));
+              window.dispatchEvent(new CustomEvent('lykos_branding_updated', { detail: currentSettings }));
             }
           }
-        })
-        .catch(e => console.warn("[LykosDB] Supabase getSettings sync warning:", e));
+        }
+      } catch (e) {
+        console.warn("[LykosDB] Supabase getSettings sync warning:", e);
+      }
     }
 
     return currentSettings;
@@ -270,8 +271,11 @@ window.LykosDB = {
 
     const sb = getSupabaseClient();
     if (sb) {
-      sb.from('site_settings').upsert({ id: 1, ...mergedSettings, updated_at: nowIso })
-        .catch(e => console.warn("[LykosDB] Supabase saveSettings error:", e));
+      try {
+        await sb.from('site_settings').upsert({ id: 1, ...mergedSettings, updated_at: nowIso });
+      } catch (e) {
+        console.warn("[LykosDB] Supabase saveSettings error:", e);
+      }
     }
     return mergedSettings;
   },
