@@ -755,22 +755,37 @@ window.renderAdminPage = async function (container) {
 
             <h4 style="font-size: 0.85rem; color: var(--accent-neon); text-transform: uppercase; margin: 1.5rem 0 0.75rem;">Logos & Ícones do Site</h4>
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
-              <div class="form-group">
+              <div class="form-group" style="background: var(--bg-dark-surface); padding: 12px; border: 1px solid var(--border-dark); border-radius: 6px;">
                 <label class="form-label">1. Logo Oficial das Partidas</label>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                  <img id="brand-logo-preview" src="${data.settings.logo_url || 'assets/logo.png'}" style="width: 44px; height: 44px; object-fit: contain; background: rgba(0,0,0,0.4); border-radius: 4px; border: 1px solid var(--border-dark); padding: 2px;">
+                  <span style="font-size: 0.75rem; color: var(--text-muted-light);">Preview atual</span>
+                </div>
+                <input type="text" id="brand-logo-url" class="form-input" value="${data.settings.logo_url || ''}" placeholder="URL da imagem (ex: https://...)" style="margin-bottom: 6px;">
                 <input type="file" id="brand-logo-file" class="form-input" accept="image/*">
-                <span class="upload-hint">Tamanho recomendado: 500x500px (PNG Transparente)</span>
+                <span class="upload-hint">Upload de arquivo ou cole a URL acima.</span>
               </div>
 
-              <div class="form-group">
+              <div class="form-group" style="background: var(--bg-dark-surface); padding: 12px; border: 1px solid var(--border-dark); border-radius: 6px;">
                 <label class="form-label">2. Logo da Barra de Navegação</label>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                  <img id="brand-header-logo-preview" src="${data.settings.header_logo_url || 'assets/logo.png'}" style="height: 44px; max-width: 120px; object-fit: contain; background: rgba(0,0,0,0.4); border-radius: 4px; border: 1px solid var(--border-dark); padding: 2px;">
+                  <span style="font-size: 0.75rem; color: var(--text-muted-light);">Preview atual</span>
+                </div>
+                <input type="text" id="brand-header-logo-url" class="form-input" value="${data.settings.header_logo_url || ''}" placeholder="URL da imagem (ex: https://...)" style="margin-bottom: 6px;">
                 <input type="file" id="brand-header-logo-file" class="form-input" accept="image/*">
-                <span class="upload-hint">Tamanho recomendado: 200x52px (PNG Transparente)</span>
+                <span class="upload-hint">Upload de arquivo ou cole a URL acima.</span>
               </div>
 
-              <div class="form-group">
+              <div class="form-group" style="background: var(--bg-dark-surface); padding: 12px; border: 1px solid var(--border-dark); border-radius: 6px;">
                 <label class="form-label">3. Favicon do Navegador</label>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                  <img id="brand-favicon-preview" src="${data.settings.favicon_url || 'assets/favicon.png'}" style="width: 32px; height: 32px; object-fit: contain; background: rgba(0,0,0,0.4); border-radius: 4px; border: 1px solid var(--border-dark); padding: 2px;">
+                  <span style="font-size: 0.75rem; color: var(--text-muted-light);">Preview atual</span>
+                </div>
+                <input type="text" id="brand-favicon-url" class="form-input" value="${data.settings.favicon_url || ''}" placeholder="URL do favicon (ex: assets/favicon.png ou https://...)" style="margin-bottom: 6px;">
                 <input type="file" id="brand-favicon-file" class="form-input" accept="image/*">
-                <span class="upload-hint">Tamanho recomendado: 64x64px (ICO/PNG Transparente)</span>
+                <span class="upload-hint">Upload de arquivo ou cole a URL acima.</span>
               </div>
             </div>
 
@@ -1864,53 +1879,104 @@ window.renderAdminPage = async function (container) {
 
     const formBranding = container.querySelector('#form-branding');
     if (formBranding) {
+      const setupPreview = (fileId, urlId, previewId) => {
+        const fileInp = container.querySelector('#' + fileId);
+        const urlInp = container.querySelector('#' + urlId);
+        const imgPrev = container.querySelector('#' + previewId);
+        if (fileInp && imgPrev) {
+          fileInp.onchange = () => {
+            if (fileInp.files && fileInp.files[0]) {
+              const reader = new FileReader();
+              reader.onload = (ev) => { imgPrev.src = ev.target.result; };
+              reader.readAsDataURL(fileInp.files[0]);
+            }
+          };
+        }
+        if (urlInp && imgPrev) {
+          urlInp.oninput = () => {
+            if (urlInp.value.trim()) imgPrev.src = urlInp.value.trim();
+          };
+        }
+      };
+
+      setupPreview('brand-logo-file', 'brand-logo-url', 'brand-logo-preview');
+      setupPreview('brand-header-logo-file', 'brand-header-logo-url', 'brand-header-logo-preview');
+      setupPreview('brand-favicon-file', 'brand-favicon-url', 'brand-favicon-preview');
+
       formBranding.onsubmit = async (e) => {
         e.preventDefault();
-        const logoFile = container.querySelector('#brand-logo-file');
-        let logoUrl = data.settings.logo_url;
-        if (logoFile && logoFile.files && logoFile.files[0]) {
-          logoUrl = await window.LykosDB.uploadAsset(logoFile.files[0]);
+        const submitBtn = formBranding.querySelector('button[type="submit"]');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerText = 'Salvando Alterações...';
         }
 
-        const headerLogoFile = container.querySelector('#brand-header-logo-file');
-        let headerLogoUrl = data.settings.header_logo_url;
-        if (headerLogoFile && headerLogoFile.files && headerLogoFile.files[0]) {
-          headerLogoUrl = await window.LykosDB.uploadAsset(headerLogoFile.files[0]);
-        }
-
-        const faviconFile = container.querySelector('#brand-favicon-file');
-        let faviconUrl = data.settings.favicon_url;
-        if (faviconFile && faviconFile.files && faviconFile.files[0]) {
-          faviconUrl = await window.LykosDB.uploadAsset(faviconFile.files[0]);
-        }
-
-        const showTournaments = container.querySelector('#brand-show-tournaments-tab').checked;
-
-        const contactSocials = [];
-        container.querySelectorAll('.brand-social-row').forEach(row => {
-          const name = row.querySelector('.brand-soc-name').value;
-          const platform = row.querySelector('.brand-soc-platform').value;
-          const url = row.querySelector('.brand-soc-url').value;
-          if (name && url) {
-            contactSocials.push({ name, platform, url });
+        try {
+          const logoFile = container.querySelector('#brand-logo-file');
+          const logoUrlInp = container.querySelector('#brand-logo-url');
+          let logoUrl = data.settings.logo_url;
+          if (logoFile && logoFile.files && logoFile.files[0]) {
+            logoUrl = await window.LykosDB.uploadAsset(logoFile.files[0]);
+          } else if (logoUrlInp && logoUrlInp.value.trim()) {
+            logoUrl = logoUrlInp.value.trim();
           }
-        });
 
-        const newSettings = {
-          ...data.settings,
-          team_name: container.querySelector('#brand-team-name').value,
-          primary_color: container.querySelector('#brand-primary-color').value,
-          logo_url: logoUrl,
-          header_logo_url: headerLogoUrl,
-          favicon_url: faviconUrl,
-          show_tournaments_tab: showTournaments,
-          contact_socials_json: contactSocials,
-          discord_url: contactSocials.find(s => s.platform === 'discord')?.url || data.settings.discord_url,
-          instagram_url: contactSocials.find(s => s.platform === 'instagram')?.url || data.settings.instagram_url
-        };
+          const headerLogoFile = container.querySelector('#brand-header-logo-file');
+          const headerLogoUrlInp = container.querySelector('#brand-header-logo-url');
+          let headerLogoUrl = data.settings.header_logo_url;
+          if (headerLogoFile && headerLogoFile.files && headerLogoFile.files[0]) {
+            headerLogoUrl = await window.LykosDB.uploadAsset(headerLogoFile.files[0]);
+          } else if (headerLogoUrlInp && headerLogoUrlInp.value.trim()) {
+            headerLogoUrl = headerLogoUrlInp.value.trim();
+          }
 
-        await window.LykosDB.saveSettings(newSettings);
-        renderDashboard();
+          const faviconFile = container.querySelector('#brand-favicon-file');
+          const faviconUrlInp = container.querySelector('#brand-favicon-url');
+          let faviconUrl = data.settings.favicon_url;
+          if (faviconFile && faviconFile.files && faviconFile.files[0]) {
+            faviconUrl = await window.LykosDB.uploadAsset(faviconFile.files[0]);
+          } else if (faviconUrlInp && faviconUrlInp.value.trim()) {
+            faviconUrl = faviconUrlInp.value.trim();
+          }
+
+          const showTournaments = container.querySelector('#brand-show-tournaments-tab').checked;
+
+          const contactSocials = [];
+          container.querySelectorAll('.brand-social-row').forEach(row => {
+            const name = row.querySelector('.brand-soc-name').value;
+            const platform = row.querySelector('.brand-soc-platform').value;
+            const url = row.querySelector('.brand-soc-url').value;
+            if (name && url) {
+              contactSocials.push({ name, platform, url });
+            }
+          });
+
+          const newSettings = {
+            ...data.settings,
+            team_name: container.querySelector('#brand-team-name').value,
+            primary_color: container.querySelector('#brand-primary-color').value,
+            logo_url: logoUrl,
+            header_logo_url: headerLogoUrl,
+            favicon_url: faviconUrl,
+            show_tournaments_tab: showTournaments,
+            contact_socials_json: contactSocials,
+            discord_url: contactSocials.find(s => s.platform === 'discord')?.url || data.settings.discord_url,
+            instagram_url: contactSocials.find(s => s.platform === 'instagram')?.url || data.settings.instagram_url
+          };
+
+          await window.LykosDB.saveSettings(newSettings);
+
+          alert('✓ Configurações de marca e Favicon salvas com sucesso!');
+          renderDashboard();
+        } catch (err) {
+          console.error('[Admin] Error saving branding settings:', err);
+          alert('Erro ao salvar configurações de marca: ' + err.message);
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = 'Salvar Configurações de Marca →';
+          }
+        }
       };
     }
 

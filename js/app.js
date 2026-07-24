@@ -2,6 +2,18 @@
    LYKOS E-SPORTS - MAIN APPLICATION ENTRYPOINT & THEME INITIALIZATION
    ========================================================================== */
 
+function updateFavicon(url) {
+  if (!url) return;
+  const existingLinks = document.querySelectorAll("link[rel*='icon']");
+  existingLinks.forEach(el => el.remove());
+
+  const link = document.createElement('link');
+  link.rel = 'icon';
+  link.type = url.endsWith('.ico') ? 'image/x-icon' : (url.endsWith('.svg') ? 'image/svg+xml' : 'image/png');
+  link.href = url;
+  document.head.appendChild(link);
+}
+
 async function initLykosApp() {
   try {
     // Apply saved theme (Dark or Light) safely
@@ -13,13 +25,7 @@ async function initLykosApp() {
 
     // Dynamic Favicon Head Update
     if (settings && settings.favicon_url) {
-      let link = document.querySelector("link[rel*='icon']");
-      if (!link) {
-        link = document.createElement('link');
-        link.rel = 'icon';
-        document.head.appendChild(link);
-      }
-      link.href = settings.favicon_url;
+      updateFavicon(settings.favicon_url);
     }
 
     // Update Page Title
@@ -65,13 +71,7 @@ window.addEventListener('lykos_branding_updated', async (e) => {
   document.title = `${settings.team_name || 'LYKOS'} E-Sports | Official Team Website`;
 
   if (settings.favicon_url) {
-    let link = document.querySelector("link[rel*='icon']");
-    if (!link) {
-      link = document.createElement('link');
-      link.rel = 'icon';
-      document.head.appendChild(link);
-    }
-    link.href = settings.favicon_url;
+    updateFavicon(settings.favicon_url);
   }
 
   if (window.renderHeader) await window.renderHeader();

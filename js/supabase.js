@@ -193,16 +193,22 @@ window.LykosDB = {
       sb.from('site_settings').select('*').eq('id', 1).maybeSingle()
         .then(({ data, error }) => {
           if (data && !error) {
-            let updated = false;
-            Object.keys(data).forEach(key => {
-              if (data[key] !== null && data[key] !== undefined && data[key] !== '' && currentSettings[key] !== data[key]) {
-                currentSettings[key] = data[key];
-                updated = true;
+            const localTime = localParsed.updated_at ? new Date(localParsed.updated_at).getTime() : 0;
+            const remoteTime = data.updated_at ? new Date(data.updated_at).getTime() : 0;
+
+            // Only override local settings if remote data is actually newer or equal
+            if (remoteTime >= localTime) {
+              let updated = false;
+              Object.keys(data).forEach(key => {
+                if (data[key] !== null && data[key] !== undefined && data[key] !== '' && currentSettings[key] !== data[key]) {
+                  currentSettings[key] = data[key];
+                  updated = true;
+                }
+              });
+              if (updated) {
+                localStorage.setItem('lykos_settings', JSON.stringify(currentSettings));
+                window.dispatchEvent(new CustomEvent('lykos_branding_updated', { detail: currentSettings }));
               }
-            });
-            if (updated) {
-              localStorage.setItem('lykos_settings', JSON.stringify(currentSettings));
-              window.dispatchEvent(new CustomEvent('lykos_branding_updated', { detail: currentSettings }));
             }
           }
         })
@@ -214,14 +220,15 @@ window.LykosDB = {
   async saveSettings(settings) {
     const rawLocal = localStorage.getItem('lykos_settings');
     const localParsed = safeParse(rawLocal, {});
-    const mergedSettings = { ...DEFAULT_SETTINGS, ...localParsed, ...settings };
+    const nowIso = new Date().toISOString();
+    const mergedSettings = { ...DEFAULT_SETTINGS, ...localParsed, ...settings, updated_at: nowIso };
 
     localStorage.setItem('lykos_settings', JSON.stringify(mergedSettings));
     window.dispatchEvent(new CustomEvent('lykos_branding_updated', { detail: mergedSettings }));
 
     const sb = getSupabaseClient();
     if (sb) {
-      sb.from('site_settings').upsert({ id: 1, ...mergedSettings, updated_at: new Date().toISOString() })
+      sb.from('site_settings').upsert({ id: 1, ...mergedSettings, updated_at: nowIso })
         .catch(e => console.warn("[LykosDB] Supabase saveSettings error:", e));
     }
     return mergedSettings;
