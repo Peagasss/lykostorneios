@@ -36,7 +36,7 @@ module.exports = async (req, res) => {
     });
   }
 
-  // 1. Try Vercel / Neon Postgres first
+  // Vercel / Neon Postgres
   if (process.env.POSTGRES_URL) {
     try {
       const result = await sql`SELECT * FROM app_users WHERE LOWER(email) = ${normEmail} LIMIT 1;`;
@@ -45,30 +45,12 @@ module.exports = async (req, res) => {
         const { password: _, ...userWithoutPassword } = user;
         return res.status(200).json({ user: userWithoutPassword, provider: 'neon-postgres' });
       }
-    } catch (e) {
-      console.warn('[Vercel Postgres] Login query fallback:', e.message);
-    }
-  }
-
-  // 2. Fallback Supabase
-  try {
-    const SUPABASE_URL = process.env.SUPABASE_URL || 'https://kwrrhqommtdqvowrfbcp.supabase.co';
-    const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY || 'sb_publishable_XVbHrN_u7L9EneAmLYTvag_3b1tMlLb';
-    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    const { data: user, error } = await supabase
-      .from('app_users')
-      .select('*')
-      .ilike('email', normEmail)
-      .maybeSingle();
-
-    if (error || !user || user.password !== normPass) {
       return res.status(401).json({ error: 'E-mail ou senha incorretos.' });
+    } catch (e) {
+      console.error('[Vercel Postgres Login Error]:', e);
+      return res.status(500).json({ error: e.message });
     }
-
-    const { password: _, ...userWithoutPassword } = user;
-    return res.status(200).json({ user: userWithoutPassword, provider: 'supabase' });
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
   }
+
+  return res.status(401).json({ error: 'E-mail ou senha incorretos.' });
 };

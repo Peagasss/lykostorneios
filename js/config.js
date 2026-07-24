@@ -3,10 +3,11 @@
    ========================================================================== */
 
 window.LYKOS_CONFIG = {
-  // Supabase Project URL and Anon Key
-  SUPABASE_URL: "https://kwrrhqommtdqvowrfbcp.supabase.co",
-  SUPABASE_ANON_KEY: "sb_publishable_XVbHrN_u7L9EneAmLYTvag_3b1tMlLb",
-  
+  // Backend Base API URL (Vercel Serverless + Neon Postgres)
+  API_BASE_URL: window.location.hostname.includes('vercel.app')
+    ? ''
+    : 'https://lykostorneios.vercel.app',
+
   // Default branding values
   DEFAULT_BRANDING: {
     team_name: "LYKOS",

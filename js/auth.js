@@ -68,12 +68,13 @@
         return user;
       }
 
-      // 2. Ultra-fast network lookup with 800ms max timeout (for accounts created on other devices)
+      // 2. Ultra-fast network lookup with 1200ms max timeout (for accounts created on other devices)
       const fetchApiPromise = (async () => {
         try {
           const controller = new AbortController();
-          const timer = setTimeout(() => controller.abort(), 800);
-          const apiRes = await fetch('/api/login', {
+          const timer = setTimeout(() => controller.abort(), 1200);
+          const baseUrl = (window.LYKOS_CONFIG && window.LYKOS_CONFIG.API_BASE_URL) || '';
+          const apiRes = await fetch(`${baseUrl}/api/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: normEmail, password: normPass }),
@@ -86,16 +87,6 @@
             if (resData && resData.user) return resData.user;
           }
         } catch (e) {}
-
-        // Fallback direct Supabase SDK
-        const config = window.LYKOS_CONFIG || {};
-        if (config.SUPABASE_URL && config.SUPABASE_ANON_KEY && window.supabase) {
-          try {
-            const sb = window.supabase.createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY);
-            const { data } = await sb.from('app_users').select('*').ilike('email', normEmail).maybeSingle();
-            if (data && data.password === normPass) return data;
-          } catch (e) {}
-        }
         return null;
       })();
 

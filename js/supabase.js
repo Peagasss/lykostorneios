@@ -152,37 +152,20 @@ const DEFAULT_USERS = [
   }
 ];
 
-let _supabase = null;
-function getSupabaseClient() {
-  if (_supabase) return _supabase;
-  const config = window.LYKOS_CONFIG || {};
-  const url = config.SUPABASE_URL;
-  const key = config.SUPABASE_ANON_KEY;
-
-  if (url && key && !url.includes("your-supabase-project")) {
-    try {
-      if (window.supabase && typeof window.supabase.createClient === 'function') {
-        _supabase = window.supabase.createClient(url, key);
-      } else if (typeof window.createClient === 'function') {
-        _supabase = window.createClient(url, key);
-      }
-    } catch (e) {
-      console.warn("[LykosDB] Supabase init warning:", e);
-    }
-  }
-  return _supabase;
+function getApiUrl(endpoint) {
+  const baseUrl = (window.LYKOS_CONFIG && window.LYKOS_CONFIG.API_BASE_URL) || '';
+  return `${baseUrl}${endpoint}`;
 }
 
-// Helpers for Supabase real-time sync with instant local cache (stale-while-revalidate)
+// Helpers for Neon Postgres Vercel API sync with instant local cache (stale-while-revalidate)
 async function fetchSupabaseOrLocal(tableName, storageKey, fallbackDefault) {
   const raw = localStorage.getItem(storageKey);
   const localData = safeParse(raw, null);
 
-  // Try backend Vercel API first for instant server-side cached response
+  // Try Vercel Backend API (Neon Postgres)
   const remotePromise = (async () => {
     try {
-      // Check if backend bundle API is available
-      const apiRes = await fetch('/api/data').catch(() => null);
+      const apiRes = await fetch(getApiUrl('/api/data')).catch(() => null);
       if (apiRes && apiRes.ok) {
         const bundle = await apiRes.json();
         const keyMap = {
@@ -205,16 +188,6 @@ async function fetchSupabaseOrLocal(tableName, storageKey, fallbackDefault) {
           return data;
         }
       }
-
-      // Fallback to direct Supabase SDK if API endpoint is not active
-      const sb = getSupabaseClient();
-      if (sb) {
-        const { data, error } = await sb.from(tableName).select('*');
-        if (data && !error && data.length > 0) {
-          localStorage.setItem(storageKey, JSON.stringify(data));
-          return data;
-        }
-      }
     } catch (e) {
       console.warn(`[LykosDB] Backend fetch error for ${tableName}:`, e);
     }
@@ -231,7 +204,7 @@ async function saveSupabaseAndLocal(tableName, storageKey, fullList, singleItem)
   if (singleItem) {
     (async () => {
       try {
-        await fetch('/api/save', {
+        await fetch(getApiUrl('/api/save'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ entity: tableName, item: singleItem })
@@ -248,7 +221,7 @@ async function deleteSupabaseAndLocal(tableName, storageKey, fullList, itemId) {
   if (itemId) {
     (async () => {
       try {
-        await fetch('/api/delete', {
+        await fetch(getApiUrl('/api/delete'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ entity: tableName, id: itemId })
@@ -318,7 +291,7 @@ window.LykosDB = {
 
     (async () => {
       try {
-        await fetch('/api/save', {
+        await fetch(getApiUrl('/api/save'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ entity: 'site_settings', item: mergedSettings })
@@ -476,7 +449,7 @@ window.LykosDB = {
     localStorage.setItem('lykos_about', JSON.stringify(about));
     (async () => {
       try {
-        await fetch('/api/save', {
+        await fetch(getApiUrl('/api/save'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ entity: 'about_settings', item: about })
@@ -602,7 +575,7 @@ window.LykosDB = {
 
     (async () => {
       try {
-        await fetch('/api/save', {
+        await fetch(getApiUrl('/api/save'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ entity: 'app_users', item: user })
@@ -628,7 +601,7 @@ window.LykosDB = {
 
     (async () => {
       try {
-        await fetch('/api/delete', {
+        await fetch(getApiUrl('/api/delete'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ entity: 'app_users', id })
@@ -639,75 +612,23 @@ window.LykosDB = {
 
   async getLoginLogs() {
     const raw = localStorage.getItem('lykos_login_logs');
-    const localLogs = safeParse(raw, []);
-
-    const sb = getSupabaseClient();
-    if (sb) {
-      (async () => {
-        try {
-          const { data, error } = await sb.from('login_logs').select('*').order('timestamp', { ascending: false }).limit(200);
-          if (data && !error && data.length > 0) {
-            localStorage.setItem('lykos_login_logs', JSON.stringify(data));
-          }
-        } catch (e) {}
-      })();
-    }
-    return localLogs;
+    return safeParse(raw, []);
   },
   async addLoginLog(log) {
     const logs = await this.getLoginLogs();
     logs.unshift(log);
     localStorage.setItem('lykos_login_logs', JSON.stringify(logs.slice(0, 200)));
-
-    const sb = getSupabaseClient();
-    if (sb) {
-      try {
-        await sb.from('login_logs').insert(log);
-      } catch (e) {}
-    }
     return log;
   },
   async clearLoginLogs() {
     localStorage.removeItem('lykos_login_logs');
-    const sb = getSupabaseClient();
-    if (sb) {
-      try {
-        await sb.from('login_logs').delete().neq('id', '0');
-      } catch (e) {}
-    }
   },
 
   async uploadAsset(file) {
-    // Convert to base64 locally first so we have an instant fallback (< 10ms)
-    const base64Promise = new Promise((resolve) => {
+    return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (e) => resolve(e.target.result);
       reader.readAsDataURL(file);
     });
-
-    const sb = getSupabaseClient();
-    if (sb) {
-      try {
-        const ext = file.name.split('.').pop() || 'png';
-        const fileName = `lykos-${Date.now()}-${Math.random().toString(36).substr(2, 8)}.${ext}`;
-
-        // Timeout network upload after 1.5 seconds max
-        const uploadPromise = sb.storage
-          .from('assets')
-          .upload(fileName, file, { upsert: true, contentType: file.type });
-        const timeoutPromise = new Promise(resolve => setTimeout(() => resolve({ data: null, error: 'timeout' }), 1500));
-
-        const { data, error } = await Promise.race([uploadPromise, timeoutPromise]);
-
-        if (!error && data) {
-          const { data: urlData } = sb.storage.from('assets').getPublicUrl(fileName);
-          if (urlData && urlData.publicUrl) {
-            return urlData.publicUrl;
-          }
-        }
-      } catch (e) {}
-    }
-
-    return await base64Promise;
   }
 };
