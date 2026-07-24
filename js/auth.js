@@ -68,11 +68,11 @@
         return user;
       }
 
-      // 2. Fast network lookup with 1.5s timeout (for accounts created on other devices)
+      // 2. Ultra-fast network lookup with 800ms max timeout (for accounts created on other devices)
       const fetchApiPromise = (async () => {
         try {
           const controller = new AbortController();
-          const timer = setTimeout(() => controller.abort(), 1500);
+          const timer = setTimeout(() => controller.abort(), 800);
           const apiRes = await fetch('/api/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

@@ -42,6 +42,7 @@ window.renderAdminPage = async function (container) {
 
     const authForm = container.querySelector('#auth-form');
     const authError = container.querySelector('#auth-error');
+    const submitBtn = authForm.querySelector('button[type="submit"]');
 
     authForm.onsubmit = async (e) => {
       e.preventDefault();
@@ -49,10 +50,19 @@ window.renderAdminPage = async function (container) {
       const email = container.querySelector('#auth-email').value;
       const password = container.querySelector('#auth-password').value;
 
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Autenticando...';
+      }
+
       try {
         await window.LykosAuth.login(email, password);
         window.renderAdminPage(container);
       } catch (err) {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerText = 'Acessar Painel →';
+        }
         authError.style.display = 'block';
         authError.innerText = err.message || 'Erro de autenticação.';
       }
