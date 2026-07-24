@@ -230,17 +230,16 @@ async function saveSupabaseAndLocal(tableName, storageKey, fullList, singleItem)
   localStorage.setItem(storageKey, JSON.stringify(fullList));
   const sb = getSupabaseClient();
   if (sb && singleItem) {
-    try {
-      const { data, error } = await sb.from(tableName).upsert(singleItem);
-      if (error) {
-        console.error(`[LykosDB] Supabase upsert error on table '${tableName}':`, error);
-        if (error.code === '42P01') {
-          console.warn(`[LykosDB] A tabela '${tableName}' ainda não foi criada no Supabase SQL Editor.`);
+    (async () => {
+      try {
+        const { error } = await sb.from(tableName).upsert(singleItem);
+        if (error) {
+          console.error(`[LykosDB] Supabase upsert error on table '${tableName}':`, error);
         }
+      } catch (e) {
+        console.warn(`[LykosDB] Supabase upsert exception for ${tableName}:`, e);
       }
-    } catch (e) {
-      console.warn(`[LykosDB] Supabase upsert exception for ${tableName}:`, e);
-    }
+    })();
   }
 }
 
@@ -248,14 +247,16 @@ async function deleteSupabaseAndLocal(tableName, storageKey, fullList, itemId) {
   localStorage.setItem(storageKey, JSON.stringify(fullList));
   const sb = getSupabaseClient();
   if (sb && itemId) {
-    try {
-      const { error } = await sb.from(tableName).delete().eq('id', String(itemId));
-      if (error) {
-        console.error(`[LykosDB] Supabase delete error on table '${tableName}':`, error);
+    (async () => {
+      try {
+        const { error } = await sb.from(tableName).delete().eq('id', String(itemId));
+        if (error) {
+          console.error(`[LykosDB] Supabase delete error on table '${tableName}':`, error);
+        }
+      } catch (e) {
+        console.warn(`[LykosDB] Supabase delete exception for ${tableName}:`, e);
       }
-    } catch (e) {
-      console.warn(`[LykosDB] Supabase delete exception for ${tableName}:`, e);
-    }
+    })();
   }
 }
 
@@ -710,35 +711,36 @@ window.LykosDB = {
   },
 
   async uploadAsset(file) {
-    const sb = getSupabaseClient();
-    if (sb) {
-      try {
-        // Try to upload to Supabase Storage for a real public URL
-        const ext = file.name.split('.').pop() || 'png';
-        const fileName = `lykos-${Date.now()}-${Math.random().toString(36).substr(2, 8)}.${ext}`;
-        const { data, error } = await sb.storage
-          .from('assets')
-          .upload(fileName, file, { upsert: true, contentType: file.type });
-
-        if (!error && data) {
-          const { data: urlData } = sb.storage.from('assets').getPublicUrl(fileName);
-          if (urlData && urlData.publicUrl) {
-            console.log('[LykosDB] Image uploaded to Supabase Storage:', urlData.publicUrl);
-            return urlData.publicUrl;
-          }
-        }
-        // If storage failed (bucket not created), log and fall through to base64
-        console.warn('[LykosDB] Supabase Storage upload failed (bucket "assets" may not exist), using base64 fallback.', error);
-      } catch (e) {
-        console.warn('[LykosDB] Supabase Storage exception, using base64 fallback:', e);
-      }
-    }
-
-    // Fallback: convert to base64 data URL (works locally but large)
-    return new Promise((resolve) => {
+    // Convert to base64 locally first so we have an instant fallback (< 10ms)
+    const base64Promise = new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (e) => resolve(e.target.result);
       reader.readAsDataURL(file);
     });
+
+    const sb = getSupabaseClient();
+    if (sb) {
+      try {
+        const ext = file.name.split('.').pop() || 'png';
+        const fileName = `lykos-${Date.now()}-${Math.random().toString(36).substr(2, 8)}.${ext}`;
+
+        // Timeout network upload after 1.5 seconds max
+        const uploadPromise = sb.storage
+          .from('assets')
+          .upload(fileName, file, { upsert: true, contentType: file.type });
+        const timeoutPromise = new Promise(resolve => setTimeout(() => resolve({ data: null, error: 'timeout' }), 1500));
+
+        const { data, error } = await Promise.race([uploadPromise, timeoutPromise]);
+
+        if (!error && data) {
+          const { data: urlData } = sb.storage.from('assets').getPublicUrl(fileName);
+          if (urlData && urlData.publicUrl) {
+            return urlData.publicUrl;
+          }
+        }
+      } catch (e) {}
+    }
+
+    return await base64Promise;
   }
 };
