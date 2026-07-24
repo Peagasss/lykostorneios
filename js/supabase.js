@@ -256,27 +256,32 @@ window.LykosDB = {
 
     const sb = getSupabaseClient();
     if (sb) {
-      try {
-        const { data, error } = await sb.from('site_settings').select('*').eq('id', 1).maybeSingle();
-        if (data && !error) {
-          const localTime = localParsed.updated_at ? new Date(localParsed.updated_at).getTime() : 0;
-          const remoteTime = data.updated_at ? new Date(data.updated_at).getTime() : 0;
+      // Fire-and-forget background sync
+      (async () => {
+        try {
+          const { data, error } = await sb.from('site_settings').select('*').eq('id', 1).maybeSingle();
+          if (data && !error) {
+            const localTime = localParsed.updated_at ? new Date(localParsed.updated_at).getTime() : 0;
+            const remoteTime = data.updated_at ? new Date(data.updated_at).getTime() : 0;
 
-          // Always prefer remote data when it's newer or when there's no local data
-          if (remoteTime >= localTime) {
-            Object.keys(data).forEach(key => {
-              // Only update if remote has a meaningful non-null value
-              if (data[key] !== null && data[key] !== undefined) {
-                currentSettings[key] = data[key];
+            if (remoteTime >= localTime) {
+              let changed = false;
+              Object.keys(data).forEach(key => {
+                if (data[key] !== null && data[key] !== undefined && currentSettings[key] !== data[key]) {
+                  currentSettings[key] = data[key];
+                  changed = true;
+                }
+              });
+              if (changed) {
+                localStorage.setItem('lykos_settings', JSON.stringify(currentSettings));
+                window.dispatchEvent(new CustomEvent('lykos_branding_updated', { detail: currentSettings }));
               }
-            });
-            localStorage.setItem('lykos_settings', JSON.stringify(currentSettings));
-            window.dispatchEvent(new CustomEvent('lykos_branding_updated', { detail: currentSettings }));
+            }
           }
+        } catch (e) {
+          console.warn("[LykosDB] Supabase getSettings background sync warning:", e);
         }
-      } catch (e) {
-        console.warn("[LykosDB] Supabase getSettings sync warning:", e);
-      }
+      })();
     }
 
     return currentSettings;
@@ -455,17 +460,20 @@ window.LykosDB = {
   async getAboutSettings() {
     const rawLocal = localStorage.getItem('lykos_about');
     const localParsed = safeParse(rawLocal, null);
+    const result = localParsed !== null ? localParsed : DEFAULT_ABOUT;
+
     const sb = getSupabaseClient();
     if (sb) {
-      try {
-        const { data, error } = await sb.from('about_settings').select('*').eq('id', 1).maybeSingle();
-        if (data && !error) {
-          localStorage.setItem('lykos_about', JSON.stringify(data));
-          return data;
-        }
-      } catch (e) {}
+      (async () => {
+        try {
+          const { data, error } = await sb.from('about_settings').select('*').eq('id', 1).maybeSingle();
+          if (data && !error) {
+            localStorage.setItem('lykos_about', JSON.stringify(data));
+          }
+        } catch (e) {}
+      })();
     }
-    return localParsed !== null ? localParsed : DEFAULT_ABOUT;
+    return result;
   },
   async saveAboutSettings(about) {
     localStorage.setItem('lykos_about', JSON.stringify(about));
@@ -576,20 +584,21 @@ window.LykosDB = {
   },
 
   async getUsers() {
+    const raw = localStorage.getItem('lykos_users');
+    const localUsers = safeParse(raw, DEFAULT_USERS);
+
     const sb = getSupabaseClient();
     if (sb) {
-      try {
-        const { data, error } = await sb.from('app_users').select('*');
-        if (data && !error && data.length > 0) {
-          localStorage.setItem('lykos_users', JSON.stringify(data));
-          return data;
-        }
-      } catch (e) {
-        console.warn("[LykosDB] Supabase getUsers error, falling back to localStorage", e);
-      }
+      (async () => {
+        try {
+          const { data, error } = await sb.from('app_users').select('*');
+          if (data && !error && data.length > 0) {
+            localStorage.setItem('lykos_users', JSON.stringify(data));
+          }
+        } catch (e) {}
+      })();
     }
-    const raw = localStorage.getItem('lykos_users');
-    return safeParse(raw, DEFAULT_USERS);
+    return localUsers;
   },
   async saveUser(user) {
     const users = await this.getUsers();
@@ -641,18 +650,21 @@ window.LykosDB = {
   },
 
   async getLoginLogs() {
+    const raw = localStorage.getItem('lykos_login_logs');
+    const localLogs = safeParse(raw, []);
+
     const sb = getSupabaseClient();
     if (sb) {
-      try {
-        const { data, error } = await sb.from('login_logs').select('*').order('timestamp', { ascending: false }).limit(200);
-        if (data && !error && data.length > 0) {
-          localStorage.setItem('lykos_login_logs', JSON.stringify(data));
-          return data;
-        }
-      } catch (e) {}
+      (async () => {
+        try {
+          const { data, error } = await sb.from('login_logs').select('*').order('timestamp', { ascending: false }).limit(200);
+          if (data && !error && data.length > 0) {
+            localStorage.setItem('lykos_login_logs', JSON.stringify(data));
+          }
+        } catch (e) {}
+      })();
     }
-    const raw = localStorage.getItem('lykos_login_logs');
-    return safeParse(raw, []);
+    return localLogs;
   },
   async addLoginLog(log) {
     const logs = await this.getLoginLogs();
