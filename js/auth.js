@@ -46,8 +46,27 @@
       }
 
       // Lookup user in DB
-      const users = window.LykosDB ? await window.LykosDB.getUsers() : JSON.parse(localStorage.getItem('lykos_users') || '[]');
-      const user = users.find(u => u.email && u.email.toLowerCase().trim() === normEmail && u.password === normPass);
+      let users = window.LykosDB ? await window.LykosDB.getUsers() : JSON.parse(localStorage.getItem('lykos_users') || '[]');
+      let user = users.find(u => u.email && u.email.toLowerCase().trim() === normEmail && u.password === normPass);
+
+      // If not in local cache, query Supabase directly for newly created accounts
+      if (!user && window.supabase) {
+        const config = window.LYKOS_CONFIG || {};
+        if (config.SUPABASE_URL && config.SUPABASE_ANON_KEY) {
+          try {
+            const sb = window.supabase.createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY);
+            const { data } = await sb.from('app_users').select('*').eq('email', normEmail).maybeSingle();
+            if (data && data.password === normPass) {
+              user = data;
+              // Sync local list
+              users.push(user);
+              localStorage.setItem('lykos_users', JSON.stringify(users));
+            }
+          } catch (e) {
+            console.warn('[LykosAuth] Direct Supabase login lookup failed:', e);
+          }
+        }
+      }
 
       if (!user) {
         throw new Error('E-mail ou senha incorretos.');
