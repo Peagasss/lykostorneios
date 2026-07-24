@@ -214,9 +214,15 @@ async function saveSupabaseAndLocal(tableName, storageKey, fullList, singleItem)
   const sb = getSupabaseClient();
   if (sb && singleItem) {
     try {
-      await sb.from(tableName).upsert(singleItem);
+      const { data, error } = await sb.from(tableName).upsert(singleItem);
+      if (error) {
+        console.error(`[LykosDB] Supabase upsert error on table '${tableName}':`, error);
+        if (error.code === '42P01') {
+          console.warn(`[LykosDB] A tabela '${tableName}' ainda não foi criada no Supabase SQL Editor.`);
+        }
+      }
     } catch (e) {
-      console.warn(`[LykosDB] Supabase upsert error for ${tableName}:`, e);
+      console.warn(`[LykosDB] Supabase upsert exception for ${tableName}:`, e);
     }
   }
 }
@@ -226,9 +232,12 @@ async function deleteSupabaseAndLocal(tableName, storageKey, fullList, itemId) {
   const sb = getSupabaseClient();
   if (sb && itemId) {
     try {
-      await sb.from(tableName).delete().eq('id', String(itemId));
+      const { error } = await sb.from(tableName).delete().eq('id', String(itemId));
+      if (error) {
+        console.error(`[LykosDB] Supabase delete error on table '${tableName}':`, error);
+      }
     } catch (e) {
-      console.warn(`[LykosDB] Supabase delete error for ${tableName}:`, e);
+      console.warn(`[LykosDB] Supabase delete exception for ${tableName}:`, e);
     }
   }
 }
@@ -289,9 +298,13 @@ window.LykosDB = {
     const sb = getSupabaseClient();
     if (sb) {
       try {
-        await sb.from('site_settings').upsert({ id: 1, ...mergedSettings, updated_at: nowIso });
+        const { data, error } = await sb.from('site_settings').upsert({ id: 1, ...mergedSettings, updated_at: nowIso });
+        if (error) {
+          console.error("[LykosDB] Supabase saveSettings error:", error);
+          alert('Aviso do Supabase ao salvar marca: ' + (error.message || 'Erro de permissão ou tabela. Execute o arquivo supabase_schema.sql no Supabase.'));
+        }
       } catch (e) {
-        console.warn("[LykosDB] Supabase saveSettings error:", e);
+        console.warn("[LykosDB] Supabase saveSettings exception:", e);
       }
     }
     return mergedSettings;
