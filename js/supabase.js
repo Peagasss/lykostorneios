@@ -199,12 +199,13 @@ async function fetchSupabaseOrLocal(tableName, storageKey, fallbackDefault) {
 
   // Instant zero-latency render if local cache exists
   if (localData !== null) {
+    // Refresh from Supabase in background to update cache for next visit
     remotePromise.then(() => {});
     return localData;
   }
 
-  // Fast timeout fallback for first visit
-  const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(null), 1200));
+  // First visit: wait up to 4 seconds for Supabase before giving up
+  const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(null), 4000));
   const result = await Promise.race([remotePromise, timeoutPromise]);
   return result !== null ? result : fallbackDefault;
 }
@@ -475,7 +476,18 @@ window.LykosDB = {
     const sb = getSupabaseClient();
     if (sb) {
       try {
-        await sb.from('about_settings').upsert({ id: 1, ...about });
+        const { error } = await sb.from('about_settings').upsert({
+          id: 1,
+          history_text: about.history_text || '',
+          mission_text: about.mission_text || '',
+          stat_trophies: about.stat_trophies || '14+',
+          stat_winrate: about.stat_winrate || '78%',
+          stat_community: about.stat_community || '500K+',
+          about_image_url: about.about_image_url || ''
+        });
+        if (error) {
+          console.error("[LykosDB] Supabase saveAboutSettings error:", error);
+        }
       } catch (e) {
         console.warn("[LykosDB] Supabase saveAboutSettings error:", e);
       }
