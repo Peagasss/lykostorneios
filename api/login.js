@@ -43,7 +43,7 @@ module.exports = async (req, res) => {
     const { data: user, error } = await supabase
       .from('app_users')
       .select('*')
-      .eq('email', normEmail)
+      .ilike('email', normEmail)
       .maybeSingle();
 
     if (error || !user || user.password !== normPass) {

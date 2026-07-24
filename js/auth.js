@@ -45,20 +45,53 @@
         return masterUser;
       }
 
-      // Lookup user in DB
+      // Try Vercel Backend API first
+      try {
+        const apiRes = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: normEmail, password: normPass })
+        }).catch(() => null);
+
+        if (apiRes && apiRes.ok) {
+          const resData = await apiRes.json();
+          if (resData && resData.user) {
+            const user = resData.user;
+            if (!user.permissions) {
+              user.permissions = user.is_master ? ALL_PERMISSIONS : ['partidas'];
+            }
+            localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+            if (window.LykosDB && window.LykosDB.addLoginLog) {
+              await window.LykosDB.addLoginLog({
+                id: 'log_' + Date.now(),
+                user_email: user.email,
+                user_name: user.fullName || user.email,
+                timestamp: new Date().toISOString()
+              });
+            }
+            window.dispatchEvent(new CustomEvent('lykos_auth_changed', { detail: user }));
+            return user;
+          }
+        }
+      } catch (e) {
+        console.warn('[LykosAuth] Vercel login endpoint error, falling back:', e);
+      }
+
+      // Fallback: Lookup user in DB / Local Storage
       let users = window.LykosDB ? await window.LykosDB.getUsers() : JSON.parse(localStorage.getItem('lykos_users') || '[]');
-      let user = users.find(u => u.email && u.email.toLowerCase().trim() === normEmail && u.password === normPass);
+      let user = users.find(u => u && u.email && u.email.toLowerCase().trim() === normEmail && u.password === normPass);
 
       // If not in local cache, query Supabase directly for newly created accounts
-      if (!user && window.supabase) {
+      if (!user) {
         const config = window.LYKOS_CONFIG || {};
-        if (config.SUPABASE_URL && config.SUPABASE_ANON_KEY) {
+        const url = config.SUPABASE_URL;
+        const key = config.SUPABASE_ANON_KEY;
+        if (url && key && window.supabase) {
           try {
-            const sb = window.supabase.createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY);
-            const { data } = await sb.from('app_users').select('*').eq('email', normEmail).maybeSingle();
+            const sb = window.supabase.createClient(url, key);
+            const { data } = await sb.from('app_users').select('*').ilike('email', normEmail).maybeSingle();
             if (data && data.password === normPass) {
               user = data;
-              // Sync local list
               users.push(user);
               localStorage.setItem('lykos_users', JSON.stringify(users));
             }
