@@ -52,9 +52,7 @@ module.exports = async (req, res) => {
         updatedAt: new Date().toISOString()
       };
 
-      cache.data = payload;
-      cache.timestamp = now;
-      return res.status(200).json({ ...payload, cached: false });
+      return res.status(200).json(payload);
     } catch (err) {
       console.error('[Vercel Postgres Data API Error]:', err);
       return res.status(500).json({ error: err.message });
