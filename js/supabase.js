@@ -298,10 +298,34 @@ window.LykosDB = {
     const sb = getSupabaseClient();
     if (sb) {
       try {
-        const { data, error } = await sb.from('site_settings').upsert({ id: 1, ...mergedSettings, updated_at: nowIso });
+        // Only send columns that exist in the site_settings table schema
+        const supabasePayload = {
+          id: 1,
+          team_name: mergedSettings.team_name,
+          logo_url: mergedSettings.logo_url,
+          header_logo_url: mergedSettings.header_logo_url,
+          favicon_url: mergedSettings.favicon_url,
+          primary_color: mergedSettings.primary_color,
+          show_tournaments_tab: mergedSettings.show_tournaments_tab,
+          hero_title: mergedSettings.hero_title,
+          hero_subtitle: mergedSettings.hero_subtitle,
+          hero_image_url: mergedSettings.hero_image_url,
+          discord_url: mergedSettings.discord_url,
+          instagram_url: mergedSettings.instagram_url,
+          x_url: mergedSettings.x_url,
+          facebook_url: mergedSettings.facebook_url,
+          contact_socials_json: mergedSettings.contact_socials_json,
+          updated_at: nowIso
+        };
+        const { error } = await sb.from('site_settings').upsert(supabasePayload);
         if (error) {
           console.error("[LykosDB] Supabase saveSettings error:", error);
-          alert('Aviso do Supabase ao salvar marca: ' + (error.message || 'Erro de permissão ou tabela. Execute o arquivo supabase_schema.sql no Supabase.'));
+          // If column missing, keep local data but show actionable message
+          if (error.message && error.message.includes("column")) {
+            alert('Supabase: coluna ausente no banco de dados.\n\nSolução: Execute o arquivo supabase_schema.sql no SQL Editor do Supabase para atualizar a estrutura da tabela.');
+          } else {
+            alert('Aviso do Supabase: ' + error.message);
+          }
         }
       } catch (e) {
         console.warn("[LykosDB] Supabase saveSettings exception:", e);

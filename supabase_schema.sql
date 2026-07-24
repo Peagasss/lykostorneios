@@ -1,30 +1,21 @@
 -- ============================================================================
--- LYKOS E-SPORTS - COMPLETE SUPABASE DATABASE SCHEMA
--- Execute this SQL script in your Supabase SQL Editor to allow real-time global sync
+-- LYKOS E-SPORTS - SUPABASE MIGRATION SCRIPT
+-- Run this FIRST in the Supabase SQL Editor (replaces the old schema script)
+-- This script is safe to run multiple times (idempotent)
 -- ============================================================================
 
--- 1. SITE SETTINGS
+-- ============================================================================
+-- STEP 1: CREATE TABLES (if they don't exist yet)
+-- ============================================================================
+
 CREATE TABLE IF NOT EXISTS public.site_settings (
   id INT PRIMARY KEY DEFAULT 1,
   team_name TEXT DEFAULT 'LYKOS',
   logo_url TEXT DEFAULT 'assets/logo.png',
-  header_logo_url TEXT DEFAULT 'assets/logo.png',
-  favicon_url TEXT DEFAULT 'assets/favicon.png',
-  primary_color TEXT DEFAULT '#4d00b5',
-  show_tournaments_tab BOOLEAN DEFAULT false,
-  hero_title TEXT DEFAULT 'SANGUE.GARRA.GLÓRIA.',
-  hero_subtitle TEXT DEFAULT 'A organização oficial de e-sports de alta performance.',
-  discord_url TEXT DEFAULT 'https://discord.gg/lykosesports',
-  instagram_url TEXT DEFAULT 'https://instagram.com/lykosesports',
-  x_url TEXT DEFAULT 'https://x.com/lykosesports',
-  facebook_url TEXT DEFAULT 'https://facebook.com/lykosesports',
-  contact_socials_json JSONB DEFAULT '[]'::jsonb,
-  hero_image_url TEXT DEFAULT '',
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   CONSTRAINT single_row CHECK (id = 1)
 );
 
--- 2. MODALITIES
 CREATE TABLE IF NOT EXISTS public.modalities (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
@@ -33,7 +24,6 @@ CREATE TABLE IF NOT EXISTS public.modalities (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 3. ROSTER (PLAYERS)
 CREATE TABLE IF NOT EXISTS public.roster (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
@@ -53,7 +43,6 @@ CREATE TABLE IF NOT EXISTS public.roster (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 4. STAFF
 CREATE TABLE IF NOT EXISTS public.staff (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
@@ -64,7 +53,6 @@ CREATE TABLE IF NOT EXISTS public.staff (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 5. MATCHES
 CREATE TABLE IF NOT EXISTS public.matches (
   id TEXT PRIMARY KEY,
   game TEXT NOT NULL,
@@ -83,7 +71,6 @@ CREATE TABLE IF NOT EXISTS public.matches (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 6. TROPHIES
 CREATE TABLE IF NOT EXISTS public.trophies (
   id TEXT PRIMARY KEY,
   title TEXT NOT NULL,
@@ -96,7 +83,6 @@ CREATE TABLE IF NOT EXISTS public.trophies (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 7. ABOUT SETTINGS
 CREATE TABLE IF NOT EXISTS public.about_settings (
   id INT PRIMARY KEY DEFAULT 1,
   history_text TEXT DEFAULT '',
@@ -108,7 +94,6 @@ CREATE TABLE IF NOT EXISTS public.about_settings (
   CONSTRAINT single_about_row CHECK (id = 1)
 );
 
--- 8. GALLERY
 CREATE TABLE IF NOT EXISTS public.gallery (
   id TEXT PRIMARY KEY,
   title TEXT NOT NULL,
@@ -118,7 +103,6 @@ CREATE TABLE IF NOT EXISTS public.gallery (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 9. SOCIAL FEEDS
 CREATE TABLE IF NOT EXISTS public.social_feeds (
   id TEXT PRIMARY KEY,
   platform TEXT NOT NULL,
@@ -128,7 +112,6 @@ CREATE TABLE IF NOT EXISTS public.social_feeds (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 10. RECENT TOURNAMENTS
 CREATE TABLE IF NOT EXISTS public.recent_tournaments (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
@@ -139,7 +122,6 @@ CREATE TABLE IF NOT EXISTS public.recent_tournaments (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 11. COMMUNITY TOURNAMENTS
 CREATE TABLE IF NOT EXISTS public.community_tournaments (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
@@ -154,7 +136,6 @@ CREATE TABLE IF NOT EXISTS public.community_tournaments (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 12. APP USERS
 CREATE TABLE IF NOT EXISTS public.app_users (
   id TEXT PRIMARY KEY,
   email TEXT NOT NULL UNIQUE,
@@ -165,7 +146,6 @@ CREATE TABLE IF NOT EXISTS public.app_users (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 13. LOGIN LOGS
 CREATE TABLE IF NOT EXISTS public.login_logs (
   id TEXT PRIMARY KEY,
   user_email TEXT NOT NULL,
@@ -174,16 +154,44 @@ CREATE TABLE IF NOT EXISTS public.login_logs (
 );
 
 -- ============================================================================
--- ENABLE ROW LEVEL SECURITY & OPEN POLICIES FOR REALTIME WEB ACCESS
+-- STEP 2: MIGRATE EXISTING TABLES — ADD MISSING COLUMNS SAFELY
+-- These ALTER TABLE statements are safe to run even if columns already exist
+-- ============================================================================
+
+ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS header_logo_url TEXT DEFAULT 'assets/logo.png';
+ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS favicon_url TEXT DEFAULT 'assets/favicon.png';
+ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS primary_color TEXT DEFAULT '#4d00b5';
+ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS show_tournaments_tab BOOLEAN DEFAULT false;
+ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS hero_title TEXT DEFAULT 'SANGUE.GARRA.GLÓRIA.';
+ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS hero_subtitle TEXT DEFAULT 'A organização oficial de e-sports de alta performance.';
+ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS discord_url TEXT DEFAULT 'https://discord.gg/lykosesports';
+ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS instagram_url TEXT DEFAULT 'https://instagram.com/lykosesports';
+ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS x_url TEXT DEFAULT 'https://x.com/lykosesports';
+ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS facebook_url TEXT DEFAULT 'https://facebook.com/lykosesports';
+ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS contact_socials_json JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS hero_image_url TEXT DEFAULT '';
+
+-- Ensure single row exists for site_settings
+INSERT INTO public.site_settings (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================================
+-- STEP 3: ENABLE ROW LEVEL SECURITY + OPEN READ/WRITE POLICIES
 -- ============================================================================
 
 DO $$
 DECLARE
   t text;
 BEGIN
-  FOR t IN SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' LOOP
+  FOR t IN
+    SELECT table_name FROM information_schema.tables
+    WHERE table_schema = 'public'
+    AND table_type = 'BASE TABLE'
+  LOOP
     EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY;', t);
     EXECUTE format('DROP POLICY IF EXISTS "Public Open Access" ON public.%I;', t);
-    EXECUTE format('CREATE POLICY "Public Open Access" ON public.%I FOR ALL USING (true) WITH CHECK (true);', t);
+    EXECUTE format(
+      'CREATE POLICY "Public Open Access" ON public.%I FOR ALL USING (true) WITH CHECK (true);',
+      t
+    );
   END LOOP;
 END $$;
