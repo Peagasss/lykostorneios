@@ -5,20 +5,14 @@ let cache = {
   data: null,
   timestamp: 0
 };
-const CACHE_TTL_MS = 10000;
-
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
-  }
-
-  const now = Date.now();
-  if (cache.data && (now - cache.timestamp < CACHE_TTL_MS)) {
-    return res.status(200).json({ ...cache.data, cached: true });
   }
 
   // 1. Try Vercel / Neon Postgres first (ultra fast < 20ms)
