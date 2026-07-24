@@ -394,22 +394,7 @@ window.LykosDB = {
   },
 
   async getAboutSettings() {
-    const rawLocal = localStorage.getItem('lykos_about');
-    const localParsed = safeParse(rawLocal, null);
-    const result = localParsed !== null ? localParsed : DEFAULT_ABOUT;
-
-    const sb = getSupabaseClient();
-    if (sb) {
-      (async () => {
-        try {
-          const { data, error } = await sb.from('about_settings').select('*').eq('id', 1).maybeSingle();
-          if (data && !error) {
-            localStorage.setItem('lykos_about', JSON.stringify(data));
-          }
-        } catch (e) {}
-      })();
-    }
-    return result;
+    return fetchSupabaseOrLocal('about_settings', 'lykos_about', DEFAULT_ABOUT);
   },
   async saveAboutSettings(about) {
     localStorage.setItem('lykos_about', JSON.stringify(about));
@@ -513,20 +498,7 @@ window.LykosDB = {
 
   async getUsers() {
     const raw = localStorage.getItem('lykos_users');
-    const localUsers = safeParse(raw, DEFAULT_USERS);
-
-    const sb = getSupabaseClient();
-    if (sb) {
-      (async () => {
-        try {
-          const { data, error } = await sb.from('app_users').select('*');
-          if (data && !error && data.length > 0) {
-            localStorage.setItem('lykos_users', JSON.stringify(data));
-          }
-        } catch (e) {}
-      })();
-    }
-    return localUsers;
+    return safeParse(raw, DEFAULT_USERS);
   },
   async saveUser(user) {
     const users = await this.getUsers();
