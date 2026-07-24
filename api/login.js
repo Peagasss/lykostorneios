@@ -1,3 +1,4 @@
+const { sql } = require('@vercel/postgres');
 const { createClient } = require('@supabase/supabase-js');
 
 module.exports = async (req, res) => {
@@ -35,11 +36,26 @@ module.exports = async (req, res) => {
     });
   }
 
-  const SUPABASE_URL = process.env.SUPABASE_URL || 'https://kwrrhqommtdqvowrfbcp.supabase.co';
-  const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY || 'sb_publishable_XVbHrN_u7L9EneAmLYTvag_3b1tMlLb';
-  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  // 1. Try Vercel / Neon Postgres first
+  if (process.env.POSTGRES_URL) {
+    try {
+      const result = await sql`SELECT * FROM app_users WHERE LOWER(email) = ${normEmail} LIMIT 1;`;
+      const user = result.rows[0];
+      if (user && user.password === normPass) {
+        const { password: _, ...userWithoutPassword } = user;
+        return res.status(200).json({ user: userWithoutPassword, provider: 'neon-postgres' });
+      }
+    } catch (e) {
+      console.warn('[Vercel Postgres] Login query fallback:', e.message);
+    }
+  }
 
+  // 2. Fallback Supabase
   try {
+    const SUPABASE_URL = process.env.SUPABASE_URL || 'https://kwrrhqommtdqvowrfbcp.supabase.co';
+    const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY || 'sb_publishable_XVbHrN_u7L9EneAmLYTvag_3b1tMlLb';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
     const { data: user, error } = await supabase
       .from('app_users')
       .select('*')
@@ -50,9 +66,8 @@ module.exports = async (req, res) => {
       return res.status(401).json({ error: 'E-mail ou senha incorretos.' });
     }
 
-    // Do not return password hash to client
     const { password: _, ...userWithoutPassword } = user;
-    return res.status(200).json({ user: userWithoutPassword });
+    return res.status(200).json({ user: userWithoutPassword, provider: 'supabase' });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
