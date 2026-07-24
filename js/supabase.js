@@ -265,18 +265,16 @@ window.LykosDB = {
           const localTime = localParsed.updated_at ? new Date(localParsed.updated_at).getTime() : 0;
           const remoteTime = data.updated_at ? new Date(data.updated_at).getTime() : 0;
 
+          // Always prefer remote data when it's newer or when there's no local data
           if (remoteTime >= localTime) {
-            let updated = false;
             Object.keys(data).forEach(key => {
-              if (data[key] !== null && data[key] !== undefined && data[key] !== '' && currentSettings[key] !== data[key]) {
+              // Only update if remote has a meaningful non-null value
+              if (data[key] !== null && data[key] !== undefined) {
                 currentSettings[key] = data[key];
-                updated = true;
               }
             });
-            if (updated) {
-              localStorage.setItem('lykos_settings', JSON.stringify(currentSettings));
-              window.dispatchEvent(new CustomEvent('lykos_branding_updated', { detail: currentSettings }));
-            }
+            localStorage.setItem('lykos_settings', JSON.stringify(currentSettings));
+            window.dispatchEvent(new CustomEvent('lykos_branding_updated', { detail: currentSettings }));
           }
         }
       } catch (e) {
@@ -672,6 +670,31 @@ window.LykosDB = {
   },
 
   async uploadAsset(file) {
+    const sb = getSupabaseClient();
+    if (sb) {
+      try {
+        // Try to upload to Supabase Storage for a real public URL
+        const ext = file.name.split('.').pop() || 'png';
+        const fileName = `lykos-${Date.now()}-${Math.random().toString(36).substr(2, 8)}.${ext}`;
+        const { data, error } = await sb.storage
+          .from('assets')
+          .upload(fileName, file, { upsert: true, contentType: file.type });
+
+        if (!error && data) {
+          const { data: urlData } = sb.storage.from('assets').getPublicUrl(fileName);
+          if (urlData && urlData.publicUrl) {
+            console.log('[LykosDB] Image uploaded to Supabase Storage:', urlData.publicUrl);
+            return urlData.publicUrl;
+          }
+        }
+        // If storage failed (bucket not created), log and fall through to base64
+        console.warn('[LykosDB] Supabase Storage upload failed (bucket "assets" may not exist), using base64 fallback.', error);
+      } catch (e) {
+        console.warn('[LykosDB] Supabase Storage exception, using base64 fallback:', e);
+      }
+    }
+
+    // Fallback: convert to base64 data URL (works locally but large)
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (e) => resolve(e.target.result);

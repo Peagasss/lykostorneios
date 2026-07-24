@@ -195,3 +195,35 @@ BEGIN
     );
   END LOOP;
 END $$;
+
+-- ============================================================================
+-- STEP 4: CREATE PUBLIC STORAGE BUCKET FOR UPLOADED IMAGES
+-- Allows /admin to upload logos, banners, etc. as real public URLs
+-- ============================================================================
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('assets', 'assets', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+-- Allow anonymous reads (anyone can view images)
+DROP POLICY IF EXISTS "Public read assets" ON storage.objects;
+CREATE POLICY "Public read assets"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'assets');
+
+-- Allow anonymous writes (admin can upload without authentication)
+DROP POLICY IF EXISTS "Public upload assets" ON storage.objects;
+CREATE POLICY "Public upload assets"
+  ON storage.objects FOR INSERT
+  WITH CHECK (bucket_id = 'assets');
+
+-- Allow anonymous deletes / updates (admin can replace images)
+DROP POLICY IF EXISTS "Public update assets" ON storage.objects;
+CREATE POLICY "Public update assets"
+  ON storage.objects FOR UPDATE
+  USING (bucket_id = 'assets');
+
+DROP POLICY IF EXISTS "Public delete assets" ON storage.objects;
+CREATE POLICY "Public delete assets"
+  ON storage.objects FOR DELETE
+  USING (bucket_id = 'assets');
