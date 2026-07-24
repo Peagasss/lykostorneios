@@ -3,10 +3,12 @@
    ========================================================================== */
 
 window.renderSobrePage = async function (container) {
-  const settings = await window.LykosDB.getSettings();
-  const aboutSettings = await window.LykosDB.getAboutSettings();
-  const trophies = await window.LykosDB.getTrophies();
-  const recentTournaments = await window.LykosDB.getRecentTournaments();
+  const [settings, aboutSettings, trophies, recentTournaments] = await Promise.all([
+    window.LykosDB.getSettings(),
+    window.LykosDB.getAboutSettings(),
+    window.LykosDB.getTrophies(),
+    window.LykosDB.getRecentTournaments()
+  ]);
 
   container.innerHTML = `
     <section class="section-dark-1" style="padding-top: 130px; text-align: center;">

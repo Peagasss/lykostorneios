@@ -3,9 +3,11 @@
    ========================================================================== */
 
 window.renderElencoPage = async function (container) {
-  const allRoster = await window.LykosDB.getRoster();
-  const modalities = await window.LykosDB.getModalities();
-  const staffMembers = await window.LykosDB.getStaff();
+  const [allRoster, modalities, staffMembers] = await Promise.all([
+    window.LykosDB.getRoster(),
+    window.LykosDB.getModalities(),
+    window.LykosDB.getStaff()
+  ]);
 
   function renderRosterGrid(filter) {
     const filtered = filter === 'ALL' 

@@ -90,19 +90,25 @@ window.renderAdminPage = async function (container) {
   }
 
   async function renderDashboard() {
-    const settings = await window.LykosDB.getSettings();
-    const modalities = await window.LykosDB.getModalities();
-    const matches = await window.LykosDB.getMatches();
-    const roster = await window.LykosDB.getRoster();
-    const staffMembers = await window.LykosDB.getStaff();
-    const gallery = await window.LykosDB.getGallery();
-    const trophies = await window.LykosDB.getTrophies();
-    const recentTournaments = await window.LykosDB.getRecentTournaments();
-    const communityTournaments = await window.LykosDB.getCommunityTournaments();
-    const aboutSettings = await window.LykosDB.getAboutSettings();
-    const socialFeeds = await window.LykosDB.getSocialFeeds();
-    const users = await window.LykosDB.getUsers();
-    const loginLogs = await window.LykosDB.getLoginLogs();
+    const [
+      settings, modalities, matches, roster, staffMembers,
+      gallery, trophies, recentTournaments, communityTournaments,
+      aboutSettings, socialFeeds, users, loginLogs
+    ] = await Promise.all([
+      window.LykosDB.getSettings(),
+      window.LykosDB.getModalities(),
+      window.LykosDB.getMatches(),
+      window.LykosDB.getRoster(),
+      window.LykosDB.getStaff(),
+      window.LykosDB.getGallery(),
+      window.LykosDB.getTrophies(),
+      window.LykosDB.getRecentTournaments(),
+      window.LykosDB.getCommunityTournaments(),
+      window.LykosDB.getAboutSettings(),
+      window.LykosDB.getSocialFeeds(),
+      window.LykosDB.getUsers(),
+      window.LykosDB.getLoginLogs()
+    ]);
 
     // Ensure activeTab is permitted for currentUser
     if (!hasPermission(activeTab)) {

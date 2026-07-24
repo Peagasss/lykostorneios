@@ -4,8 +4,10 @@
    ========================================================================== */
 
 window.renderPartidasPage = async function (container) {
-  const matches = await window.LykosDB.getMatches();
-  const settings = await window.LykosDB.getSettings();
+  const [matches, settings] = await Promise.all([
+    window.LykosDB.getMatches(),
+    window.LykosDB.getSettings()
+  ]);
 
   const teamName = settings.team_name || 'LYKOS';
   const teamLogoHtml = settings.logo_url 

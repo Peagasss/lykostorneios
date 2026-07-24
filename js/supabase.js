@@ -173,12 +173,18 @@ function getSupabaseClient() {
   return _supabase;
 }
 
-// Helpers for Supabase real-time sync with localStorage fallback
+// Helpers for Supabase real-time sync with instant local cache (stale-while-revalidate)
 async function fetchSupabaseOrLocal(tableName, storageKey, fallbackDefault) {
   const raw = localStorage.getItem(storageKey);
   const localData = safeParse(raw, null);
   const sb = getSupabaseClient();
-  if (sb) {
+
+  if (!sb) {
+    return localData !== null ? localData : fallbackDefault;
+  }
+
+  // Remote fetch to sync cache
+  const remotePromise = (async () => {
     try {
       const { data, error } = await sb.from(tableName).select('*');
       if (data && !error && data.length > 0) {
@@ -188,8 +194,19 @@ async function fetchSupabaseOrLocal(tableName, storageKey, fallbackDefault) {
     } catch (e) {
       console.warn(`[LykosDB] Supabase select error for ${tableName}:`, e);
     }
+    return null;
+  })();
+
+  // Instant zero-latency render if local cache exists
+  if (localData !== null) {
+    remotePromise.then(() => {});
+    return localData;
   }
-  return localData !== null ? localData : fallbackDefault;
+
+  // Fast timeout fallback for first visit
+  const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(null), 1200));
+  const result = await Promise.race([remotePromise, timeoutPromise]);
+  return result !== null ? result : fallbackDefault;
 }
 
 async function saveSupabaseAndLocal(tableName, storageKey, fullList, singleItem) {

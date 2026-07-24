@@ -3,11 +3,13 @@
    ========================================================================== */
 
 window.renderHomePage = async function (container) {
-  const settings = await window.LykosDB.getSettings();
-  const matches = await window.LykosDB.getMatches();
-  const roster = await window.LykosDB.getRoster();
-  const gallery = await window.LykosDB.getGallery();
-  const socialFeeds = await window.LykosDB.getSocialFeeds();
+  const [settings, matches, roster, gallery, socialFeeds] = await Promise.all([
+    window.LykosDB.getSettings(),
+    window.LykosDB.getMatches(),
+    window.LykosDB.getRoster(),
+    window.LykosDB.getGallery(),
+    window.LykosDB.getSocialFeeds()
+  ]);
 
   const nextMatch = matches.find(m => m.status === 'UPCOMING') || matches[0];
   const rosterTeaser = roster.slice(0, 4);
