@@ -197,17 +197,13 @@ async function fetchSupabaseOrLocal(tableName, storageKey, fallbackDefault) {
     return null;
   })();
 
-  // Instant zero-latency render if local cache exists
-  if (localData !== null) {
-    // Refresh from Supabase in background to update cache for next visit
-    remotePromise.then(() => {});
-    return localData;
-  }
+  // Instant render if local cache exists, else fallback default
+  const initialData = localData !== null ? localData : fallbackDefault;
 
-  // First visit: wait up to 4 seconds for Supabase before giving up
-  const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(null), 4000));
-  const result = await Promise.race([remotePromise, timeoutPromise]);
-  return result !== null ? result : fallbackDefault;
+  // Fire-and-forget background sync from Supabase to fill cache for subsequent renders/visits
+  remotePromise.then(() => {});
+
+  return initialData;
 }
 
 async function saveSupabaseAndLocal(tableName, storageKey, fullList, singleItem) {
