@@ -28,30 +28,39 @@ module.exports = async (req, res) => {
   }
 
   try {
+    const safeSelect = async (query, fallback = []) => {
+      try {
+        const { data, error } = await query;
+        return (data && !error) ? data : fallback;
+      } catch (e) {
+        return fallback;
+      }
+    };
+
     const [
-      { data: settings },
-      { data: matches },
-      { data: roster },
-      { data: staff },
-      { data: modalities },
-      { data: trophies },
-      { data: about },
-      { data: gallery },
-      { data: social },
-      { data: recentTournaments },
-      { data: communityTournaments }
+      settings,
+      matches,
+      roster,
+      staff,
+      modalities,
+      trophies,
+      about,
+      gallery,
+      social,
+      recentTournaments,
+      communityTournaments
     ] = await Promise.all([
-      supabase.from('site_settings').select('*').eq('id', 1).maybeSingle(),
-      supabase.from('matches').select('*'),
-      supabase.from('roster').select('*'),
-      supabase.from('staff').select('*'),
-      supabase.from('modalities').select('*'),
-      supabase.from('trophies').select('*'),
-      supabase.from('about_settings').select('*').eq('id', 1).maybeSingle(),
-      supabase.from('gallery').select('*'),
-      supabase.from('social_feeds').select('*'),
-      supabase.from('recent_tournaments').select('*'),
-      supabase.from('community_tournaments').select('*')
+      safeSelect(supabase.from('site_settings').select('*').eq('id', 1).maybeSingle(), null),
+      safeSelect(supabase.from('matches').select('*')),
+      safeSelect(supabase.from('roster').select('*')),
+      safeSelect(supabase.from('staff').select('*')),
+      safeSelect(supabase.from('modalities').select('*')),
+      safeSelect(supabase.from('trophies').select('*')),
+      safeSelect(supabase.from('about_settings').select('*').eq('id', 1).maybeSingle(), null),
+      safeSelect(supabase.from('gallery').select('*')),
+      safeSelect(supabase.from('social_feeds').select('*')),
+      safeSelect(supabase.from('recent_tournaments').select('*')),
+      safeSelect(supabase.from('community_tournaments').select('*'))
     ]);
 
     const payload = {
