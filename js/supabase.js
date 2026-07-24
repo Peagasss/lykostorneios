@@ -199,6 +199,65 @@ async function fetchSupabaseOrLocal(tableName, storageKey, fallbackDefault) {
   return initialData;
 }
 
+// Background Real-Time Poller (Polls /api/data every 4 seconds for live sync without F5)
+let _isPollingStarted = false;
+function startRealtimePoller() {
+  if (_isPollingStarted) return;
+  _isPollingStarted = true;
+
+  setInterval(async () => {
+    try {
+      const res = await fetch(getApiUrl('/api/data')).catch(() => null);
+      if (res && res.ok) {
+        const bundle = await res.json();
+        let anyChanged = false;
+
+        const syncMap = [
+          { key: 'settings', storage: 'lykos_settings', event: 'lykos_branding_updated' },
+          { key: 'about', storage: 'lykos_about' },
+          { key: 'modalities', storage: 'lykos_modalities' },
+          { key: 'roster', storage: 'lykos_roster' },
+          { key: 'staff', storage: 'lykos_staff' },
+          { key: 'matches', storage: 'lykos_matches' },
+          { key: 'trophies', storage: 'lykos_trophies' },
+          { key: 'gallery', storage: 'lykos_gallery' },
+          { key: 'social', storage: 'lykos_social' },
+          { key: 'recentTournaments', storage: 'lykos_recent_tournaments' },
+          { key: 'communityTournaments', storage: 'lykos_community_tournaments' }
+        ];
+
+        syncMap.forEach(item => {
+          if (bundle[item.key]) {
+            const fresh = JSON.stringify(bundle[item.key]);
+            const old = localStorage.getItem(item.storage);
+            if (fresh !== old) {
+              localStorage.setItem(item.storage, fresh);
+              anyChanged = true;
+              if (item.event) {
+                window.dispatchEvent(new CustomEvent(item.event, { detail: bundle[item.key] }));
+              }
+            }
+          }
+        });
+
+        // Trigger route re-render if data updated
+        if (anyChanged && window.LykosRouter && window.LykosRouter.handleRoute) {
+          window.LykosRouter.handleRoute().catch(() => {});
+        }
+      }
+    } catch (e) {}
+  }, 4000);
+}
+
+// Auto-start polling on page load
+if (typeof window !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startRealtimePoller);
+  } else {
+    startRealtimePoller();
+  }
+}
+
 async function saveSupabaseAndLocal(tableName, storageKey, fullList, singleItem) {
   localStorage.setItem(storageKey, JSON.stringify(fullList));
   if (singleItem) {
