@@ -17,23 +17,21 @@ function updateFavicon(url) {
 async function initLykosApp() {
   try {
     // Apply saved theme (Dark or Light) safely
-    const savedTheme = window.LykosDB && window.LykosDB.getTheme ? window.LykosDB.getTheme() : 'dark';
+    const savedTheme = (window.LykosDB && window.LykosDB.getTheme) ? window.LykosDB.getTheme() : 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
 
-    // Load and apply initial branding settings
-    const settings = window.LykosDB && window.LykosDB.getSettings ? await window.LykosDB.getSettings() : { team_name: 'LYKOS' };
-
     // Dynamic Favicon Head Update
-    if (settings && settings.favicon_url) {
-      updateFavicon(settings.favicon_url);
+    const rawSettings = localStorage.getItem('lykos_settings');
+    if (rawSettings) {
+      try {
+        const s = JSON.parse(rawSettings);
+        if (s && s.favicon_url) updateFavicon(s.favicon_url);
+      } catch (e) {}
     }
 
-    // Update Page Title
-    document.title = `${settings.team_name || 'LYKOS'} E-Sports | Official Team Website`;
-
-    // Render Header & Footer
-    if (window.renderHeader) await window.renderHeader();
-    if (window.renderFooter) await window.renderFooter();
+    // Render Header & Footer safely without waiting
+    if (window.renderHeader) window.renderHeader().catch(console.error);
+    if (window.renderFooter) window.renderFooter().catch(console.error);
 
     // Register SPA Routes
     if (window.LykosRouter) {
@@ -47,14 +45,13 @@ async function initLykosApp() {
       window.LykosRouter.addRoute('/torneios', window.renderTorneiosPage);
       window.LykosRouter.addRoute('/admin', window.renderAdminPage);
 
-      // Initialize Route
+      // Initialize Route immediately
       await window.LykosRouter.handleRoute();
     }
   } catch (err) {
     console.error('[LykosApp] Initialization error:', err);
-    // Automatic fail-safe recovery render
     if (window.LykosRouter) {
-      await window.LykosRouter.handleRoute();
+      await window.LykosRouter.handleRoute().catch(console.error);
     }
   }
 }
