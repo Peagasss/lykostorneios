@@ -166,8 +166,7 @@ window.renderAdminPage = async function (container) {
               ${hasPermission('modalidades') ? `<button class="admin-nav-item ${activeTab === 'modalidades' ? 'active' : ''}" data-tab="modalidades">Modalidades (Games)</button>` : ''}
               ${hasPermission('trophies') ? `<button class="admin-nav-item ${activeTab === 'trophies' ? 'active' : ''}" data-tab="trophies">Conquistas & Troféus</button>` : ''}
               ${hasPermission('about') ? `<button class="admin-nav-item ${activeTab === 'about' ? 'active' : ''}" data-tab="about">Página Sobre</button>` : ''}
-              ${hasPermission('galeria') ? `<button class="admin-nav-item ${activeTab === 'galeria' ? 'active' : ''}" data-tab="galeria">Galeria de Fotos</button>` : ''}
-              ${hasPermission('social') ? `<button class="admin-nav-item ${activeTab === 'social' ? 'active' : ''}" data-tab="social">Redes Sociais & Feeds</button>` : ''}
+              ${(hasPermission('galeria') || hasPermission('social')) ? `<button class="admin-nav-item ${(activeTab === 'galeria' || activeTab === 'social' || activeTab === 'blog') ? 'active' : ''}" data-tab="blog">Portal Blog, Notícias & Mídias</button>` : ''}
               ${hasPermission('branding') ? `<button class="admin-nav-item ${activeTab === 'branding' ? 'active' : ''}" data-tab="branding">Logo & Marca</button>` : ''}
               ${hasPermission('roles') ? `<button class="admin-nav-item ${activeTab === 'roles' ? 'active' : ''}" data-tab="roles">Usuários & Permissões</button>` : ''}
             </div>
@@ -707,56 +706,38 @@ window.renderAdminPage = async function (container) {
       `;
     }
 
-    if (tab === 'galeria') {
+    if (tab === 'blog' || tab === 'galeria' || tab === 'social') {
       return `
-        <div style="background: var(--bg-dark-surface); border: 1px solid var(--border-dark); border-radius: var(--radius-sm); padding: 1.75rem; margin-bottom: 2rem;">
-          <h3 style="margin-bottom: 1.25rem; font-size: 1.15rem;">Adicionar Imagem à Galeria</h3>
+        <!-- SEÇÃO 1: PUBLICAR NOTÍCIA, FOTO OU VÍDEO NO BLOG -->
+        <div style="background: var(--bg-dark-surface); border: 1px solid var(--border-dark); border-radius: var(--radius-sm); padding: 1.75rem; margin-bottom: 2.5rem;">
+          <h3 style="margin-bottom: 1.25rem; font-size: 1.15rem; color: #ffffff; font-family: var(--font-heading);">📰 Publicar Nova Notícia / Foto / Vídeo no Portal</h3>
           <form id="form-gallery">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
-              <div class="form-group"><label class="form-label">Título da Foto</label><input type="text" id="gal-title" class="form-input" required></div>
+              <div class="form-group"><label class="form-label">Título da Notícia / Matéria</label><input type="text" id="gal-title" class="form-input" placeholder="Ex: LYKOS conquista classificação para o Mundial" required></div>
               <div class="form-group">
-                <label class="form-label">Categoria</label>
+                <label class="form-label">Categoria / Tag</label>
                 <select id="gal-category" class="form-select">
+                  <option value="Notícia">Notícia Oficial</option>
                   <option value="Campeonatos">Campeonatos</option>
                   <option value="Bastidores">Bastidores</option>
+                  <option value="Vídeo">Vídeo / Highlights</option>
                   <option value="Eventos">Eventos</option>
                 </select>
               </div>
             </div>
-            <div class="form-group"><label class="form-label">Descrição da Foto</label><textarea id="gal-desc" class="form-textarea" rows="2" placeholder="Ex: Momento da comemoração no palco principal."></textarea></div>
+            <div class="form-group"><label class="form-label">Conteúdo / Texto da Notícia</label><textarea id="gal-desc" class="form-textarea" rows="4" placeholder="Escreva a matéria completa ou detalhes da publicação..."></textarea></div>
             <div class="form-group">
-              <label class="form-label">Upload de Foto (PC)</label>
+              <label class="form-label">Imagem de Capa (Upload do PC)</label>
               <input type="file" id="gal-file" class="form-input" accept="image/*">
               <span class="upload-hint">Tamanho recomendado: 1200x800px (Proporção 3:2, JPG/WEBP)</span>
             </div>
-            <button type="submit" class="btn-primary">Adicionar à Galeria &rarr;</button>
+            <button type="submit" class="btn-primary">Publicar Notícia / Mídia &rarr;</button>
           </form>
         </div>
 
-        <h3 style="margin-bottom: 1rem; font-size: 1.15rem;">Fotos Registradas</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 1rem;">
-          ${data.gallery.map(g => `
-            <div style="background: var(--bg-dark-surface); border: 1px solid var(--border-dark); border-radius: var(--radius-xs); overflow: hidden;">
-              <img src="${g.image_url}" style="width: 100%; height: 120px; object-fit: cover;">
-              <div style="padding: 0.85rem;">
-                <span class="gallery-tag">${g.category}</span>
-                <div style="font-weight: 700; font-size: 0.85rem; margin-top: 4px; color: white;">${g.title}</div>
-                <div style="font-size: 0.75rem; color: var(--text-muted-light); margin-top: 4px; max-height: 36px; overflow: hidden;">${g.description || ''}</div>
-                <div style="display: flex; gap: 4px; margin-top: 8px;">
-                  <button class="btn-edit pop-edit-gallery-btn" data-id="${g.id}">Editar</button>
-                  <button class="btn-danger delete-gallery-btn" data-id="${g.id}" data-title="${g.title}">Remover</button>
-                </div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      `;
-    }
-
-    if (tab === 'social') {
-      return `
-        <div style="background: var(--bg-dark-surface); border: 1px solid var(--border-dark); border-radius: var(--radius-sm); padding: 1.75rem; margin-bottom: 2rem;">
-          <h3 style="margin-bottom: 1.25rem; font-size: 1.15rem;">Cadastrar Novo Post / Rede Social</h3>
+        <!-- SEÇÃO 2: ADICIONAR FEED / EMBED DE REDE SOCIAL -->
+        <div style="background: var(--bg-dark-surface); border: 1px solid var(--border-dark); border-radius: var(--radius-sm); padding: 1.75rem; margin-bottom: 2.5rem;">
+          <h3 style="margin-bottom: 1.25rem; font-size: 1.15rem; color: #ffffff; font-family: var(--font-heading);">🔥 Incorporar Post de Rede Social (Instagram, X, TikTok, YouTube)</h3>
           <form id="form-social">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
               <div class="form-group">
@@ -765,31 +746,50 @@ window.renderAdminPage = async function (container) {
                   <option value="instagram">Instagram</option>
                   <option value="x">X (Twitter)</option>
                   <option value="tiktok">TikTok</option>
-                  <option value="youtube">YouTube</option>
+                  <option value="youtube">YouTube (Vídeo)</option>
                   <option value="twitch">Twitch</option>
                   <option value="facebook">Facebook</option>
                   <option value="discord">Discord</option>
-                  <option value="linkedin">LinkedIn</option>
                 </select>
               </div>
-              <div class="form-group"><label class="form-label">Título da Publicação</label><input type="text" id="social-title" class="form-input" placeholder="Ex: Bastidores do Treino" required></div>
+              <div class="form-group"><label class="form-label">Título / Legenda do Post</label><input type="text" id="social-title" class="form-input" placeholder="Ex: Anúncio do novo uniforme" required></div>
             </div>
             <div class="form-group">
-              <label class="form-label">Código de Embed (Cole o Bloco &lt;blockquote...&gt;, &lt;iframe...&gt; ou URL)</label>
-              <textarea id="social-embed-url" class="form-textarea" rows="4" placeholder="Cole aqui o código de incorporação (embed HTML) fornecido pelo Instagram, X/Twitter, etc." required></textarea>
+              <label class="form-label">Código de Embed ou Iframe (&lt;iframe...&gt;, &lt;blockquote...&gt; ou URL)</label>
+              <textarea id="social-embed-url" class="form-textarea" rows="3" placeholder="Cole aqui o código de incorporação do post..." required></textarea>
             </div>
             <div class="form-group"><label class="form-label">URL Direta do Post Original (Opcional)</label><input type="url" id="social-post-url" class="form-input" placeholder="https://instagram.com/p/..."></div>
-            <button type="submit" class="btn-primary">Salvar Rede Social &rarr;</button>
+            <button type="submit" class="btn-primary">Incorporar Rede Social &rarr;</button>
           </form>
         </div>
 
-        <h3 style="margin-bottom: 1rem; font-size: 1.15rem;">Redes e Feeds Ativos</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem;">
+        <!-- LISTAGEM DE NOTÍCIAS PUBLICADAS -->
+        <h3 style="margin-bottom: 1rem; font-size: 1.15rem; color: #ffffff; font-family: var(--font-heading);">📰 Notícias & Mídias Ativas</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem; margin-bottom: 3rem;">
+          ${data.gallery.map(g => `
+            <div style="background: var(--bg-dark-surface); border: 1px solid var(--border-dark); border-radius: var(--radius-xs); overflow: hidden;">
+              <img src="${g.image_url}" style="width: 100%; height: 130px; object-fit: cover;">
+              <div style="padding: 1rem;">
+                <span class="gallery-tag">${g.category || 'Notícia'}</span>
+                <div style="font-weight: 700; font-size: 0.95rem; margin-top: 6px; color: white;">${g.title}</div>
+                <div style="font-size: 0.78rem; color: var(--text-muted-light); margin-top: 4px; max-height: 42px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${g.description || ''}</div>
+                <div style="display: flex; gap: 6px; margin-top: 12px;">
+                  <button class="btn-edit pop-edit-gallery-btn" data-id="${g.id}">Editar</button>
+                  <button class="btn-danger delete-gallery-btn" data-id="${g.id}" data-title="${g.title}">Excluir</button>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- LISTAGEM DE FEEDS E REDES SOCIAIS -->
+        <h3 style="margin-bottom: 1rem; font-size: 1.15rem; color: #ffffff; font-family: var(--font-heading);">🔥 Posts de Redes Sociais Ativos</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem;">
           ${data.socialFeeds.map(s => `
             <div style="background: var(--bg-dark-surface); border: 1px solid var(--border-dark); border-radius: var(--radius-xs); padding: 1rem;">
               <span class="social-platform-badge">${s.platform.toUpperCase()}</span>
               <h4 style="color: white; margin-top: 6px; font-size: 0.95rem;">${s.title}</h4>
-              <div style="display: flex; gap: 4px; margin-top: 10px;">
+              <div style="display: flex; gap: 6px; margin-top: 12px;">
                 <button class="btn-edit pop-edit-social-btn" data-id="${s.id}">Editar</button>
                 <button class="btn-danger delete-social-btn" data-id="${s.id}" data-title="${s.title}">Excluir</button>
               </div>
