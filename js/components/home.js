@@ -52,173 +52,137 @@ window.renderHomePage = async function (container) {
     }
   }
 
+  // Filter 5 starter players (or fallback to first 5 from roster)
+  let starterPlayers = roster.filter(p => p.is_starter === true);
+  if (starterPlayers.length === 0) {
+    starterPlayers = roster.slice(0, 5);
+  } else if (starterPlayers.length < 5) {
+    const remainingNeeded = 5 - starterPlayers.length;
+    const starterIds = new Set(starterPlayers.map(p => String(p.id)));
+    const fillers = roster.filter(p => !starterIds.has(String(p.id))).slice(0, remainingNeeded);
+    starterPlayers = [...starterPlayers, ...fillers];
+  }
+  // Max 5 players
+  starterPlayers = starterPlayers.slice(0, 5);
+
   container.innerHTML = `
-    <!-- HERO SECTION WITH CYBER GLOW ARC -->
-    <section class="hero-section" style="position: relative; overflow: hidden;">
-      <div class="hero-glow-arc-container">
-        <div class="hero-glow-arc-bg"></div>
-        <div class="hero-glow-arc-line"></div>
-      </div>
-
-      <div class="container hero-content" style="position: relative; z-index: 2; text-align: center; max-width: 900px; margin: 0 auto;">
-        <div class="section-title-badge" style="margin: 0 auto 1.5rem auto;">
-          <span>PRO TEAM & E-SPORTS ORGANIZATION</span>
-        </div>
-        <h1 class="hero-title" style="font-size: 3.5rem; font-weight: 700; line-height: 1.1; margin-bottom: 1.25rem;">${settings.hero_title}</h1>
-        <p class="hero-subtitle" style="font-size: 1.15rem; color: var(--text-muted-light); max-width: 700px; margin: 0 auto 2.25rem auto;">${settings.hero_subtitle}</p>
-        
-        <div class="hero-actions" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-          <a href="/partidas" class="btn-primary" style="padding: 14px 30px; font-size: 0.88rem; box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);">Calendário de Partidas &rarr;</a>
-          <a href="/elenco" class="btn-secondary" style="padding: 14px 30px; font-size: 0.88rem;">Conheça o Elenco</a>
-        </div>
-
-        <!-- TECH TRUST BAR -->
-        <div class="trust-bar">
-          <div class="trust-item"><span class="highlight">VALORANT</span> PRO LEAGUE</div>
-          <div class="trust-item">•</div>
-          <div class="trust-item"><span class="highlight">CS2</span> MAJOR CIRCUIT</div>
-          <div class="trust-item">•</div>
-          <div class="trust-item"><span class="highlight">14+</span> TROFÉUS</div>
-          <div class="trust-item">•</div>
-          <div class="trust-item"><span class="highlight">500K+</span> TORCEDORES</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECTION 1: DESTAQUE DE PARTIDAS (GLASS CARD) -->
-    <section class="section-dark-1" style="padding-top: 3rem;">
+    <!-- MAIN HOME WRAPPER -->
+    <section style="padding-top: 100px; padding-bottom: 3rem; min-height: 80vh; position: relative;">
       <div class="container">
-        <h2 class="section-heading">${sectionTitle.split(' ')[0]} <span>${sectionTitle.split(' ').slice(1).join(' ')}</span></h2>
-        <p class="section-subtitle">${sectionSubtitle}</p>
 
-        ${featuredMatch ? `
-          <div class="glass-card" style="padding: 2.25rem; display: flex; flex-direction: column; gap: 1.5rem; position: relative;">
-            <span class="match-game-label" style="position: absolute; top: 1.25rem; left: 1.5rem; font-family: var(--font-heading); font-size: 0.78rem; font-weight: 700; color: var(--accent-neon); text-transform: uppercase; letter-spacing: 0.08em;">
-              ${featuredMatch.game} ${featuredMatch.tournament_name ? '• ' + featuredMatch.tournament_name : ''}
-            </span>
+        <!-- BANNER DE DESTAQUE: 5 JOGADORES PRINCIPAIS DO ELENCO -->
+        <div style="background: rgba(10, 8, 22, 0.7); border: 1px solid var(--border-dark-strong); border-radius: var(--radius-sm); padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 15px 40px rgba(0,0,0,0.6); position: relative; overflow: hidden;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(168,85,247,0.2); padding-bottom: 0.75rem;">
+            <div style="font-family: var(--font-heading); font-size: 1.1rem; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; gap: 8px;">
+              <span>🎮</span> <span>LINE-UP PRINCIPAL DE ELITE</span>
+            </div>
+            <div style="font-family: var(--font-tech); font-size: 0.78rem; color: var(--accent-neon); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+              ${settings.team_name || 'LYKOS'} OFFICIAL ROSTER
+            </div>
+          </div>
 
-            <div style="display: flex; width: 100%; justify-content: space-between; align-items: center; gap: 1.5rem; flex-wrap: wrap; box-sizing: border-box; padding-top: 1rem;">
-              <div class="team-box" style="display: flex; align-items: center; gap: 1.25rem;">
-                ${teamLogoHtml}
-                <div>
-                  <div class="team-name" style="font-size: 1.4rem; font-weight: 700;">${settings.team_name}</div>
+          <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem;" class="starters-responsive-grid">
+            ${starterPlayers.map(player => `
+              <div class="starter-card glass-card-interactive" data-id="${player.id}" style="border: 1px solid var(--border-dark); border-radius: var(--radius-xs); overflow: hidden; background: rgba(14, 11, 26, 0.9); display: flex; flex-direction: column; cursor: pointer; transition: all 0.3s ease;">
+                <div style="height: 310px; overflow: hidden; position: relative; background: radial-gradient(circle at center, rgba(168,85,247,0.15) 0%, rgba(10,8,22,0.9) 100%);">
+                  <span class="game-badge" style="top: 10px; left: 10px; font-family: var(--font-tech); font-size: 0.65rem;">${player.game}</span>
+                  <img src="${player.photo_url}" alt="${player.nickname}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.4s ease;">
+                  
+                  <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1rem 0.85rem; background: linear-gradient(to top, rgba(8,6,16,0.98) 0%, rgba(8,6,16,0.7) 70%, transparent 100%); text-align: center;">
+                    <div style="font-family: var(--font-heading); font-size: 1.3rem; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.03em;">${player.nickname}</div>
+                    <div style="font-size: 0.75rem; color: var(--accent-neon); font-weight: 700; text-transform: uppercase; margin-top: 2px;">${player.role || 'Player'}</div>
+                  </div>
                 </div>
               </div>
+            `).join('')}
+          </div>
+        </div>
 
-              <div class="match-vs-center" style="text-align: center;">
-                ${(featuredMatch.status || '').toUpperCase() === 'LIVE' ? `<span class="match-status-pill status-live" style="margin-bottom: 12px; display: inline-block;">🔴 AO VIVO</span>` : ''}
-                <div class="match-score-badge" style="font-size: 2.2rem; padding: 6px 24px; background: rgba(168, 85, 247, 0.15); border: 1px solid var(--border-dark-strong); border-radius: var(--radius-sm);">
-                  ${(featuredMatch.status || '').toUpperCase() === 'FINISHED' || (featuredMatch.status || '').toUpperCase() === 'LIVE' 
-                    ? `${featuredMatch.score_lykos || 0} - ${featuredMatch.score_opponent || 0}` 
-                    : 'VS.'}
-                </div>
+        <!-- DIVISÃO EM DOIS LADOS: PRÓXIMO CONFRONTO (ESQUERDA) | TORCIDA OFICIAL (DIREITA) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;" class="home-split-grid">
+          
+          <!-- LADO ESQUERDO: NOTIFICAÇÃO PRÓXIMO CONFRONTO HIERÁRQUICO -->
+          <div class="glass-card" style="padding: 2rem; border: 1px solid var(--border-dark-strong); display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="margin-bottom: 1rem;">
+                <h2 style="font-family: var(--font-heading); font-size: 2.2rem; font-weight: 800; color: #ffffff; line-height: 1.1; margin-bottom: 6px;">
+                  PRÓXIMO <span style="color: var(--accent-neon);">CONFRONTO</span>
+                </h2>
+                <p style="font-size: 0.88rem; color: var(--text-muted-light);">
+                  ${sectionSubtitle}
+                </p>
               </div>
 
-              <div class="team-box away" style="display: flex; align-items: center; gap: 1.25rem;">
-                <img src="${featuredMatch.opponent_logo || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=200&q=80'}" alt="${featuredMatch.opponent_name}" class="team-logo-img">
-                <div>
-                  <div class="team-name" style="font-size: 1.4rem; font-weight: 700;">${featuredMatch.opponent_name}</div>
+              ${featuredMatch ? `
+                <div style="background: rgba(14, 11, 26, 0.85); border: 1px solid var(--border-dark); border-radius: var(--radius-xs); padding: 1.5rem; margin-top: 1.5rem;">
+                  <div style="font-family: var(--font-heading); font-size: 0.78rem; font-weight: 700; color: var(--accent-neon); text-transform: uppercase; margin-bottom: 1rem;">
+                    ${featuredMatch.game} • ${featuredMatch.tournament_name || 'Campeonato'}
+                  </div>
+
+                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem;">
+                    <!-- TIME CASA -->
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                      ${teamLogoHtml}
+                      <div style="font-family: var(--font-heading); font-size: 1.2rem; font-weight: 800; color: white;">${settings.team_name}</div>
+                    </div>
+
+                    <!-- SCORE / VS -->
+                    <div style="text-align: center;">
+                      ${(featuredMatch.status || '').toUpperCase() === 'LIVE' ? `<span class="match-status-pill status-live" style="margin-bottom: 6px; display: inline-block;">🔴 AO VIVO</span>` : ''}
+                      <div style="font-family: var(--font-heading); font-size: 1.8rem; font-weight: 800; color: white; padding: 4px 16px; background: rgba(168,85,247,0.15); border-radius: var(--radius-xs); border: 1px solid var(--border-dark);">
+                        ${(featuredMatch.status || '').toUpperCase() === 'FINISHED' || (featuredMatch.status || '').toUpperCase() === 'LIVE' 
+                          ? `${featuredMatch.score_lykos || 0} - ${featuredMatch.score_opponent || 0}` 
+                          : 'VS'}
+                      </div>
+                    </div>
+
+                    <!-- ADVERSÁRIO -->
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                      <div style="font-family: var(--font-heading); font-size: 1.2rem; font-weight: 800; color: white;">${featuredMatch.opponent_name}</div>
+                      <img src="${featuredMatch.opponent_logo || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=200&q=80'}" alt="${featuredMatch.opponent_name}" class="team-logo-img">
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ` : `
+                <div style="padding: 2rem; text-align: center; color: var(--text-muted-light);">Nenhuma partida agendada.</div>
+              `}
             </div>
 
-            <!-- STREAM / ACTIONS ROW -->
-            <div style="display: flex; justify-content: flex-end; gap: 12px; align-items: center; border-top: 1px solid var(--border-dark); padding-top: 1.25rem; width: 100%; box-sizing: border-box;">
-              ${(featuredMatch.status || '').toUpperCase() === 'LIVE' && featuredMatch.stream_url ? `
-                <a href="${featuredMatch.stream_url}" target="_blank" class="btn-live">
-                  Assistir Ao Vivo
-                </a>
-              ` : (featuredMatch.stream_url ? `
-                <a href="${featuredMatch.stream_url}" target="_blank" class="btn-secondary" style="padding: 10px 18px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px;">
-                  Transmissão
-                </a>
-              ` : '')}
-              <a href="/partidas/${featuredMatch.id}" class="btn-primary" style="padding: 10px 20px; font-size: 0.8rem;">
-                Detalhes da Partida &rarr;
+            <div style="margin-top: 1.75rem; display: flex; gap: 10px; justify-content: flex-end;">
+              ${featuredMatch && (featuredMatch.status || '').toUpperCase() === 'LIVE' && featuredMatch.stream_url ? `
+                <a href="${featuredMatch.stream_url}" target="_blank" class="btn-live" style="padding: 10px 18px; font-size: 0.8rem;">🔴 ASSISTIR AO VIVO</a>
+              ` : ''}
+              ${featuredMatch ? `<a href="/partidas/${featuredMatch.id}" class="btn-secondary" style="padding: 10px 18px; font-size: 0.8rem;">Detalhes &rarr;</a>` : ''}
+              <a href="/partidas" class="btn-primary" style="padding: 10px 18px; font-size: 0.8rem;">Ver Calendário &rarr;</a>
+            </div>
+          </div>
+
+          <!-- LADO DIREITO: FAÇA PARTE DA NOSSA TORCIDA OFICIAL (VAI PARA /CONTATO) -->
+          <div class="glass-card" style="padding: 2.5rem; border: 1px solid var(--border-dark-strong); display: flex; flex-direction: column; justify-content: space-between; background: linear-gradient(135deg, rgba(168,85,247,0.2) 0%, rgba(10,8,22,0.9) 100%); position: relative; overflow: hidden;">
+            <div style="position: absolute; top: -50px; right: -50px; width: 220px; height: 220px; background: rgba(168,85,247,0.25); filter: blur(50px); border-radius: 50%; pointer-events: none;"></div>
+
+            <div>
+              <div class="section-title-badge" style="margin-bottom: 1rem;">COMUNIDADE & TORCIDA</div>
+              <h2 style="font-family: var(--font-heading); font-size: 2.4rem; font-weight: 800; color: #ffffff; line-height: 1.15; margin-bottom: 1rem;">
+                FAÇA PARTE DA NOSSA <span style="color: var(--accent-neon);">TORCIDA OFICIAL</span>
+              </h2>
+              <p style="font-size: 0.95rem; color: var(--text-muted-light); line-height: 1.6; margin-bottom: 1.75rem;">
+                Entre no nosso servidor do Discord, participe de torneios da comunidade, receba conteúdos exclusivos em primeira mão e torça junto com a alcateia!
+              </p>
+            </div>
+
+            <div>
+              <a href="/contato" class="btn-primary" style="display: block; text-align: center; padding: 16px 24px; font-size: 0.95rem; font-weight: 800; box-shadow: 0 0 25px rgba(168,85,247,0.5);">
+                UNIR-SE À TORCIDA AGORA &rarr;
               </a>
             </div>
           </div>
-        ` : ''}
-      </div>
-    </section>
 
-    <!-- SECTION 2: PILARES & STATS (01, 02, 03, 04) -->
-    <section class="section-dark-2">
-      <div class="container">
-        <h2 class="section-heading">Nossa <span>Excelência</span></h2>
-        <p class="section-subtitle">A estrutura que move a alcateia rumo ao topo mundial.</p>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem;">
-          <div class="cyber-stat-card">
-            <div class="cyber-stat-num">01</div>
-            <div class="cyber-stat-title">Pro-Teams Dedicados</div>
-            <div class="cyber-stat-desc">Lineups treinadas com suporte psicológico e comissão técnica de alto nível.</div>
-          </div>
-
-          <div class="cyber-stat-card">
-            <div class="cyber-stat-num">02</div>
-            <div class="cyber-stat-title">78% Winrate Global</div>
-            <div class="cyber-stat-desc">Consistência e alto desempenho comprovados nas principais ligas nacionais e internacionais.</div>
-          </div>
-
-          <div class="cyber-stat-card">
-            <div class="cyber-stat-num">03</div>
-            <div class="cyber-stat-title">Comunidade Viva</div>
-            <div class="cyber-stat-desc">Mais de 500 mil torcedores conectados no Discord, redes sociais e transmissões.</div>
-          </div>
-
-          <div class="cyber-stat-card">
-            <div class="cyber-stat-num">04</div>
-            <div class="cyber-stat-title">Infraestrutura Gaming</div>
-            <div class="cyber-stat-desc">Gaming House moderna para bootcamps e preparação estratégica contínua.</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECTION 3: ELENCO SPOTLIGHT (GLASS CARDS) -->
-    <section class="section-dark-1">
-      <div class="container">
-        <h2 class="section-heading">Elenco de <span>Elite</span></h2>
-        <p class="section-subtitle">Pro-players de destaque vestindo o manto da LYKOS.</p>
-
-        <div class="roster-grid">
-          ${rosterTeaser.map(player => `
-            <div class="glass-card glass-card-interactive player-card" data-id="${player.id}" style="padding: 1.25rem;">
-              <div class="player-image-wrap" style="border-radius: var(--radius-sm); overflow: hidden;">
-                <span class="game-badge">${player.game}</span>
-                <img src="${player.photo_url}" alt="${player.nickname}">
-              </div>
-              <div class="player-info" style="padding-top: 1rem;">
-                <div class="player-role">${player.role}</div>
-                <div class="player-nickname" style="font-size: 1.35rem; color: #ffffff;">${player.nickname}</div>
-                <div class="player-fullname">${player.name}</div>
-                <p class="player-bio" style="font-size: 0.82rem; margin-top: 6px;">${player.bio}</p>
-                <div style="font-size: 0.78rem; color: var(--accent-neon); font-weight: 700; margin-top: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Ver Perfil &rarr;</div>
-              </div>
-            </div>
-          `).join('')}
         </div>
 
-        <div style="text-align: center; margin-top: 3rem;">
-          <a href="/elenco" class="btn-primary">Ver Elenco Completo &rarr;</a>
-        </div>
       </div>
     </section>
-
-    <!-- SECTION 4: DESTAQUES / PURPLE BANNER -->
-    <section class="section-dark-2">
-      <div class="container">
-        <div class="purple-highlight-section" style="text-align: center; max-width: 1000px; margin: 0 auto;">
-          <h2 style="font-family: var(--font-heading); font-size: 2.4rem; font-weight: 700; color: #ffffff; margin-bottom: 1rem;">Faça Parte da Nossa Torcida Oficial</h2>
-          <p style="font-size: 1.05rem; color: rgba(255,255,255,0.85); max-width: 650px; margin: 0 auto 2rem auto;">Entre no nosso servidor do Discord, participe de torneios da comunidade e acompanhe os bastidores exclusivos da alcateia.</p>
-          <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-            <a href="${settings.discord_url || 'https://discord.gg/lykosesports'}" target="_blank" class="btn-secondary" style="background: #ffffff !important; color: #4c1d95 !important; border: none; font-weight: 700; padding: 12px 28px;">Entrar no Discord &rarr;</a>
-            <a href="/contato" class="btn-secondary" style="background: rgba(0,0,0,0.25); color: #ffffff; border: 1px solid rgba(255,255,255,0.3); padding: 12px 28px;">Canais Oficiais</a>
-          </div>
-        </div>
-      </div>
-    </section>
+  `;
 
     <!-- PLAYER POP-UP MODAL FOR HOME -->
     <div id="home-player-modal" class="modal-backdrop" style="display: none;">
@@ -233,7 +197,7 @@ window.renderHomePage = async function (container) {
   const modalBody = container.querySelector('#home-player-modal-body');
   const modalClose = container.querySelector('#home-player-modal-close');
 
-  container.querySelectorAll('.player-card').forEach(card => {
+  container.querySelectorAll('.starter-card').forEach(card => {
     card.onclick = async () => {
       const id = card.getAttribute('data-id');
       const player = await window.LykosDB.getPlayerById(id);
@@ -251,7 +215,7 @@ window.renderHomePage = async function (container) {
         </div>
 
         <div style="margin-bottom: 1.25rem;">
-          <p style="font-size: 0.88rem; line-height: 1.6; color: white;">${player.bio}</p>
+          <p style="font-size: 0.88rem; line-height: 1.6; color: white;">${player.bio || 'Atleta titular da organização.'}</p>
         </div>
 
         <div style="display: flex; gap: 10px;">
@@ -264,23 +228,12 @@ window.renderHomePage = async function (container) {
     };
   });
 
-  modalClose.onclick = () => modal.style.display = 'none';
-  modal.onclick = (e) => {
-    if (e.target === modal) modal.style.display = 'none';
-  };
-
-  // Trigger Instagram embed parser if blockquotes are present
-  if (container.querySelector('.instagram-media')) {
-    if (window.instgrm && window.instgrm.Embeds) {
-      window.instgrm.Embeds.process();
-    } else {
-      let script = document.querySelector('script[src*="instagram.com/embed.js"]');
-      if (!script) {
-        script = document.createElement('script');
-        script.async = true;
-        script.src = 'https://www.instagram.com/embed.js';
-        document.body.appendChild(script);
-      }
-    }
+  if (modalClose) {
+    modalClose.onclick = () => modal.style.display = 'none';
+  }
+  if (modal) {
+    modal.onclick = (e) => {
+      if (e.target === modal) modal.style.display = 'none';
+    };
   }
 };

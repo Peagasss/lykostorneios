@@ -519,6 +519,13 @@ window.renderAdminPage = async function (container) {
             </div>
 
             <div class="form-group" style="margin-top: 1rem;">
+              <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; color: white; font-weight: 700; font-size: 0.88rem;">
+                <input type="checkbox" id="roster-is-starter" style="width: 18px; height: 18px; accent-color: var(--accent-neon);">
+                <span>⭐ Exibir no Banner do 5 Principal (Home)</span>
+              </label>
+            </div>
+
+            <div class="form-group" style="margin-top: 1rem;">
               <label class="form-label">Foto do Pro-Player (Upload PC)</label>
               <input type="file" id="roster-file" class="form-input" accept="image/*">
               <span class="upload-hint">Tamanho recomendado: 800x800px (Quadrado 1:1, JPG/PNG)</span>
@@ -540,11 +547,13 @@ window.renderAdminPage = async function (container) {
                 <img src="${p.photo_url}" alt="${p.nickname}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
                 <div style="flex: 1; min-width: 0; overflow: hidden;">
                   <span class="game-badge" style="position: static; font-size: 0.65rem;">${p.game}</span>
+                  ${p.is_starter ? `<span style="background: rgba(168,85,247,0.2); border: 1px solid var(--accent-neon); color: var(--accent-neon); font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; font-weight: 700; margin-left: 4px;">⭐ 5 Principal</span>` : ''}
                   <div style="font-family: var(--font-heading); font-weight: 700; font-size: 0.95rem; color: white; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${p.nickname}</div>
                   <div style="font-size: 0.75rem; color: var(--text-muted-light); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${p.name}</div>
                 </div>
               </div>
               <div style="display: flex; gap: 4px; flex-shrink: 0;">
+                <button class="btn-secondary toggle-starter-btn" data-id="${p.id}" style="padding: 4px 8px; font-size: 0.75rem; color: ${p.is_starter ? '#a855f7' : '#aaa'}; border-color: ${p.is_starter ? '#a855f7' : 'var(--border-dark)'};" title="Alternar 5 Principal">${p.is_starter ? '★ 5-Home' : '☆ 5-Home'}</button>
                 <button class="btn-edit pop-edit-roster-btn" data-id="${p.id}" style="padding: 4px 10px; font-size: 0.75rem;">Editar</button>
                 <button class="btn-danger delete-roster-btn" data-id="${p.id}" data-title="${p.nickname}" style="padding: 4px 10px; font-size: 0.75rem;">Excluir</button>
               </div>
@@ -1401,6 +1410,7 @@ window.renderAdminPage = async function (container) {
             nickname: container.querySelector('#roster-nickname').value,
             game: container.querySelector('#roster-game').value,
             role: container.querySelector('#roster-role').value,
+            is_starter: container.querySelector('#roster-is-starter') ? container.querySelector('#roster-is-starter').checked : false,
             mouse: container.querySelector('#roster-mouse').value || '',
             keyboard: container.querySelector('#roster-keyboard').value || '',
             headset: container.querySelector('#roster-headset').value || '',
@@ -1416,6 +1426,18 @@ window.renderAdminPage = async function (container) {
         }
       };
     }
+
+    container.querySelectorAll('.toggle-starter-btn').forEach(btn => {
+      btn.onclick = async () => {
+        const id = btn.getAttribute('data-id');
+        const player = data.roster.find(p => String(p.id) === String(id));
+        if (!player) return;
+        player.is_starter = !player.is_starter;
+        await window.LykosDB.savePlayer(player);
+        showToastSuccess(player.is_starter ? `${player.nickname} definido como 5-Principal!` : `${player.nickname} removido do 5-Principal`);
+        renderDashboard();
+      };
+    });
 
     container.querySelectorAll('.pop-edit-roster-btn').forEach(btn => {
       btn.onclick = () => {
@@ -1434,6 +1456,13 @@ window.renderAdminPage = async function (container) {
                 <select id="pop-p-game" class="form-select">${data.modalities.map(m => `<option value="${m.name}" ${player.game === m.name ? 'selected' : ''}>${m.name}</option>`).join('')}</select>
               </div>
               <div class="form-group"><label class="form-label">Função / Role</label><input type="text" id="pop-p-role" class="form-input" value="${player.role || ''}" required></div>
+            </div>
+
+            <div class="form-group" style="margin-top: 0.5rem;">
+              <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; color: white; font-weight: 700; font-size: 0.88rem;">
+                <input type="checkbox" id="pop-p-starter" style="width: 18px; height: 18px; accent-color: var(--accent-neon);" ${player.is_starter ? 'checked' : ''}>
+                <span>⭐ Exibir no Banner do 5 Principal (Home)</span>
+              </label>
             </div>
 
             <h4 style="font-size: 0.85rem; color: var(--accent-neon); text-transform: uppercase; margin: 1rem 0 0.5rem;">Setup & Periféricos</h4>
@@ -1471,6 +1500,7 @@ window.renderAdminPage = async function (container) {
             nickname: form.querySelector('#pop-p-nick').value,
             game: form.querySelector('#pop-p-game').value,
             role: form.querySelector('#pop-p-role').value,
+            is_starter: form.querySelector('#pop-p-starter') ? form.querySelector('#pop-p-starter').checked : false,
             mouse: form.querySelector('#pop-p-mouse').value,
             keyboard: form.querySelector('#pop-p-keyboard').value,
             headset: form.querySelector('#pop-p-headset').value,
