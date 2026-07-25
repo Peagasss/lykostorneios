@@ -2313,19 +2313,35 @@ window.renderAdminPage = async function (container) {
       });
     });
 
-    // 3.1 MOVE ROSTER UP/DOWN HANDLERS
+    // 3.1 MOVE ROSTER UP/DOWN HANDLERS (Optimistic Instant UI Updates)
     container.querySelectorAll('.move-roster-up').forEach(btn => {
       btn.onclick = async () => {
         const id = btn.getAttribute('data-id');
         const idx = data.roster.findIndex(p => String(p.id) === String(id));
         if (idx > 0) {
+          // Swap in memory instantly
+          const temp = data.roster[idx];
+          data.roster[idx] = data.roster[idx - 1];
+          data.roster[idx - 1] = temp;
           data.roster.forEach((p, i) => { p.sort_order = i; });
-          const temp = data.roster[idx].sort_order;
-          data.roster[idx].sort_order = data.roster[idx - 1].sort_order;
-          data.roster[idx - 1].sort_order = temp;
-          await window.LykosDB.savePlayer(data.roster[idx]);
-          await window.LykosDB.savePlayer(data.roster[idx - 1]);
-          renderDashboard();
+
+          // Re-render UI immediately (0ms latency for the user)
+          const tabContent = container.querySelector('#admin-tab-content');
+          if (tabContent) {
+            tabContent.innerHTML = renderTabBody('elenco', data);
+            setupDeleteModalEvents();
+            attachTabFormHandlers(data);
+          }
+
+          // Persist changes to Azure DB in background
+          try {
+            await Promise.all([
+              window.LykosDB.savePlayer(data.roster[idx]),
+              window.LykosDB.savePlayer(data.roster[idx - 1])
+            ]);
+          } catch (e) {
+            console.error('[LykosAdmin] Error saving order:', e);
+          }
         }
       };
     });
@@ -2335,30 +2351,62 @@ window.renderAdminPage = async function (container) {
         const id = btn.getAttribute('data-id');
         const idx = data.roster.findIndex(p => String(p.id) === String(id));
         if (idx !== -1 && idx < data.roster.length - 1) {
+          // Swap in memory instantly
+          const temp = data.roster[idx];
+          data.roster[idx] = data.roster[idx + 1];
+          data.roster[idx + 1] = temp;
           data.roster.forEach((p, i) => { p.sort_order = i; });
-          const temp = data.roster[idx].sort_order;
-          data.roster[idx].sort_order = data.roster[idx + 1].sort_order;
-          data.roster[idx + 1].sort_order = temp;
-          await window.LykosDB.savePlayer(data.roster[idx]);
-          await window.LykosDB.savePlayer(data.roster[idx + 1]);
-          renderDashboard();
+
+          // Re-render UI immediately (0ms latency for the user)
+          const tabContent = container.querySelector('#admin-tab-content');
+          if (tabContent) {
+            tabContent.innerHTML = renderTabBody('elenco', data);
+            setupDeleteModalEvents();
+            attachTabFormHandlers(data);
+          }
+
+          // Persist changes to Azure DB in background
+          try {
+            await Promise.all([
+              window.LykosDB.savePlayer(data.roster[idx]),
+              window.LykosDB.savePlayer(data.roster[idx + 1])
+            ]);
+          } catch (e) {
+            console.error('[LykosAdmin] Error saving order:', e);
+          }
         }
       };
     });
 
-    // 4.1 MOVE STAFF UP/DOWN HANDLERS
+    // 4.1 MOVE STAFF UP/DOWN HANDLERS (Optimistic Instant UI Updates)
     container.querySelectorAll('.move-staff-up').forEach(btn => {
       btn.onclick = async () => {
         const id = btn.getAttribute('data-id');
         const idx = data.staffMembers.findIndex(s => String(s.id) === String(id));
         if (idx > 0) {
+          // Swap in memory instantly
+          const temp = data.staffMembers[idx];
+          data.staffMembers[idx] = data.staffMembers[idx - 1];
+          data.staffMembers[idx - 1] = temp;
           data.staffMembers.forEach((s, i) => { s.sort_order = i; });
-          const temp = data.staffMembers[idx].sort_order;
-          data.staffMembers[idx].sort_order = data.staffMembers[idx - 1].sort_order;
-          data.staffMembers[idx - 1].sort_order = temp;
-          await window.LykosDB.saveStaff(data.staffMembers[idx]);
-          await window.LykosDB.saveStaff(data.staffMembers[idx - 1]);
-          renderDashboard();
+
+          // Re-render UI immediately (0ms latency for the user)
+          const tabContent = container.querySelector('#admin-tab-content');
+          if (tabContent) {
+            tabContent.innerHTML = renderTabBody('staff', data);
+            setupDeleteModalEvents();
+            attachTabFormHandlers(data);
+          }
+
+          // Persist changes to Azure DB in background
+          try {
+            await Promise.all([
+              window.LykosDB.saveStaff(data.staffMembers[idx]),
+              window.LykosDB.saveStaff(data.staffMembers[idx - 1])
+            ]);
+          } catch (e) {
+            console.error('[LykosAdmin] Error saving order:', e);
+          }
         }
       };
     });
@@ -2368,13 +2416,29 @@ window.renderAdminPage = async function (container) {
         const id = btn.getAttribute('data-id');
         const idx = data.staffMembers.findIndex(s => String(s.id) === String(id));
         if (idx !== -1 && idx < data.staffMembers.length - 1) {
+          // Swap in memory instantly
+          const temp = data.staffMembers[idx];
+          data.staffMembers[idx] = data.staffMembers[idx + 1];
+          data.staffMembers[idx + 1] = temp;
           data.staffMembers.forEach((s, i) => { s.sort_order = i; });
-          const temp = data.staffMembers[idx].sort_order;
-          data.staffMembers[idx].sort_order = data.staffMembers[idx + 1].sort_order;
-          data.staffMembers[idx + 1].sort_order = temp;
-          await window.LykosDB.saveStaff(data.staffMembers[idx]);
-          await window.LykosDB.saveStaff(data.staffMembers[idx + 1]);
-          renderDashboard();
+
+          // Re-render UI immediately (0ms latency for the user)
+          const tabContent = container.querySelector('#admin-tab-content');
+          if (tabContent) {
+            tabContent.innerHTML = renderTabBody('staff', data);
+            setupDeleteModalEvents();
+            attachTabFormHandlers(data);
+          }
+
+          // Persist changes to Azure DB in background
+          try {
+            await Promise.all([
+              window.LykosDB.saveStaff(data.staffMembers[idx]),
+              window.LykosDB.saveStaff(data.staffMembers[idx + 1])
+            ]);
+          } catch (e) {
+            console.error('[LykosAdmin] Error saving order:', e);
+          }
         }
       };
     });
