@@ -18,8 +18,8 @@ window.renderHeader = async function () {
   const hasLiveMatch = matches.some(m => (m.status || '').toUpperCase() === 'LIVE');
 
   headerContainer.innerHTML = `
-    <header class="site-header" style="position: fixed; top: 0; left: 0; right: 0; width: 100%; z-index: 1000; background: rgba(10, 8, 20, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(168, 85, 247, 0.25); box-shadow: 0 10px 30px rgba(0,0,0,0.6);">
-      <div style="display: flex; align-items: center; justify-content: space-between; height: 72px; padding: 0 2.5rem; width: 100%; box-sizing: border-box;">
+    <header class="site-header" style="position: fixed; top: 12px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 1240px; border-radius: 20px; z-index: 1000; background: rgba(10, 8, 20, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(168, 85, 247, 0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+      <div class="container nav-container" style="display: flex; align-items: center; justify-content: space-between; height: 68px; padding: 0 1.5rem;">
         <a href="/" class="brand-logo" style="display: inline-flex; align-items: center; gap: 10px; text-decoration: none;">
           ${logoContent}
           <span style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: #ffffff; text-transform: uppercase; letter-spacing: 0.06em; display: inline-block;">

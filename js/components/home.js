@@ -70,25 +70,16 @@ window.renderHomePage = async function (container) {
     <section style="padding-top: 85px; padding-bottom: 3rem; min-height: 80vh; position: relative; width: 100%;">
       <div style="width: 100%; padding: 0 2rem; box-sizing: border-box;">
 
-        <!-- BANNER DE DESTAQUE: 5 JOGADORES PRINCIPAIS DO ELENCO (FULL WIDTH EDGE-TO-EDGE) -->
-        <div style="background: rgba(10, 8, 22, 0.75); border: 1px solid var(--border-dark-strong); border-radius: var(--radius-sm); padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 15px 40px rgba(0,0,0,0.6); position: relative; overflow: hidden; width: 100%; box-sizing: border-box;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(168,85,247,0.2); padding-bottom: 0.75rem;">
-            <div style="font-family: var(--font-heading); font-size: 1.1rem; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; gap: 8px;">
-              <span>🎮</span> <span>LINE-UP PRINCIPAL DE ELITE</span>
-            </div>
-            <div style="font-family: var(--font-tech); font-size: 0.78rem; color: var(--accent-neon); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
-              ${settings.team_name || 'LYKOS'} OFFICIAL ROSTER
-            </div>
-          </div>
-
-          <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.25rem;" class="starters-responsive-grid">
+        <!-- BANNER DE DESTAQUE: 5 JOGADORES PRINCIPAIS DO ELENCO (CLEAN - SEM CAIXA EXTERNA) -->
+        <div style="margin-bottom: 2.5rem; width: 100%; box-sizing: border-box;">
+          <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem;" class="starters-responsive-grid">
             ${starterPlayers.map(player => `
-              <div class="starter-card glass-card-interactive" data-id="${player.id}" style="border: 1px solid var(--border-dark); border-radius: var(--radius-xs); overflow: hidden; background: rgba(14, 11, 26, 0.9); display: flex; flex-direction: column; cursor: pointer; transition: all 0.3s ease;">
-                <div style="height: 480px; overflow: hidden; position: relative; background: radial-gradient(circle at center, rgba(168,85,247,0.15) 0%, rgba(10,8,22,0.9) 100%);">
+              <div class="starter-card glass-card-interactive" data-id="${player.id}" style="border: none; border-radius: var(--radius-sm); overflow: hidden; background: rgba(14, 11, 26, 0.6); display: flex; flex-direction: column; cursor: pointer; transition: all 0.3s ease;">
+                <div style="height: 480px; overflow: hidden; position: relative; background: radial-gradient(circle at center, rgba(168,85,247,0.1) 0%, rgba(10,8,22,0.85) 100%); border-radius: var(--radius-sm);">
                   <span class="game-badge" style="top: 12px; left: 12px; font-family: var(--font-tech); font-size: 0.68rem; z-index: 2;">${player.game}</span>
                   <img src="${player.photo_url}" alt="${player.nickname}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.4s ease;">
                   
-                  <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem 1rem; background: linear-gradient(to top, rgba(8,6,16,0.98) 0%, rgba(8,6,16,0.7) 70%, transparent 100%); text-align: center; z-index: 2;">
+                  <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem 1rem; background: linear-gradient(to top, rgba(8,6,16,0.98) 0%, rgba(8,6,16,0.6) 70%, transparent 100%); text-align: center; z-index: 2;">
                     <div style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.03em;">${player.nickname}</div>
                     <div style="font-size: 0.8rem; color: var(--accent-neon); font-weight: 700; text-transform: uppercase; margin-top: 2px;">${player.role || 'Player'}</div>
                   </div>
