@@ -10,30 +10,36 @@ window.renderAdminPage = async function (container) {
 
   if (!currentUser) {
     container.innerHTML = `
-      <section class="admin-container">
-        <div class="container" style="max-width: 440px;">
-          <div style="background: var(--bg-dark-surface); border: 1px solid var(--border-dark-strong); border-radius: var(--radius-sm); padding: 2.25rem;">
-            <div style="text-align: center; margin-bottom: 2rem;">
-              <div class="brand-logo" style="justify-content: center; font-size: 2rem; margin-bottom: 8px;">
-                LYK<span class="logo-accent">OS</span>
+      <section class="admin-container" style="position: relative; min-height: 90vh; display: flex; align-items: center; justify-content: center; overflow: hidden; padding-top: 100px;">
+        <!-- CYBER GLOW ARC BACKGROUND -->
+        <div class="hero-glow-arc-container">
+          <div class="hero-glow-arc-bg" style="width: 700px; height: 400px; top: -150px;"></div>
+          <div class="hero-glow-arc-line" style="width: 650px; height: 320px; top: -120px;"></div>
+        </div>
+
+        <div class="container" style="max-width: 460px; position: relative; z-index: 2;">
+          <div class="glass-card" style="padding: 2.75rem 2.25rem; border: 1px solid var(--border-dark-strong); box-shadow: 0 20px 50px rgba(0,0,0,0.6);">
+            <div style="text-align: center; margin-bottom: 2.25rem;">
+              <div class="section-title-badge" style="margin-bottom: 12px; font-size: 0.72rem; padding: 4px 12px;">
+                RESTRICTED AREA
               </div>
-              <h2 style="font-size: 1.35rem;">Painel de Gestão</h2>
-              <p style="font-size: 0.8rem; color: var(--text-muted-light); margin-top: 4px;">Área restrita a membros autorizados.</p>
+              <h2 style="font-family: var(--font-heading); font-size: 1.8rem; font-weight: 800; letter-spacing: -0.02em; color: #ffffff;">PAINEL DE <span style="color: var(--accent-neon);">GESTÃO</span></h2>
+              <p style="font-size: 0.85rem; color: var(--text-muted-light); margin-top: 6px;">Autenticação segura de membros autorizados.</p>
             </div>
 
             <form id="auth-form">
-              <div class="form-group">
-                <label class="form-label">E-mail</label>
-                <input type="email" id="auth-email" class="form-input" placeholder="seu-email@lykos-esports.com" required>
+              <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label class="form-label" style="font-family: var(--font-heading); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted-light); margin-bottom: 6px; display: block;">E-mail Corporativo</label>
+                <input type="email" id="auth-email" class="form-input" placeholder="admin@lykos-esports.com" required style="background: rgba(10, 8, 20, 0.8); border: 1px solid var(--border-dark-strong); color: #ffffff; padding: 12px 16px; border-radius: var(--radius-xs); width: 100%; box-sizing: border-box;">
               </div>
 
-              <div class="form-group">
-                <label class="form-label">Senha</label>
-                <input type="password" id="auth-password" class="form-input" placeholder="••••••••••••••••" required>
+              <div class="form-group" style="margin-bottom: 1.75rem;">
+                <label class="form-label" style="font-family: var(--font-heading); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted-light); margin-bottom: 6px; display: block;">Senha de Acesso</label>
+                <input type="password" id="auth-password" class="form-input" placeholder="••••••••••••••••" required style="background: rgba(10, 8, 20, 0.8); border: 1px solid var(--border-dark-strong); color: #ffffff; padding: 12px 16px; border-radius: var(--radius-xs); width: 100%; box-sizing: border-box;">
               </div>
 
-              <button type="submit" class="btn-primary" style="width: 100%;">Acessar Painel &rarr;</button>
-              <div id="auth-error" style="color: #ff4d4d; font-size: 0.8rem; margin-top: 1rem; text-align: center; display: none;"></div>
+              <button type="submit" class="btn-primary" style="width: 100%; padding: 14px; font-size: 0.88rem; box-shadow: 0 0 25px rgba(168, 85, 247, 0.45); border-radius: var(--radius-xs);">Entrar no Painel &rarr;</button>
+              <div id="auth-error" style="color: #ff4d4d; font-size: 0.82rem; margin-top: 1.25rem; text-align: center; display: none; padding: 8px; background: rgba(255, 77, 77, 0.1); border: 1px solid rgba(255, 77, 77, 0.3); border-radius: var(--radius-xs);"></div>
             </form>
           </div>
         </div>
@@ -130,29 +136,29 @@ window.renderAdminPage = async function (container) {
     sessionStorage.setItem('lykos_admin_active_tab', activeTab);
 
     container.innerHTML = `
-      <section class="admin-container">
+      <section class="admin-container" style="padding-top: 100px; position: relative;">
         <div class="container">
           
-          <div class="admin-header">
+          <div class="admin-header glass-card" style="padding: 1.5rem 2rem; border: 1px solid var(--border-dark-strong); margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
             <div>
-              <h1 style="font-size: 1.8rem;">Painel de Gestão <span>LYKOS</span></h1>
-              <p style="color: var(--text-muted-light); font-size: 0.85rem;">Área administrativa oficial de e-sports.</p>
+              <h1 style="font-family: var(--font-heading); font-size: 1.8rem; font-weight: 800; color: #ffffff;">PAINEL DE GESTÃO <span style="color: var(--accent-neon);">LYKOS</span></h1>
+              <p style="color: var(--text-muted-light); font-size: 0.85rem; margin-top: 2px;">Área administrativa oficial de e-sports.</p>
             </div>
 
-            <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 1.25rem;">
               <div style="text-align: right;">
-                <div style="font-weight: 700; font-size: 0.85rem; color: white;">${currentUser.fullName || currentUser.email}</div>
-                <span style="background: rgba(157,80,255,0.15); border: 1px solid var(--border-dark-strong); color: var(--accent-neon); font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">
-                  PERMISSÃO: ${currentUser.is_master ? 'ADMIN MASTER (NÍVEL MAIS ALTO)' : 'PERSONALIZADA'}
+                <div style="font-weight: 700; font-size: 0.88rem; color: white;">${currentUser.fullName || currentUser.email}</div>
+                <span style="background: rgba(168, 85, 247, 0.15); border: 1px solid var(--border-dark-strong); color: var(--accent-neon); font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: var(--radius-xs); text-transform: uppercase;">
+                  ${currentUser.is_master ? 'ADMIN MASTER' : 'PERSONALIZADO'}
                 </span>
               </div>
-              <button id="admin-logout-btn" class="btn-secondary" style="padding: 6px 14px; font-size: 0.78rem;">Sair</button>
+              <button id="admin-logout-btn" class="btn-secondary" style="padding: 8px 16px; font-size: 0.78rem;">Sair</button>
             </div>
           </div>
 
           <div class="admin-layout-grid">
             
-            <div class="admin-sidebar-nav">
+            <div class="admin-sidebar-nav glass-card" style="padding: 1rem; border: 1px solid var(--border-dark-strong);">
               ${hasPermission('partidas') ? `<button class="admin-nav-item ${activeTab === 'partidas' ? 'active' : ''}" data-tab="partidas">Partidas & Súmulas</button>` : ''}
               ${hasPermission('torneios') ? `<button class="admin-nav-item ${activeTab === 'torneios' ? 'active' : ''}" data-tab="torneios">Torneios (Divulgação)</button>` : ''}
               ${hasPermission('elenco') ? `<button class="admin-nav-item ${activeTab === 'elenco' ? 'active' : ''}" data-tab="elenco">Elenco Pro-Players</button>` : ''}
@@ -485,22 +491,24 @@ window.renderAdminPage = async function (container) {
         </div>
 
         <h3 style="margin-bottom: 1rem; font-size: 1.15rem;">Atletas do Elenco</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.25rem;">
           ${data.roster.map((p, idx) => `
-            <div style="background: var(--bg-dark-surface); border: 1px solid var(--border-dark); border-radius: var(--radius-xs); padding: 1rem; display: flex; gap: 0.85rem; align-items: center;">
-              <div style="display: flex; flex-direction: column; gap: 4px; margin-right: 4px;">
-                <button class="btn-secondary move-roster-up" data-id="${p.id}" style="padding: 2px 6px; font-size: 0.7rem; font-weight: bold; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border-dark); border-radius: 3px; cursor: pointer;" title="Mover para cima">▲</button>
-                <button class="btn-secondary move-roster-down" data-id="${p.id}" style="padding: 2px 6px; font-size: 0.7rem; font-weight: bold; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border-dark); border-radius: 3px; cursor: pointer;" title="Mover para baixo">▼</button>
+            <div style="background: var(--bg-dark-surface); border: 1px solid var(--border-dark); border-radius: var(--radius-xs); padding: 1rem; display: flex; gap: 0.85rem; align-items: center; justify-content: space-between;">
+              <div style="display: flex; gap: 0.85rem; align-items: center; flex: 1; min-width: 0;">
+                <div style="display: flex; flex-direction: column; gap: 4px; flex-shrink: 0;">
+                  <button class="btn-secondary move-roster-up" data-id="${p.id}" style="padding: 2px 6px; font-size: 0.7rem; font-weight: bold; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border-dark); border-radius: 3px; cursor: pointer;" title="Mover para cima">▲</button>
+                  <button class="btn-secondary move-roster-down" data-id="${p.id}" style="padding: 2px 6px; font-size: 0.7rem; font-weight: bold; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border-dark); border-radius: 3px; cursor: pointer;" title="Mover para baixo">▼</button>
+                </div>
+                <img src="${p.photo_url}" alt="${p.nickname}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
+                <div style="flex: 1; min-width: 0; overflow: hidden;">
+                  <span class="game-badge" style="position: static; font-size: 0.65rem;">${p.game}</span>
+                  <div style="font-family: var(--font-heading); font-weight: 700; font-size: 0.95rem; color: white; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${p.nickname}</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted-light); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${p.name}</div>
+                </div>
               </div>
-              <img src="${p.photo_url}" alt="${p.nickname}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;">
-              <div style="flex: 1;">
-                <span class="game-badge" style="position: static; font-size: 0.65rem;">${p.game}</span>
-                <div style="font-family: var(--font-heading); font-weight: 700; font-size: 1rem; color: white;">${p.nickname}</div>
-                <div style="font-size: 0.75rem; color: var(--text-muted-light);">${p.name}</div>
-              </div>
-              <div style="display: flex; gap: 4px;">
-                <button class="btn-edit pop-edit-roster-btn" data-id="${p.id}">Editar</button>
-                <button class="btn-danger delete-roster-btn" data-id="${p.id}" data-title="${p.nickname}">Excluir</button>
+              <div style="display: flex; gap: 4px; flex-shrink: 0;">
+                <button class="btn-edit pop-edit-roster-btn" data-id="${p.id}" style="padding: 4px 10px; font-size: 0.75rem;">Editar</button>
+                <button class="btn-danger delete-roster-btn" data-id="${p.id}" data-title="${p.nickname}" style="padding: 4px 10px; font-size: 0.75rem;">Excluir</button>
               </div>
             </div>
           `).join('')}
@@ -532,21 +540,23 @@ window.renderAdminPage = async function (container) {
         </div>
 
         <h3 style="margin-bottom: 1rem; font-size: 1.15rem;">Comissão Técnica Cadastrada</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem;">
           ${data.staffMembers.map((st, idx) => `
-            <div style="background: var(--bg-dark-surface); border: 1px solid var(--border-dark); border-radius: var(--radius-xs); padding: 1rem; display: flex; gap: 0.85rem; align-items: center;">
-              <div style="display: flex; flex-direction: column; gap: 4px; margin-right: 4px;">
-                <button class="btn-secondary move-staff-up" data-id="${st.id}" style="padding: 2px 6px; font-size: 0.7rem; font-weight: bold; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border-dark); border-radius: 3px; cursor: pointer;" title="Mover para cima">▲</button>
-                <button class="btn-secondary move-staff-down" data-id="${st.id}" style="padding: 2px 6px; font-size: 0.7rem; font-weight: bold; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border-dark); border-radius: 3px; cursor: pointer;" title="Mover para baixo">▼</button>
+            <div style="background: var(--bg-dark-surface); border: 1px solid var(--border-dark); border-radius: var(--radius-xs); padding: 1rem; display: flex; gap: 0.85rem; align-items: center; justify-content: space-between;">
+              <div style="display: flex; gap: 0.85rem; align-items: center; flex: 1; min-width: 0;">
+                <div style="display: flex; flex-direction: column; gap: 4px; flex-shrink: 0;">
+                  <button class="btn-secondary move-staff-up" data-id="${st.id}" style="padding: 2px 6px; font-size: 0.7rem; font-weight: bold; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border-dark); border-radius: 3px; cursor: pointer;" title="Mover para cima">▲</button>
+                  <button class="btn-secondary move-staff-down" data-id="${st.id}" style="padding: 2px 6px; font-size: 0.7rem; font-weight: bold; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border-dark); border-radius: 3px; cursor: pointer;" title="Mover para baixo">▼</button>
+                </div>
+                <img src="${st.photo_url}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
+                <div style="flex: 1; min-width: 0; overflow: hidden;">
+                  <div style="font-weight: 700; color: white; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${st.name}</div>
+                  <div style="font-size: 0.75rem; color: var(--accent-neon); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${st.role}</div>
+                </div>
               </div>
-              <img src="${st.photo_url}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover;">
-              <div style="flex: 1;">
-                <div style="font-weight: 700; color: white;">${st.name}</div>
-                <div style="font-size: 0.75rem; color: var(--accent-neon);">${st.role}</div>
-              </div>
-              <div style="display: flex; gap: 4px;">
-                <button class="btn-edit pop-edit-staff-btn" data-id="${st.id}">Editar</button>
-                <button class="btn-danger delete-staff-btn" data-id="${st.id}" data-title="${st.name}">Excluir</button>
+              <div style="display: flex; gap: 4px; flex-shrink: 0;">
+                <button class="btn-edit pop-edit-staff-btn" data-id="${st.id}" style="padding: 4px 10px; font-size: 0.75rem;">Editar</button>
+                <button class="btn-danger delete-staff-btn" data-id="${st.id}" data-title="${st.name}" style="padding: 4px 10px; font-size: 0.75rem;">Excluir</button>
               </div>
             </div>
           `).join('')}
@@ -2309,19 +2319,12 @@ window.renderAdminPage = async function (container) {
         const id = btn.getAttribute('data-id');
         const idx = data.roster.findIndex(p => String(p.id) === String(id));
         if (idx > 0) {
-          const item1 = data.roster[idx];
-          const item2 = data.roster[idx - 1];
-          const temp = item1.sort_order || 0;
-          item1.sort_order = item2.sort_order || 0;
-          item2.sort_order = temp;
-          if (item1.sort_order === item2.sort_order) {
-            item2.sort_order = idx - 1;
-            item1.sort_order = idx;
-          }
-          await Promise.all([
-            window.LykosDB.savePlayer(item1),
-            window.LykosDB.savePlayer(item2)
-          ]);
+          data.roster.forEach((p, i) => { p.sort_order = i; });
+          const temp = data.roster[idx].sort_order;
+          data.roster[idx].sort_order = data.roster[idx - 1].sort_order;
+          data.roster[idx - 1].sort_order = temp;
+          await window.LykosDB.savePlayer(data.roster[idx]);
+          await window.LykosDB.savePlayer(data.roster[idx - 1]);
           renderDashboard();
         }
       };
@@ -2332,19 +2335,12 @@ window.renderAdminPage = async function (container) {
         const id = btn.getAttribute('data-id');
         const idx = data.roster.findIndex(p => String(p.id) === String(id));
         if (idx !== -1 && idx < data.roster.length - 1) {
-          const item1 = data.roster[idx];
-          const item2 = data.roster[idx + 1];
-          const temp = item1.sort_order || 0;
-          item1.sort_order = item2.sort_order || 0;
-          item2.sort_order = temp;
-          if (item1.sort_order === item2.sort_order) {
-            item1.sort_order = idx;
-            item2.sort_order = idx + 1;
-          }
-          await Promise.all([
-            window.LykosDB.savePlayer(item1),
-            window.LykosDB.savePlayer(item2)
-          ]);
+          data.roster.forEach((p, i) => { p.sort_order = i; });
+          const temp = data.roster[idx].sort_order;
+          data.roster[idx].sort_order = data.roster[idx + 1].sort_order;
+          data.roster[idx + 1].sort_order = temp;
+          await window.LykosDB.savePlayer(data.roster[idx]);
+          await window.LykosDB.savePlayer(data.roster[idx + 1]);
           renderDashboard();
         }
       };
@@ -2356,19 +2352,12 @@ window.renderAdminPage = async function (container) {
         const id = btn.getAttribute('data-id');
         const idx = data.staffMembers.findIndex(s => String(s.id) === String(id));
         if (idx > 0) {
-          const item1 = data.staffMembers[idx];
-          const item2 = data.staffMembers[idx - 1];
-          const temp = item1.sort_order || 0;
-          item1.sort_order = item2.sort_order || 0;
-          item2.sort_order = temp;
-          if (item1.sort_order === item2.sort_order) {
-            item2.sort_order = idx - 1;
-            item1.sort_order = idx;
-          }
-          await Promise.all([
-            window.LykosDB.saveStaff(item1),
-            window.LykosDB.saveStaff(item2)
-          ]);
+          data.staffMembers.forEach((s, i) => { s.sort_order = i; });
+          const temp = data.staffMembers[idx].sort_order;
+          data.staffMembers[idx].sort_order = data.staffMembers[idx - 1].sort_order;
+          data.staffMembers[idx - 1].sort_order = temp;
+          await window.LykosDB.saveStaff(data.staffMembers[idx]);
+          await window.LykosDB.saveStaff(data.staffMembers[idx - 1]);
           renderDashboard();
         }
       };
@@ -2379,19 +2368,12 @@ window.renderAdminPage = async function (container) {
         const id = btn.getAttribute('data-id');
         const idx = data.staffMembers.findIndex(s => String(s.id) === String(id));
         if (idx !== -1 && idx < data.staffMembers.length - 1) {
-          const item1 = data.staffMembers[idx];
-          const item2 = data.staffMembers[idx + 1];
-          const temp = item1.sort_order || 0;
-          item1.sort_order = item2.sort_order || 0;
-          item2.sort_order = temp;
-          if (item1.sort_order === item2.sort_order) {
-            item1.sort_order = idx;
-            item2.sort_order = idx + 1;
-          }
-          await Promise.all([
-            window.LykosDB.saveStaff(item1),
-            window.LykosDB.saveStaff(item2)
-          ]);
+          data.staffMembers.forEach((s, i) => { s.sort_order = i; });
+          const temp = data.staffMembers[idx].sort_order;
+          data.staffMembers[idx].sort_order = data.staffMembers[idx + 1].sort_order;
+          data.staffMembers[idx + 1].sort_order = temp;
+          await window.LykosDB.saveStaff(data.staffMembers[idx]);
+          await window.LykosDB.saveStaff(data.staffMembers[idx + 1]);
           renderDashboard();
         }
       };

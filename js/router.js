@@ -41,13 +41,31 @@
     }
 
     getPath() {
-      // Prefer clean pathname, fallback to hash if present
+      // Prefer clean pathname, fallback to hash if present or protocol is file:
+      if (window.location.protocol === 'file:') {
+        if (window.location.hash && window.location.hash.startsWith('#/')) {
+          return window.location.hash.slice(1);
+        }
+        return '/';
+      }
       if (window.location.hash && window.location.hash.startsWith('#/')) {
         return window.location.hash.slice(1);
       }
       let pathname = window.location.pathname || '/';
       if (!pathname.startsWith('/')) pathname = '/' + pathname;
       return pathname;
+    }
+
+    navigate(path) {
+      if (!path.startsWith('/')) path = '/' + path;
+      if (window.location.protocol === 'file:') {
+        window.location.hash = '#' + path;
+        return;
+      }
+      if (window.location.pathname !== path) {
+        window.history.pushState({}, '', path);
+      }
+      this.handleRoute();
     }
 
     async handleRoute() {
@@ -113,13 +131,6 @@
       });
     }
 
-    navigate(path) {
-      if (!path.startsWith('/')) path = '/' + path;
-      if (window.location.pathname !== path) {
-        window.history.pushState({}, '', path);
-      }
-      this.handleRoute();
-    }
   }
 
   window.LykosRouter = new Router();
