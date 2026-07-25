@@ -296,9 +296,16 @@ function startRealtimePoller() {
              if (bundle.settings) {
                window.dispatchEvent(new CustomEvent('lykos_branding_updated', { detail: bundle.settings }));
              }
-             // Avoid force re-rendering route if user is currently inside /admin
+             // Avoid force re-rendering route if user is inside /admin or reading any open modal/popup
              const isInsideAdmin = window.location.pathname.startsWith('/admin') || window.location.hash.startsWith('#/admin');
-             if (!isInsideAdmin && window.LykosRouter && window.LykosRouter.handleRoute) {
+             
+             // Universal modal check: checks both style inline display, class active, or offsetParent visibility
+             const hasOpenModal = Array.from(document.querySelectorAll('.modal-backdrop, #player-modal, #news-reader-modal, #lightbox-modal')).some(el => {
+               const style = window.getComputedStyle(el);
+               return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+             });
+
+             if (!isInsideAdmin && !hasOpenModal && window.LykosRouter && window.LykosRouter.handleRoute) {
                window.LykosRouter.handleRoute().catch(() => {});
              }
            }
