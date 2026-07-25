@@ -14,8 +14,8 @@ module.exports = async (req, res) => {
   try {
     if (entity === 'site_settings') {
       await sql`
-        INSERT INTO site_settings (id, team_name, logo_url, header_logo_url, favicon_url, primary_color, show_tournaments_tab, hero_title, hero_subtitle, discord_url, instagram_url, x_url, facebook_url, contact_socials_json, hero_image_url, updated_at)
-        VALUES (1, ${item.team_name || 'LYKOS'}, ${item.logo_url || ''}, ${item.header_logo_url || ''}, ${item.favicon_url || ''}, ${item.primary_color || '#4d00b5'}, ${item.show_tournaments_tab || false}, ${item.hero_title || ''}, ${item.hero_subtitle || ''}, ${item.discord_url || ''}, ${item.instagram_url || ''}, ${item.x_url || ''}, ${item.facebook_url || ''}, ${JSON.stringify(item.contact_socials_json || [])}, ${item.hero_image_url || ''}, NOW())
+        INSERT INTO site_settings (id, team_name, logo_url, header_logo_url, favicon_url, primary_color, show_tournaments_tab, hero_title, hero_subtitle, discord_url, instagram_url, x_url, facebook_url, contact_socials_json, hero_image_url, imgbb_api_key, updated_at)
+        VALUES (1, ${item.team_name || 'LYKOS'}, ${item.logo_url || ''}, ${item.header_logo_url || ''}, ${item.favicon_url || ''}, ${item.primary_color || '#4d00b5'}, ${item.show_tournaments_tab || false}, ${item.hero_title || ''}, ${item.hero_subtitle || ''}, ${item.discord_url || ''}, ${item.instagram_url || ''}, ${item.x_url || ''}, ${item.facebook_url || ''}, ${JSON.stringify(item.contact_socials_json || [])}, ${item.hero_image_url || ''}, ${item.imgbb_api_key || ''}, NOW())
         ON CONFLICT (id) DO UPDATE SET
           team_name = EXCLUDED.team_name,
           logo_url = EXCLUDED.logo_url,
@@ -31,6 +31,7 @@ module.exports = async (req, res) => {
           facebook_url = EXCLUDED.facebook_url,
           contact_socials_json = EXCLUDED.contact_socials_json,
           hero_image_url = EXCLUDED.hero_image_url,
+          imgbb_api_key = EXCLUDED.imgbb_api_key,
           updated_at = NOW();
       `;
     } else if (entity === 'about_settings') {

@@ -772,6 +772,15 @@ window.renderAdminPage = async function (container) {
               <div class="form-group"><label class="form-label">Cor Primária (Hex)</label><input type="color" id="brand-primary-color" class="form-input" value="${data.settings.primary_color || '#4d00b5'}" style="height: 42px;"></div>
             </div>
 
+            <!-- IMGBB CLOUD STORAGE CONFIG -->
+            <div style="margin-top: 1rem; background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.2); padding: 14px; border-radius: 6px; margin-bottom: 1.5rem;">
+              <label class="form-label" style="color: #34d399; font-weight: 700;">Chave de API do ImgBB (Opcional - Evita Estouro de Cota)</label>
+              <input type="text" id="brand-imgbb-key" class="form-input" value="${data.settings.imgbb_api_key || ''}" placeholder="Cole sua API Key do ImgBB (Ex: abc123xyz...)">
+              <span class="upload-hint" style="color: #a7f3d0; margin-top: 6px; display: block; line-height: 1.4;">
+                Recomendado! Cadastre-se grátis em <a href="https://api.imgbb.com/" target="_blank" style="color: #34d399; text-decoration: underline;">api.imgbb.com</a> para obter sua chave. Ao preencher, todos os uploads do site serão hospedados gratuitamente na nuvem do ImgBB, liberando espaço no banco de dados Neon Postgres.
+              </span>
+            </div>
+
             <!-- TOGGLE ABA TORNEIOS -->
             <div style="margin-top: 1rem; background: rgba(157,80,255,0.08); border: 1px solid var(--border-dark-strong); padding: 14px; border-radius: 6px;">
               <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; color: white; font-weight: 700;">
@@ -2031,6 +2040,7 @@ window.renderAdminPage = async function (container) {
             header_logo_url: headerLogoUrl,
             favicon_url: faviconUrl,
             show_tournaments_tab: showTournaments,
+            imgbb_api_key: container.querySelector('#brand-imgbb-key').value.trim(),
             contact_socials_json: contactSocials,
             discord_url: contactSocials.find(s => s.platform === 'discord')?.url || data.settings.discord_url,
             instagram_url: contactSocials.find(s => s.platform === 'instagram')?.url || data.settings.instagram_url

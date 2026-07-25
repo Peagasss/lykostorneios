@@ -644,8 +644,33 @@ window.LykosDB = {
   },
 
   async uploadAsset(file) {
-    // Automatic Image Compression to stay under Vercel serverless request limits
-    return new Promise((resolve, reject) => {
+    // Automatic Image Compression & Cloud hosting integration (ImgBB)
+    return new Promise(async (resolve, reject) => {
+      // 1. Try cloud hosting if ImgBB API Key is configured in settings
+      try {
+        const rawSettings = localStorage.getItem('lykos_settings');
+        const settings = rawSettings ? JSON.parse(rawSettings) : {};
+        const apiKey = settings.imgbb_api_key;
+        if (apiKey && apiKey.trim()) {
+          const formData = new FormData();
+          formData.append('image', file);
+          const imgbbRes = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey.trim()}`, {
+            method: 'POST',
+            body: formData
+          });
+          if (imgbbRes && imgbbRes.ok) {
+            const imgbbData = await imgbbRes.json();
+            if (imgbbData && imgbbData.data && imgbbData.data.url) {
+              resolve(imgbbData.data.url);
+              return;
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("[LykosDB] ImgBB cloud upload failed, falling back to local compression:", e);
+      }
+
+      // 2. Fallback to Canvas WebP Base64 compression
       if (!file || !file.type.startsWith('image/')) {
         const reader = new FileReader();
         reader.onload = (e) => resolve(e.target.result);
@@ -654,12 +679,10 @@ window.LykosDB = {
         return;
       }
 
-      // Max resolution targets depending on the entity type
       let maxWidth = 400;
       let maxHeight = 400;
       let quality = 0.75;
 
-      // Adjust image size thresholds based on filename or size to be safe
       if (file.size > 2 * 1024 * 1024) {
         maxWidth = 300;
         maxHeight = 300;
@@ -696,7 +719,6 @@ window.LykosDB = {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Convert to WebP for maximum compression
         const dataUrl = canvas.toDataURL('image/webp', quality);
         resolve(dataUrl);
       };
