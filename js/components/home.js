@@ -11,12 +11,46 @@ window.renderHomePage = async function (container) {
     window.LykosDB.getSocialFeeds()
   ]);
 
-  const nextMatch = matches.find(m => m.status === 'UPCOMING') || matches[0];
+  // Sort matches by priority: 1. LIVE, 2. UPCOMING, 3. FINISHED
+  function getMatchPriority(status) {
+    const s = (status || '').toUpperCase();
+    if (s === 'LIVE') return 1;
+    if (s === 'UPCOMING') return 2;
+    if (s === 'FINISHED') return 3;
+    return 4;
+  }
+
+  const sortedMatches = [...matches].sort((a, b) => {
+    const prioA = getMatchPriority(a.status);
+    const prioB = getMatchPriority(b.status);
+    if (prioA !== prioB) return prioA - prioB;
+
+    // Tie-breaker: closest date
+    const timeA = a && a.match_date ? new Date(a.match_date).getTime() : 0;
+    const timeB = b && b.match_date ? new Date(b.match_date).getTime() : 0;
+    if (a.status === 'UPCOMING') return timeA - timeB;
+    return timeB - timeA;
+  });
+
+  const featuredMatch = sortedMatches.length > 0 ? sortedMatches[0] : null;
   const rosterTeaser = roster.slice(0, 4);
   const galleryTeaser = gallery.slice(0, 3);
 
   const teamLogoSrc = settings.logo_url || 'assets/logo.png';
   const teamLogoHtml = `<img src="${teamLogoSrc}" alt="${settings.team_name}" class="team-logo-img" onerror="this.src='assets/logo.png'">`;
+
+  let sectionTitle = 'Próximo Confronto';
+  let sectionSubtitle = 'Acompanhe datas, horários e placares das nossas modalidades.';
+  if (featuredMatch) {
+    const status = (featuredMatch.status || 'UPCOMING').toUpperCase();
+    if (status === 'LIVE') {
+      sectionTitle = 'Partida Ao Vivo';
+      sectionSubtitle = 'Acompanhe a nossa partida em andamento!';
+    } else if (status === 'FINISHED') {
+      sectionTitle = 'Último Resultado';
+      sectionSubtitle = 'Confira o placar do nosso confronto mais recente.';
+    }
+  }
 
   container.innerHTML = `
     <!-- HERO SECTION -->
@@ -26,39 +60,63 @@ window.renderHomePage = async function (container) {
         <h1 class="hero-title">${settings.hero_title}</h1>
         <p class="hero-subtitle">${settings.hero_subtitle}</p>
         <div class="hero-actions">
-          <a href="#/partidas" class="btn-primary">Calendário de Partidas</a>
-          <a href="#/elenco" class="btn-secondary">Conheça o Elenco</a>
+          <a href="/partidas" class="btn-primary">Calendário de Partidas</a>
+          <a href="/elenco" class="btn-secondary">Conheça o Elenco</a>
         </div>
       </div>
     </section>
 
-    <!-- SECTION 1: PRÓXIMO CONFRONTO -->
+    <!-- SECTION 1: DESTAQUE DE PARTIDAS -->
     <section class="section-dark-1">
       <div class="container">
-        <h2 class="section-heading">Próximo <span>Confronto</span></h2>
-        <p class="section-subtitle">Acompanhe datas, horários e placares das nossas modalidades.</p>
+        <h2 class="section-heading">${sectionTitle.split(' ')[0]} <span>${sectionTitle.split(' ').slice(1).join(' ')}</span></h2>
+        <p class="section-subtitle">${sectionSubtitle}</p>
 
-        ${nextMatch ? `
-          <div class="match-summary-card" style="position: relative; padding-top: 2.75rem;">
-            <span class="match-game-label" style="position: absolute; top: 1.25rem; left: 1.5rem; font-family: var(--font-heading); font-size: 0.78rem; font-weight: 700; color: var(--accent-neon); text-transform: uppercase; letter-spacing: 0.08em;">${nextMatch.game}</span>
+        ${featuredMatch ? `
+          <div class="match-summary-card" style="position: relative; padding-top: 2.75rem; display: flex; flex-direction: column; gap: 1.5rem;">
+            <span class="match-game-label" style="position: absolute; top: 1.25rem; left: 1.5rem; font-family: var(--font-heading); font-size: 0.78rem; font-weight: 700; color: var(--accent-neon); text-transform: uppercase; letter-spacing: 0.08em;">
+              ${featuredMatch.game} ${featuredMatch.tournament_name ? '• ' + featuredMatch.tournament_name : ''}
+            </span>
 
-            <div class="team-box">
-              ${teamLogoHtml}
-              <div>
-                <div class="team-name">${settings.team_name}</div>
+            <div style="display: flex; width: 100%; justify-content: space-between; align-items: center; gap: 1.5rem; flex-wrap: wrap; box-sizing: border-box; padding: 0 1rem;">
+              <div class="team-box">
+                ${teamLogoHtml}
+                <div>
+                  <div class="team-name">${settings.team_name}</div>
+                </div>
+              </div>
+
+              <div class="match-vs-center">
+                ${(featuredMatch.status || '').toUpperCase() === 'LIVE' ? `<span class="match-status-pill status-live" style="margin-bottom: 12px; display: inline-block;">🔴 AO VIVO</span>` : ''}
+                <div class="match-score-badge" style="font-size: 2rem; padding: 4px 20px;">
+                  ${(featuredMatch.status || '').toUpperCase() === 'FINISHED' || (featuredMatch.status || '').toUpperCase() === 'LIVE' 
+                    ? `${featuredMatch.score_lykos || 0} - ${featuredMatch.score_opponent || 0}` 
+                    : 'VS.'}
+                </div>
+              </div>
+
+              <div class="team-box away">
+                <img src="${featuredMatch.opponent_logo || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=200&q=80'}" alt="${featuredMatch.opponent_name}" class="team-logo-img">
+                <div>
+                  <div class="team-name">${featuredMatch.opponent_name}</div>
+                </div>
               </div>
             </div>
 
-            <div class="match-vs-center">
-              ${nextMatch.status === 'LIVE' ? `<span class="match-status-pill status-live" style="margin-bottom: 8px;">🔴 AO VIVO</span>` : ''}
-              <div class="match-score-badge">VS.</div>
-            </div>
-
-            <div class="team-box away">
-              <img src="${nextMatch.opponent_logo || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=200&q=80'}" alt="${nextMatch.opponent_name}" class="team-logo-img">
-              <div>
-                <div class="team-name">${nextMatch.opponent_name}</div>
-              </div>
+            <!-- STREAM / ACTIONS ROW -->
+            <div style="display: flex; justify-content: flex-end; gap: 10px; align-items: center; border-top: 1px solid var(--border-dark); padding-top: 1rem; width: 100%; box-sizing: border-box;">
+              ${(featuredMatch.status || '').toUpperCase() === 'LIVE' && featuredMatch.stream_url ? `
+                <a href="${featuredMatch.stream_url}" target="_blank" class="btn-live">
+                  Assistir Ao Vivo
+                </a>
+              ` : (featuredMatch.stream_url ? `
+                <a href="${featuredMatch.stream_url}" target="_blank" class="btn-secondary" style="padding: 8px 14px; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 6px;">
+                  Transmissão
+                </a>
+              ` : '')}
+              <a href="/partidas/${featuredMatch.id}" class="btn-primary" style="padding: 8px 18px; font-size: 0.78rem;">
+                Detalhes da Partida &rarr;
+              </a>
             </div>
           </div>
         ` : ''}
