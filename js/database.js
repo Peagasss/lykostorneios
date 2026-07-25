@@ -158,37 +158,55 @@ function getApiUrl(endpoint) {
   return `${baseUrl}${endpoint}`;
 }
 
+let _sharedDataPromise = null;
+let _sharedDataTimestamp = 0;
+
+async function fetchFullDataBundle() {
+  const now = Date.now();
+  if (_sharedDataPromise && (now - _sharedDataTimestamp < 2000)) {
+    return _sharedDataPromise;
+  }
+  _sharedDataTimestamp = now;
+  _sharedDataPromise = (async () => {
+    try {
+      const apiRes = await fetch(getApiUrl('/api/data?t=' + now)).catch(() => null);
+      if (apiRes && apiRes.ok) {
+        return await apiRes.json();
+      }
+    } catch (e) {
+      console.warn('[LykosDB] Bundle fetch error:', e);
+    }
+    return null;
+  })();
+  return _sharedDataPromise;
+}
+
 // Helpers for Azure PostgreSQL Vercel API sync
 async function fetchDatabaseOrLocal(tableName, storageKey, fallbackDefault) {
   const raw = localStorage.getItem(storageKey);
   const localData = safeParse(raw, null);
 
-  try {
-    const apiRes = await fetch(getApiUrl('/api/data?t=' + Date.now())).catch(() => null);
-    if (apiRes && apiRes.ok) {
-      const bundle = await apiRes.json();
-      const keyMap = {
-        site_settings: 'settings',
-        about_settings: 'about',
-        modalities: 'modalities',
-        roster: 'roster',
-        staff: 'staff',
-        matches: 'matches',
-        trophies: 'trophies',
-        gallery: 'gallery',
-        social_feeds: 'social',
-        recent_tournaments: 'recentTournaments',
-        community_tournaments: 'communityTournaments'
-      };
-      const mappedKey = keyMap[tableName];
-      if (mappedKey && bundle[mappedKey]) {
-        const data = bundle[mappedKey];
-        localStorage.setItem(storageKey, JSON.stringify(data));
-        return data;
-      }
+  const bundle = await fetchFullDataBundle();
+  if (bundle) {
+    const keyMap = {
+      site_settings: 'settings',
+      about_settings: 'about',
+      modalities: 'modalities',
+      roster: 'roster',
+      staff: 'staff',
+      matches: 'matches',
+      trophies: 'trophies',
+      gallery: 'gallery',
+      social_feeds: 'social',
+      recent_tournaments: 'recentTournaments',
+      community_tournaments: 'communityTournaments'
+    };
+    const mappedKey = keyMap[tableName];
+    if (mappedKey && bundle[mappedKey]) {
+      const data = bundle[mappedKey];
+      localStorage.setItem(storageKey, JSON.stringify(data));
+      return data;
     }
-  } catch (e) {
-    console.warn(`[LykosDB] Backend fetch error for ${tableName}:`, e);
   }
 
   return localData !== null ? localData : fallbackDefault;
