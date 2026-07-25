@@ -1029,6 +1029,24 @@ input[type="file"]::-webkit-file-upload-button:hover {
   .starters-responsive-grid { grid-template-columns: 1fr !important; }
 }
 
+/* Home 5 Starters Hover Darkening Effect (Hover on one dims the others) */
+.starters-responsive-grid .starter-card {
+  transition: opacity 0.4s ease, filter 0.4s ease, transform 0.4s ease !important;
+}
+
+.starters-responsive-grid:hover .starter-card:not(:hover) {
+  opacity: 0.35;
+  filter: grayscale(40%) brightness(0.6);
+  transform: scale(0.97);
+}
+
+.starters-responsive-grid .starter-card:hover {
+  opacity: 1 !important;
+  filter: grayscale(0%) brightness(1.1) !important;
+  transform: scale(1.03) translateY(-4px) !important;
+  z-index: 10;
+}
+
 /* Smart Collapsible Floating Navbar (Ultra Smooth & Fluid Transition) */
 .site-header {
   max-width: 1240px;
