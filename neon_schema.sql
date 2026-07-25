@@ -20,6 +20,7 @@
     facebook_url TEXT DEFAULT 'https://facebook.com/lykosesports',
     contact_socials_json JSONB DEFAULT '[]'::jsonb,
     hero_image_url TEXT DEFAULT '',
+    imgbb_api_key TEXT DEFAULT '',
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
     CONSTRAINT single_row CHECK (id = 1)
   );
@@ -52,6 +53,7 @@
     monitor TEXT DEFAULT '',
     social_x TEXT DEFAULT '',
     social_instagram TEXT DEFAULT '',
+    sort_order INT DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
   );
 
@@ -63,6 +65,7 @@
     role TEXT NOT NULL,
     game TEXT NOT NULL,
     photo_url TEXT DEFAULT '',
+    sort_order INT DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
   );
 

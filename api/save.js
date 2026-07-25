@@ -32,6 +32,13 @@ module.exports = async (req, res) => {
       } catch (schemaErr) {
         console.warn('[Schema Init Warning from Save API]:', schemaErr);
       }
+
+      // 1.1 Silent migration to add sorting and API key columns if they don't exist yet
+      await Promise.all([
+        sql`ALTER TABLE roster ADD COLUMN IF NOT EXISTS sort_order INT DEFAULT 0;`,
+        sql`ALTER TABLE staff ADD COLUMN IF NOT EXISTS sort_order INT DEFAULT 0;`,
+        sql`ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS imgbb_api_key TEXT DEFAULT '';`
+      ]).catch(err => console.warn('[Migration Warning from Save API]:', err));
     }
 
     if (entity === 'site_settings') {
