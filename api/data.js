@@ -1,8 +1,38 @@
-if (process.env.NEON_URL) {
-  process.env.POSTGRES_URL = process.env.NEON_URL;
-}
-const { sql } = require('@vercel/postgres');
+const { Pool } = require('pg');
 const { createClient } = require('@supabase/supabase-js');
+
+let pool = null;
+
+async function sql(strings, ...values) {
+  if (!pool) {
+    const connectionString = process.env.NEON_URL || process.env.POSTGRES_URL;
+    pool = new Pool({
+      connectionString,
+      ssl: { rejectUnauthorized: false }
+    });
+  }
+
+  let queryText = '';
+  for (let i = 0; i < strings.length; i++) {
+    queryText += strings[i];
+    if (i < values.length) {
+      queryText += `$${i + 1}`;
+    }
+  }
+
+  return pool.query(queryText, values);
+}
+
+sql.query = async (text, params) => {
+  if (!pool) {
+    const connectionString = process.env.NEON_URL || process.env.POSTGRES_URL;
+    pool = new Pool({
+      connectionString,
+      ssl: { rejectUnauthorized: false }
+    });
+  }
+  return pool.query(text, params);
+};
 
 let cache = {
   data: null,
