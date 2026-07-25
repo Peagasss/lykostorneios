@@ -92,9 +92,9 @@
             }
 
             if (isRouteChange) {
-              appContainer.style.opacity = '0';
-              appContainer.style.transform = 'translateY(12px)';
-              appContainer.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+              appContainer.style.opacity = '0.3';
+              appContainer.style.transform = 'translateY(6px)';
+              appContainer.style.transition = 'opacity 0.15s ease-out, transform 0.15s ease-out';
               
               window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -104,7 +104,7 @@
                 await route.renderFunc(appContainer, params);
                 appContainer.style.opacity = '1';
                 appContainer.style.transform = 'translateY(0)';
-              }, 120);
+              }, 40);
               return;
             }
 
