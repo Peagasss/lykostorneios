@@ -312,21 +312,10 @@ window.LykosDB = {
     const nowIso = new Date().toISOString();
     const mergedSettings = { ...DEFAULT_SETTINGS, ...localParsed, ...settings, updated_at: nowIso };
 
-    // Strip base64 data URLs from localStorage to avoid quota exceeded errors
-    // Base64 images are sent to the API but stored locally only as placeholders
-    const localSafe = { ...mergedSettings };
-    ['logo_url', 'header_logo_url', 'favicon_url', 'hero_image_url'].forEach(key => {
-      if (localSafe[key] && localSafe[key].startsWith('data:')) {
-        localSafe[key] = localSafe[key].substring(0, 50) + '...[base64]';
-      }
-    });
-
     try {
-      localStorage.setItem('lykos_settings', JSON.stringify(localSafe));
+      localStorage.setItem('lykos_settings', JSON.stringify(mergedSettings));
     } catch (e) {
-      // If still too large, save without image fields
-      const minimalSafe = { ...localSafe, logo_url: '', header_logo_url: '', favicon_url: '', hero_image_url: '' };
-      localStorage.setItem('lykos_settings', JSON.stringify(minimalSafe));
+      console.warn("[LykosDB] localStorage save settings warning (possibly quota exceeded):", e);
     }
 
     window.dispatchEvent(new CustomEvent('lykos_branding_updated', { detail: mergedSettings }));
