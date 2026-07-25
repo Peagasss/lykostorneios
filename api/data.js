@@ -5,7 +5,7 @@ let pool = null;
 
 async function sql(strings, ...values) {
   if (!pool) {
-    const connectionString = process.env.NEON_URL || process.env.POSTGRES_URL;
+    const connectionString = process.env.AZURE_POSTGRES_URL || process.env.NEON_URL || process.env.POSTGRES_URL;
     pool = new Pool({
       connectionString,
       ssl: { rejectUnauthorized: false }
@@ -25,7 +25,7 @@ async function sql(strings, ...values) {
 
 sql.query = async (text, params) => {
   if (!pool) {
-    const connectionString = process.env.NEON_URL || process.env.POSTGRES_URL;
+    const connectionString = process.env.AZURE_POSTGRES_URL || process.env.NEON_URL || process.env.POSTGRES_URL;
     pool = new Pool({
       connectionString,
       ssl: { rejectUnauthorized: false }
@@ -48,8 +48,9 @@ module.exports = async (req, res) => {
     return res.status(200).end();
   }
 
-  // 1. Try Vercel / Neon Postgres first (ultra fast < 20ms)
-  if (process.env.POSTGRES_URL) {
+  // 1. Database Connection Check (Azure / Postgres)
+  const dbUrl = process.env.AZURE_POSTGRES_URL || process.env.NEON_URL || process.env.POSTGRES_URL;
+  if (dbUrl) {
       // 1. Silent schema migration / initialization if database is empty (self-bootstraps new Neon DBs)
       try {
         const checkTable = await sql`SELECT to_regclass('public.site_settings');`;
