@@ -491,22 +491,24 @@ window.renderAdminPage = async function (container) {
         </div>
 
         <h3 style="margin-bottom: 1rem; font-size: 1.15rem;">Atletas do Elenco</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.25rem;">
           ${data.roster.map((p, idx) => `
-            <div style="background: var(--bg-dark-surface); border: 1px solid var(--border-dark); border-radius: var(--radius-xs); padding: 1rem; display: flex; gap: 0.85rem; align-items: center;">
-              <div style="display: flex; flex-direction: column; gap: 4px; margin-right: 4px;">
-                <button class="btn-secondary move-roster-up" data-id="${p.id}" style="padding: 2px 6px; font-size: 0.7rem; font-weight: bold; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border-dark); border-radius: 3px; cursor: pointer;" title="Mover para cima">▲</button>
-                <button class="btn-secondary move-roster-down" data-id="${p.id}" style="padding: 2px 6px; font-size: 0.7rem; font-weight: bold; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border-dark); border-radius: 3px; cursor: pointer;" title="Mover para baixo">▼</button>
+            <div style="background: var(--bg-dark-surface); border: 1px solid var(--border-dark); border-radius: var(--radius-xs); padding: 1rem; display: flex; gap: 0.85rem; align-items: center; justify-content: space-between;">
+              <div style="display: flex; gap: 0.85rem; align-items: center; flex: 1; min-width: 0;">
+                <div style="display: flex; flex-direction: column; gap: 4px; flex-shrink: 0;">
+                  <button class="btn-secondary move-roster-up" data-id="${p.id}" style="padding: 2px 6px; font-size: 0.7rem; font-weight: bold; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border-dark); border-radius: 3px; cursor: pointer;" title="Mover para cima">▲</button>
+                  <button class="btn-secondary move-roster-down" data-id="${p.id}" style="padding: 2px 6px; font-size: 0.7rem; font-weight: bold; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border-dark); border-radius: 3px; cursor: pointer;" title="Mover para baixo">▼</button>
+                </div>
+                <img src="${p.photo_url}" alt="${p.nickname}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
+                <div style="flex: 1; min-width: 0; overflow: hidden;">
+                  <span class="game-badge" style="position: static; font-size: 0.65rem;">${p.game}</span>
+                  <div style="font-family: var(--font-heading); font-weight: 700; font-size: 0.95rem; color: white; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${p.nickname}</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted-light); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${p.name}</div>
+                </div>
               </div>
-              <img src="${p.photo_url}" alt="${p.nickname}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;">
-              <div style="flex: 1;">
-                <span class="game-badge" style="position: static; font-size: 0.65rem;">${p.game}</span>
-                <div style="font-family: var(--font-heading); font-weight: 700; font-size: 1rem; color: white;">${p.nickname}</div>
-                <div style="font-size: 0.75rem; color: var(--text-muted-light);">${p.name}</div>
-              </div>
-              <div style="display: flex; gap: 4px;">
-                <button class="btn-edit pop-edit-roster-btn" data-id="${p.id}">Editar</button>
-                <button class="btn-danger delete-roster-btn" data-id="${p.id}" data-title="${p.nickname}">Excluir</button>
+              <div style="display: flex; gap: 4px; flex-shrink: 0;">
+                <button class="btn-edit pop-edit-roster-btn" data-id="${p.id}" style="padding: 4px 10px; font-size: 0.75rem;">Editar</button>
+                <button class="btn-danger delete-roster-btn" data-id="${p.id}" data-title="${p.nickname}" style="padding: 4px 10px; font-size: 0.75rem;">Excluir</button>
               </div>
             </div>
           `).join('')}
@@ -538,21 +540,23 @@ window.renderAdminPage = async function (container) {
         </div>
 
         <h3 style="margin-bottom: 1rem; font-size: 1.15rem;">Comissão Técnica Cadastrada</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem;">
           ${data.staffMembers.map((st, idx) => `
-            <div style="background: var(--bg-dark-surface); border: 1px solid var(--border-dark); border-radius: var(--radius-xs); padding: 1rem; display: flex; gap: 0.85rem; align-items: center;">
-              <div style="display: flex; flex-direction: column; gap: 4px; margin-right: 4px;">
-                <button class="btn-secondary move-staff-up" data-id="${st.id}" style="padding: 2px 6px; font-size: 0.7rem; font-weight: bold; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border-dark); border-radius: 3px; cursor: pointer;" title="Mover para cima">▲</button>
-                <button class="btn-secondary move-staff-down" data-id="${st.id}" style="padding: 2px 6px; font-size: 0.7rem; font-weight: bold; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border-dark); border-radius: 3px; cursor: pointer;" title="Mover para baixo">▼</button>
+            <div style="background: var(--bg-dark-surface); border: 1px solid var(--border-dark); border-radius: var(--radius-xs); padding: 1rem; display: flex; gap: 0.85rem; align-items: center; justify-content: space-between;">
+              <div style="display: flex; gap: 0.85rem; align-items: center; flex: 1; min-width: 0;">
+                <div style="display: flex; flex-direction: column; gap: 4px; flex-shrink: 0;">
+                  <button class="btn-secondary move-staff-up" data-id="${st.id}" style="padding: 2px 6px; font-size: 0.7rem; font-weight: bold; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border-dark); border-radius: 3px; cursor: pointer;" title="Mover para cima">▲</button>
+                  <button class="btn-secondary move-staff-down" data-id="${st.id}" style="padding: 2px 6px; font-size: 0.7rem; font-weight: bold; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border-dark); border-radius: 3px; cursor: pointer;" title="Mover para baixo">▼</button>
+                </div>
+                <img src="${st.photo_url}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
+                <div style="flex: 1; min-width: 0; overflow: hidden;">
+                  <div style="font-weight: 700; color: white; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${st.name}</div>
+                  <div style="font-size: 0.75rem; color: var(--accent-neon); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${st.role}</div>
+                </div>
               </div>
-              <img src="${st.photo_url}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover;">
-              <div style="flex: 1;">
-                <div style="font-weight: 700; color: white;">${st.name}</div>
-                <div style="font-size: 0.75rem; color: var(--accent-neon);">${st.role}</div>
-              </div>
-              <div style="display: flex; gap: 4px;">
-                <button class="btn-edit pop-edit-staff-btn" data-id="${st.id}">Editar</button>
-                <button class="btn-danger delete-staff-btn" data-id="${st.id}" data-title="${st.name}">Excluir</button>
+              <div style="display: flex; gap: 4px; flex-shrink: 0;">
+                <button class="btn-edit pop-edit-staff-btn" data-id="${st.id}" style="padding: 4px 10px; font-size: 0.75rem;">Editar</button>
+                <button class="btn-danger delete-staff-btn" data-id="${st.id}" data-title="${st.name}" style="padding: 4px 10px; font-size: 0.75rem;">Excluir</button>
               </div>
             </div>
           `).join('')}
@@ -2315,19 +2319,12 @@ window.renderAdminPage = async function (container) {
         const id = btn.getAttribute('data-id');
         const idx = data.roster.findIndex(p => String(p.id) === String(id));
         if (idx > 0) {
-          const item1 = data.roster[idx];
-          const item2 = data.roster[idx - 1];
-          const temp = item1.sort_order || 0;
-          item1.sort_order = item2.sort_order || 0;
-          item2.sort_order = temp;
-          if (item1.sort_order === item2.sort_order) {
-            item2.sort_order = idx - 1;
-            item1.sort_order = idx;
-          }
-          await Promise.all([
-            window.LykosDB.savePlayer(item1),
-            window.LykosDB.savePlayer(item2)
-          ]);
+          data.roster.forEach((p, i) => { p.sort_order = i; });
+          const temp = data.roster[idx].sort_order;
+          data.roster[idx].sort_order = data.roster[idx - 1].sort_order;
+          data.roster[idx - 1].sort_order = temp;
+          await window.LykosDB.savePlayer(data.roster[idx]);
+          await window.LykosDB.savePlayer(data.roster[idx - 1]);
           renderDashboard();
         }
       };
@@ -2338,19 +2335,12 @@ window.renderAdminPage = async function (container) {
         const id = btn.getAttribute('data-id');
         const idx = data.roster.findIndex(p => String(p.id) === String(id));
         if (idx !== -1 && idx < data.roster.length - 1) {
-          const item1 = data.roster[idx];
-          const item2 = data.roster[idx + 1];
-          const temp = item1.sort_order || 0;
-          item1.sort_order = item2.sort_order || 0;
-          item2.sort_order = temp;
-          if (item1.sort_order === item2.sort_order) {
-            item1.sort_order = idx;
-            item2.sort_order = idx + 1;
-          }
-          await Promise.all([
-            window.LykosDB.savePlayer(item1),
-            window.LykosDB.savePlayer(item2)
-          ]);
+          data.roster.forEach((p, i) => { p.sort_order = i; });
+          const temp = data.roster[idx].sort_order;
+          data.roster[idx].sort_order = data.roster[idx + 1].sort_order;
+          data.roster[idx + 1].sort_order = temp;
+          await window.LykosDB.savePlayer(data.roster[idx]);
+          await window.LykosDB.savePlayer(data.roster[idx + 1]);
           renderDashboard();
         }
       };
@@ -2362,19 +2352,12 @@ window.renderAdminPage = async function (container) {
         const id = btn.getAttribute('data-id');
         const idx = data.staffMembers.findIndex(s => String(s.id) === String(id));
         if (idx > 0) {
-          const item1 = data.staffMembers[idx];
-          const item2 = data.staffMembers[idx - 1];
-          const temp = item1.sort_order || 0;
-          item1.sort_order = item2.sort_order || 0;
-          item2.sort_order = temp;
-          if (item1.sort_order === item2.sort_order) {
-            item2.sort_order = idx - 1;
-            item1.sort_order = idx;
-          }
-          await Promise.all([
-            window.LykosDB.saveStaff(item1),
-            window.LykosDB.saveStaff(item2)
-          ]);
+          data.staffMembers.forEach((s, i) => { s.sort_order = i; });
+          const temp = data.staffMembers[idx].sort_order;
+          data.staffMembers[idx].sort_order = data.staffMembers[idx - 1].sort_order;
+          data.staffMembers[idx - 1].sort_order = temp;
+          await window.LykosDB.saveStaff(data.staffMembers[idx]);
+          await window.LykosDB.saveStaff(data.staffMembers[idx - 1]);
           renderDashboard();
         }
       };
@@ -2385,19 +2368,12 @@ window.renderAdminPage = async function (container) {
         const id = btn.getAttribute('data-id');
         const idx = data.staffMembers.findIndex(s => String(s.id) === String(id));
         if (idx !== -1 && idx < data.staffMembers.length - 1) {
-          const item1 = data.staffMembers[idx];
-          const item2 = data.staffMembers[idx + 1];
-          const temp = item1.sort_order || 0;
-          item1.sort_order = item2.sort_order || 0;
-          item2.sort_order = temp;
-          if (item1.sort_order === item2.sort_order) {
-            item1.sort_order = idx;
-            item2.sort_order = idx + 1;
-          }
-          await Promise.all([
-            window.LykosDB.saveStaff(item1),
-            window.LykosDB.saveStaff(item2)
-          ]);
+          data.staffMembers.forEach((s, i) => { s.sort_order = i; });
+          const temp = data.staffMembers[idx].sort_order;
+          data.staffMembers[idx].sort_order = data.staffMembers[idx + 1].sort_order;
+          data.staffMembers[idx + 1].sort_order = temp;
+          await window.LykosDB.saveStaff(data.staffMembers[idx]);
+          await window.LykosDB.saveStaff(data.staffMembers[idx + 1]);
           renderDashboard();
         }
       };
