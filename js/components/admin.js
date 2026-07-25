@@ -1393,18 +1393,20 @@ window.renderAdminPage = async function (container) {
     if (formRoster) {
       formRoster.onsubmit = async (e) => {
         e.preventDefault();
-        const fileInput = container.querySelector('#roster-file');
-        let photoUrl = 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=800&q=80';
-        if (fileInput && fileInput.files && fileInput.files[0]) {
-          photoUrl = await window.LykosDB.uploadAsset(fileInput.files[0]);
-        }
+        const submitBtn = formRoster.querySelector('button[type="submit"]');
 
         try {
-          const submitBtn = formRoster.querySelector('button[type="submit"]');
           if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.innerText = 'Salvando...';
+            submitBtn.innerText = 'Processando & Salvando...';
           }
+
+          const fileInput = container.querySelector('#roster-file');
+          let photoUrl = 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=800&q=80';
+          if (fileInput && fileInput.files && fileInput.files[0]) {
+            photoUrl = await window.LykosDB.uploadAsset(fileInput.files[0]);
+          }
+
           await window.LykosDB.savePlayer({
             name: container.querySelector('#roster-name').value,
             nickname: container.querySelector('#roster-nickname').value,
@@ -1422,7 +1424,12 @@ window.renderAdminPage = async function (container) {
           showToastSuccess('Atleta salvo com sucesso!');
           renderDashboard();
         } catch (err) {
-          alert('Erro ao salvar jogador: ' + err.message);
+          console.error('[Admin] Roster Save Error:', err);
+          showToastSuccess('⚠️ ' + (err.message || 'Erro ao salvar atleta.'));
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = 'Salvar Novo Jogador →';
+          }
         }
       };
     }
