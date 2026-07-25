@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LYKOS E-SPORTS - DATA ACCESS LAYER (With Azure Sync & Local Fallback)
+   LYKOS E-SPORTS - DATA ACCESS LAYER (Strict Azure Cloud Sync)
    ========================================================================== */
 
 function safeParse(jsonString, fallback) {
@@ -169,23 +169,21 @@ async function fetchFullDataBundle() {
   _sharedDataTimestamp = now;
   _sharedDataPromise = (async () => {
     try {
-      const apiRes = await fetch(getApiUrl('/api/data?t=' + now)).catch(() => null);
-      if (apiRes && apiRes.ok) {
-        return await apiRes.json();
+      const apiRes = await fetch(getApiUrl('/api/data?t=' + now));
+      if (!apiRes.ok) {
+        throw new Error(`Erro HTTP ${apiRes.status}`);
       }
+      return await apiRes.json();
     } catch (e) {
-      console.warn('[LykosDB] Bundle fetch error:', e);
+      console.error('[LykosDB] Strict Cloud Fetch Error:', e);
+      return null;
     }
-    return null;
   })();
   return _sharedDataPromise;
 }
 
-// Helpers for Azure PostgreSQL Vercel API sync
-async function fetchDatabaseOrLocal(tableName, storageKey, fallbackDefault) {
-  const raw = localStorage.getItem(storageKey);
-  const localData = safeParse(raw, null);
-
+// NO MORE LOCALSTORAGE CACHING FOR BUSINESS DATA
+async function fetchFromApi(tableName, fallbackDefault) {
   const bundle = await fetchFullDataBundle();
   if (bundle) {
     const keyMap = {
@@ -199,55 +197,51 @@ async function fetchDatabaseOrLocal(tableName, storageKey, fallbackDefault) {
       gallery: 'gallery',
       social_feeds: 'social',
       recent_tournaments: 'recentTournaments',
-      community_tournaments: 'communityTournaments'
+      community_tournaments: 'communityTournaments',
+      login_logs: 'loginLogs'
     };
     const mappedKey = keyMap[tableName];
-    if (mappedKey && bundle[mappedKey]) {
-      const data = bundle[mappedKey];
-      localStorage.setItem(storageKey, JSON.stringify(data));
-      return data;
+    if (mappedKey && bundle[mappedKey] !== undefined && bundle[mappedKey] !== null) {
+      return bundle[mappedKey];
     }
   }
-
-  return localData !== null ? localData : fallbackDefault;
+  return fallbackDefault;
 }
 
-// Save to LocalStorage and Postgres
-async function saveDatabaseAndLocal(tableName, storageKey, dataArray, singleItem) {
-  localStorage.setItem(storageKey, JSON.stringify(dataArray));
-  try {
-    const apiRes = await fetch(getApiUrl('/api/save'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ entity: tableName, item: singleItem })
-    });
-    if (!apiRes.ok) {
-      console.warn(`[LykosDB] Failed to save ${tableName} to Azure Postgres:`, await apiRes.text());
-    }
-  } catch (e) {
-    console.warn(`[LykosDB] Error saving ${tableName} to Azure Postgres:`, e);
+// STRICT SAVE TO CLOUD - THROWS ERROR IF IT FAILS
+async function saveToApi(tableName, singleItem, eventName = null) {
+  const apiRes = await fetch(getApiUrl('/api/save'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ entity: tableName, item: singleItem })
+  });
+
+  if (!apiRes.ok) {
+    const errData = await apiRes.json().catch(() => ({}));
+    throw new Error(errData.error || `Erro HTTP ${apiRes.status} da Azure`);
+  }
+  
+  if (eventName) {
+    window.dispatchEvent(new CustomEvent(eventName, { detail: singleItem }));
   }
 }
 
-// Delete from LocalStorage and Postgres
-async function deleteDatabaseAndLocal(tableName, storageKey, dataArray, itemId) {
-  localStorage.setItem(storageKey, JSON.stringify(dataArray));
-  try {
-    const apiRes = await fetch(getApiUrl('/api/delete'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ entity: tableName, id: itemId })
-    });
-    if (!apiRes.ok) {
-      console.warn(`[LykosDB] Failed to delete ${tableName} from Azure Postgres:`, await apiRes.text());
-    }
-  } catch (e) {
-    console.warn(`[LykosDB] Error deleting ${tableName} from Azure Postgres:`, e);
+async function deleteFromApi(tableName, itemId) {
+  const apiRes = await fetch(getApiUrl('/api/delete'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ entity: tableName, id: itemId })
+  });
+
+  if (!apiRes.ok) {
+    const errData = await apiRes.json().catch(() => ({}));
+    throw new Error(errData.error || `Erro HTTP ${apiRes.status} da Azure`);
   }
 }
 
-// Background Real-Time Poller (Polls /api/data every 4 seconds for live sync without F5)
 let _isPollingStarted = false;
+let _lastBundleJson = '{}';
+
 function startRealtimePoller() {
   if (_isPollingStarted) return;
   _isPollingStarted = true;
@@ -257,47 +251,26 @@ function startRealtimePoller() {
       const res = await fetch(getApiUrl('/api/data?t=' + Date.now())).catch(() => null);
       if (res && res.ok) {
         const bundle = await res.json();
-        let anyChanged = false;
+        const currentJson = JSON.stringify(bundle);
 
-        const syncMap = [
-          { key: 'settings', storage: 'lykos_settings', event: 'lykos_branding_updated' },
-          { key: 'about', storage: 'lykos_about' },
-          { key: 'modalities', storage: 'lykos_modalities' },
-          { key: 'roster', storage: 'lykos_roster' },
-          { key: 'staff', storage: 'lykos_staff' },
-          { key: 'matches', storage: 'lykos_matches' },
-          { key: 'trophies', storage: 'lykos_trophies' },
-          { key: 'gallery', storage: 'lykos_gallery' },
-          { key: 'social', storage: 'lykos_social' },
-          { key: 'recentTournaments', storage: 'lykos_recent_tournaments' },
-          { key: 'communityTournaments', storage: 'lykos_community_tournaments' },
-          { key: 'loginLogs', storage: 'lykos_login_logs' }
-        ];
-
-        syncMap.forEach(item => {
-          if (bundle[item.key]) {
-            const fresh = JSON.stringify(bundle[item.key]);
-            const old = localStorage.getItem(item.storage);
-            if (fresh !== old) {
-              localStorage.setItem(item.storage, fresh);
-              anyChanged = true;
-              if (item.event) {
-                window.dispatchEvent(new CustomEvent(item.event, { detail: bundle[item.key] }));
-              }
-            }
-          }
-        });
-
-        // Trigger route re-render if data updated
-        if (anyChanged && window.LykosRouter && window.LykosRouter.handleRoute) {
-          window.LykosRouter.handleRoute().catch(() => {});
+        if (currentJson !== _lastBundleJson) {
+           const isFirst = _lastBundleJson === '{}';
+           _lastBundleJson = currentJson;
+           
+           if (!isFirst) {
+             if (bundle.settings) {
+               window.dispatchEvent(new CustomEvent('lykos_branding_updated', { detail: bundle.settings }));
+             }
+             if (window.LykosRouter && window.LykosRouter.handleRoute) {
+               window.LykosRouter.handleRoute().catch(() => {});
+             }
+           }
         }
       }
     } catch (e) {}
   }, 4000);
 }
 
-// Auto-start polling on page load
 if (typeof window !== 'undefined') {
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', startRealtimePoller);
@@ -307,6 +280,7 @@ if (typeof window !== 'undefined') {
 }
 
 window.LykosDB = {
+  // Theme uses localStorage because it is purely client visual preference
   getTheme() {
     return localStorage.getItem('lykos_theme') || 'dark';
   },
@@ -317,110 +291,64 @@ window.LykosDB = {
   },
 
   async getSettings() {
-    return fetchDatabaseOrLocal('site_settings', 'lykos_settings', DEFAULT_SETTINGS);
+    return fetchFromApi('site_settings', DEFAULT_SETTINGS);
   },
   async saveSettings(settings) {
-    const rawLocal = localStorage.getItem('lykos_settings');
-    const localParsed = safeParse(rawLocal, {});
+    const currentSettings = await this.getSettings();
     const nowIso = new Date().toISOString();
-    const mergedSettings = { ...DEFAULT_SETTINGS, ...localParsed, ...settings, updated_at: nowIso };
+    const mergedSettings = { ...DEFAULT_SETTINGS, ...currentSettings, ...settings, updated_at: nowIso };
 
     try {
-      localStorage.setItem('lykos_settings', JSON.stringify(mergedSettings));
+      await saveToApi('site_settings', mergedSettings, 'lykos_branding_updated');
+      return mergedSettings;
     } catch (e) {
-      console.warn("[LykosDB] localStorage save settings warning (possibly quota exceeded):", e);
+      console.error("[LykosDB] Strict saveSettings error:", e);
+      throw new Error(`Falha ao salvar na Azure PostgreSQL. Verifique suas variáveis na Vercel! Detalhe: ${e.message}`);
     }
-
-    window.dispatchEvent(new CustomEvent('lykos_branding_updated', { detail: mergedSettings }));
-
-    // Send FULL data to Azure Postgres API and await response
-    try {
-      const apiRes = await fetch(getApiUrl('/api/save'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ entity: 'site_settings', item: mergedSettings })
-      });
-      if (!apiRes.ok) {
-        const errData = await apiRes.json().catch(() => ({}));
-        throw new Error(errData.error || `Erro HTTP ${apiRes.status}`);
-      }
-    } catch (e) {
-      console.error("[LykosDB] saveSettings error:", e);
-      throw new Error(`Não foi possível salvar no banco Azure PostgreSQL. Detalhe: ${e.message}`);
-    }
-
-    return mergedSettings;
   },
 
   async getModalities() {
-    return fetchDatabaseOrLocal('modalities', 'lykos_modalities', DEFAULT_MODALITIES);
+    return fetchFromApi('modalities', DEFAULT_MODALITIES);
   },
   async saveModality(modality) {
-    const modalities = await this.getModalities();
-    if (modality.id) {
-      const idx = modalities.findIndex(m => String(m.id) === String(modality.id));
-      if (idx !== -1) modalities[idx] = { ...modalities[idx], ...modality };
-    } else {
-      modality.id = 'mod_' + Date.now();
-      modalities.push(modality);
-    }
-    await saveDatabaseAndLocal('modalities', 'lykos_modalities', modalities, modality);
+    if (!modality.id) modality.id = 'mod_' + Date.now();
+    await saveToApi('modalities', modality);
     return modality;
   },
   async deleteModality(id) {
-    let modalities = await this.getModalities();
-    modalities = modalities.filter(m => String(m.id) !== String(id));
-    await deleteDatabaseAndLocal('modalities', 'lykos_modalities', modalities, id);
+    await deleteFromApi('modalities', id);
   },
 
   async getRoster() {
-    return fetchDatabaseOrLocal('roster', 'lykos_roster', DEFAULT_ROSTER);
+    return fetchFromApi('roster', DEFAULT_ROSTER);
   },
   async getPlayerById(id) {
     const roster = await this.getRoster();
     return roster.find(p => String(p.id) === String(id));
   },
   async savePlayer(player) {
-    const roster = await this.getRoster();
-    if (player.id) {
-      const idx = roster.findIndex(p => String(p.id) === String(player.id));
-      if (idx !== -1) roster[idx] = { ...roster[idx], ...player };
-    } else {
-      player.id = 'p_' + Date.now();
-      roster.push(player);
-    }
-    await saveDatabaseAndLocal('roster', 'lykos_roster', roster, player);
+    if (!player.id) player.id = 'p_' + Date.now();
+    await saveToApi('roster', player);
     return player;
   },
   async deletePlayer(id) {
-    let roster = await this.getRoster();
-    roster = roster.filter(p => String(p.id) !== String(id));
-    await deleteDatabaseAndLocal('roster', 'lykos_roster', roster, id);
+    await deleteFromApi('roster', id);
   },
 
   async getStaff() {
-    return fetchDatabaseOrLocal('staff', 'lykos_staff', DEFAULT_STAFF);
+    return fetchFromApi('staff', DEFAULT_STAFF);
   },
   async saveStaff(staffMember) {
-    const staff = await this.getStaff();
-    if (staffMember.id) {
-      const idx = staff.findIndex(s => String(s.id) === String(staffMember.id));
-      if (idx !== -1) staff[idx] = { ...staff[idx], ...staffMember };
-    } else {
-      staffMember.id = 'st_' + Date.now();
-      staff.push(staffMember);
-    }
-    await saveDatabaseAndLocal('staff', 'lykos_staff', staff, staffMember);
+    if (!staffMember.id) staffMember.id = 'st_' + Date.now();
+    await saveToApi('staff', staffMember);
     return staffMember;
   },
   async deleteStaff(id) {
-    let staff = await this.getStaff();
-    staff = staff.filter(s => String(s.id) !== String(id));
-    await deleteDatabaseAndLocal('staff', 'lykos_staff', staff, id);
+    await deleteFromApi('staff', id);
   },
 
   async getMatches() {
-    const matches = await fetchDatabaseOrLocal('matches', 'lykos_matches', DEFAULT_MATCHES);
+    const matches = await fetchFromApi('matches', DEFAULT_MATCHES);
     const list = Array.isArray(matches) ? matches : DEFAULT_MATCHES;
     return list.sort((a, b) => {
       const timeA = a && a.match_date ? new Date(a.match_date).getTime() : 0;
@@ -437,147 +365,84 @@ window.LykosDB = {
     return matches.filter(m => m && m.game === game && String(m.id) !== String(currentId) && m.status === 'FINISHED').slice(0, 3);
   },
   async saveMatch(match) {
-    const matches = await this.getMatches();
-    if (match.id) {
-      const idx = matches.findIndex(m => String(m.id) === String(match.id));
-      if (idx !== -1) matches[idx] = { ...matches[idx], ...match };
-    } else {
-      match.id = 'm_' + Date.now();
-      matches.unshift(match);
-    }
-    await saveDatabaseAndLocal('matches', 'lykos_matches', matches, match);
+    if (!match.id) match.id = 'm_' + Date.now();
+    await saveToApi('matches', match);
     return match;
   },
   async deleteMatch(id) {
-    let matches = await this.getMatches();
-    matches = matches.filter(m => String(m.id) !== String(id));
-    await deleteDatabaseAndLocal('matches', 'lykos_matches', matches, id);
+    await deleteFromApi('matches', id);
   },
 
   async getTrophies() {
-    return fetchDatabaseOrLocal('trophies', 'lykos_trophies', DEFAULT_TROPHIES);
+    return fetchFromApi('trophies', DEFAULT_TROPHIES);
   },
   async saveTrophy(trophy) {
-    const trophies = await this.getTrophies();
-    if (trophy.id) {
-      const idx = trophies.findIndex(t => String(t.id) === String(trophy.id));
-      if (idx !== -1) trophies[idx] = { ...trophies[idx], ...trophy };
-    } else {
-      trophy.id = 't_' + Date.now();
-      trophies.unshift(trophy);
-    }
-    await saveDatabaseAndLocal('trophies', 'lykos_trophies', trophies, trophy);
+    if (!trophy.id) trophy.id = 't_' + Date.now();
+    await saveToApi('trophies', trophy);
     return trophy;
   },
   async deleteTrophy(id) {
-    let trophies = await this.getTrophies();
-    trophies = trophies.filter(t => String(t.id) !== String(id));
-    await deleteDatabaseAndLocal('trophies', 'lykos_trophies', trophies, id);
+    await deleteFromApi('trophies', id);
   },
 
   async getAboutSettings() {
-    return fetchDatabaseOrLocal('about_settings', 'lykos_about', DEFAULT_ABOUT);
+    return fetchFromApi('about_settings', DEFAULT_ABOUT);
   },
   async saveAboutSettings(about) {
-    localStorage.setItem('lykos_about', JSON.stringify(about));
-    (async () => {
-      try {
-        await fetch(getApiUrl('/api/save'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ entity: 'about_settings', item: about })
-        }).catch(() => null);
-      } catch (e) {
-        console.warn("[LykosDB] saveAboutSettings error:", e);
-      }
-    })();
+    await saveToApi('about_settings', about);
     return about;
   },
 
   async getGallery() {
-    return fetchDatabaseOrLocal('gallery', 'lykos_gallery', DEFAULT_GALLERY);
+    return fetchFromApi('gallery', DEFAULT_GALLERY);
   },
   async saveGalleryItem(item) {
-    const gallery = await this.getGallery();
-    if (item.id) {
-      const idx = gallery.findIndex(g => String(g.id) === String(item.id));
-      if (idx !== -1) gallery[idx] = { ...gallery[idx], ...item };
-    } else {
-      item.id = 'g_' + Date.now();
-      gallery.unshift(item);
-    }
-    await saveDatabaseAndLocal('gallery', 'lykos_gallery', gallery, item);
+    if (!item.id) item.id = 'g_' + Date.now();
+    await saveToApi('gallery', item);
     return item;
   },
   async deleteGalleryItem(id) {
-    let gallery = await this.getGallery();
-    gallery = gallery.filter(g => String(g.id) !== String(id));
-    await deleteDatabaseAndLocal('gallery', 'lykos_gallery', gallery, id);
+    await deleteFromApi('gallery', id);
   },
 
   async getSocialFeeds() {
-    return fetchDatabaseOrLocal('social_feeds', 'lykos_social', DEFAULT_SOCIAL);
+    return fetchFromApi('social_feeds', DEFAULT_SOCIAL);
   },
   async saveSocialFeed(feed) {
-    const feeds = await this.getSocialFeeds();
-    if (feed.id) {
-      const idx = feeds.findIndex(s => String(s.id) === String(feed.id));
-      if (idx !== -1) feeds[idx] = { ...feeds[idx], ...feed };
-    } else {
-      feed.id = 's_' + Date.now();
-      feeds.unshift(feed);
-    }
-    await saveDatabaseAndLocal('social_feeds', 'lykos_social', feeds, feed);
+    if (!feed.id) feed.id = 's_' + Date.now();
+    await saveToApi('social_feeds', feed);
     return feed;
   },
   async deleteSocialFeed(id) {
-    let feeds = await this.getSocialFeeds();
-    feeds = feeds.filter(s => String(s.id) !== String(id));
-    await deleteDatabaseAndLocal('social_feeds', 'lykos_social', feeds, id);
+    await deleteFromApi('social_feeds', id);
   },
 
   async getRecentTournaments() {
-    return fetchDatabaseOrLocal('recent_tournaments', 'lykos_recent_tournaments', DEFAULT_RECENT_TOURNAMENTS);
+    return fetchFromApi('recent_tournaments', DEFAULT_RECENT_TOURNAMENTS);
   },
   async saveRecentTournament(tournament) {
-    const tournaments = await this.getRecentTournaments();
-    if (tournament.id) {
-      const idx = tournaments.findIndex(t => String(t.id) === String(tournament.id));
-      if (idx !== -1) tournaments[idx] = { ...tournaments[idx], ...tournament };
-    } else {
-      tournament.id = 'rec_' + Date.now();
-      tournaments.unshift(tournament);
-    }
-    await saveDatabaseAndLocal('recent_tournaments', 'lykos_recent_tournaments', tournaments, tournament);
+    if (!tournament.id) tournament.id = 'rec_' + Date.now();
+    await saveToApi('recent_tournaments', tournament);
     return tournament;
   },
   async deleteRecentTournament(id) {
-    let tournaments = await this.getRecentTournaments();
-    tournaments = tournaments.filter(t => String(t.id) !== String(id));
-    await deleteDatabaseAndLocal('recent_tournaments', 'lykos_recent_tournaments', tournaments, id);
+    await deleteFromApi('recent_tournaments', id);
   },
 
   async getCommunityTournaments() {
-    return fetchDatabaseOrLocal('community_tournaments', 'lykos_community_tournaments', DEFAULT_COMMUNITY_TOURNAMENTS);
+    return fetchFromApi('community_tournaments', DEFAULT_COMMUNITY_TOURNAMENTS);
   },
   async saveCommunityTournament(tournament) {
-    const tournaments = await this.getCommunityTournaments();
-    if (tournament.id) {
-      const idx = tournaments.findIndex(t => String(t.id) === String(tournament.id));
-      if (idx !== -1) tournaments[idx] = { ...tournaments[idx], ...tournament };
-    } else {
-      tournament.id = 'tourn_' + Date.now();
-      tournaments.unshift(tournament);
-    }
-    await saveDatabaseAndLocal('community_tournaments', 'lykos_community_tournaments', tournaments, tournament);
+    if (!tournament.id) tournament.id = 'tourn_' + Date.now();
+    await saveToApi('community_tournaments', tournament);
     return tournament;
   },
   async deleteCommunityTournament(id) {
-    let tournaments = await this.getCommunityTournaments();
-    tournaments = tournaments.filter(t => String(t.id) !== String(id));
-    await deleteDatabaseAndLocal('community_tournaments', 'lykos_community_tournaments', tournaments, id);
+    await deleteFromApi('community_tournaments', id);
   },
 
+  // USERS are still kept locally because they are not exposed in public /api/data
+  // This is a known limitation to protect passwords.
   async getUsers() {
     const raw = localStorage.getItem('lykos_users');
     return safeParse(raw, DEFAULT_USERS);
@@ -593,17 +458,12 @@ window.LykosDB = {
     }
     localStorage.setItem('lykos_users', JSON.stringify(users));
 
-    (async () => {
-      try {
-        await fetch(getApiUrl('/api/save'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ entity: 'app_users', item: user })
-        }).catch(() => null);
-      } catch (e) {
-        console.warn("[LykosDB] saveUser error:", e);
-      }
-    })();
+    try {
+      await saveToApi('app_users', user);
+    } catch (e) {
+      console.warn("[LykosDB] Strict saveUser error:", e);
+      throw new Error(`Falha ao sincronizar admin com a nuvem: ${e.message}`);
+    }
     return user;
   },
   async saveUserRole(userId, newRole) {
@@ -618,39 +478,33 @@ window.LykosDB = {
     let users = await this.getUsers();
     users = users.filter(u => String(u.id) !== String(id));
     localStorage.setItem('lykos_users', JSON.stringify(users));
-
-    (async () => {
-      try {
-        await fetch(getApiUrl('/api/delete'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ entity: 'app_users', id })
-        }).catch(() => null);
-      } catch (e) {}
-    })();
+    try {
+      await deleteFromApi('app_users', id);
+    } catch (e) {
+      console.warn("[LykosDB] Strict deleteUser error:", e);
+    }
   },
 
   async getLoginLogs() {
-    const raw = localStorage.getItem('lykos_login_logs');
-    return safeParse(raw, []);
+    return fetchFromApi('login_logs', []);
   },
   async addLoginLog(log) {
-    const logs = await this.getLoginLogs();
-    logs.unshift(log);
-    localStorage.setItem('lykos_login_logs', JSON.stringify(logs.slice(0, 200)));
+    // Fire and forget via API
+    fetch(getApiUrl('/api/save'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ entity: 'login_logs', item: log })
+    }).catch(()=>{});
     return log;
   },
   async clearLoginLogs() {
-    localStorage.removeItem('lykos_login_logs');
+    // Intentionally left blank as login logs should persist
   },
 
   async uploadAsset(file) {
-    // Automatic Image Compression & Cloud hosting integration (ImgBB)
     return new Promise(async (resolve, reject) => {
-      // 1. Try cloud hosting if ImgBB API Key is configured in settings
       try {
-        const rawSettings = localStorage.getItem('lykos_settings');
-        const settings = rawSettings ? JSON.parse(rawSettings) : {};
+        const settings = await this.getSettings();
         const apiKey = settings.imgbb_api_key;
         if (apiKey && apiKey.trim()) {
           const formData = new FormData();
@@ -671,7 +525,6 @@ window.LykosDB = {
         console.warn("[LykosDB] ImgBB cloud upload failed, falling back to local compression:", e);
       }
 
-      // 2. Fallback to Canvas WebP Base64 compression
       if (!file || !file.type.startsWith('image/')) {
         const reader = new FileReader();
         reader.onload = (e) => resolve(e.target.result);
