@@ -107,7 +107,7 @@ module.exports = async (req, res) => {
         recentTournaments: recentRes.rows || [],
         communityTournaments: communityRes.rows || [],
         loginLogs: loginLogsRes.rows || [],
-        provider: 'neon-postgres',
+        provider: 'azure-postgresql',
         updatedAt: new Date().toISOString()
       };
 
