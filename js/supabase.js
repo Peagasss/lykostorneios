@@ -25,6 +25,7 @@ const DEFAULT_SETTINGS = {
   instagram_url: 'https://instagram.com/lykosesports',
   x_url: 'https://x.com/lykosesports',
   facebook_url: 'https://facebook.com/lykosesports',
+  imgbb_api_key: '65be38396ebe8d02b71f57e3c3a8b921',
   contact_socials_json: [
     { name: 'Discord', platform: 'discord', url: 'https://discord.gg/lykosesports' },
     { name: 'Instagram', platform: 'instagram', url: 'https://instagram.com/lykosesports' },
