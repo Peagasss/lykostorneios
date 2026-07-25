@@ -1,0 +1,62 @@
+# =============================================================================
+# LYKOS E-SPORTS — Netlify Configuration
+# =============================================================================
+
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+# Include schema.sql inside each function bundle so data.js and save.js
+# can self-bootstrap the database on first deploy
+[functions]
+  included_files = ["schema.sql"]
+  node_bundler = "esbuild"
+
+# ---------------------------------------------------------------------------
+# API Redirects: keep /api/* paths working (same as Vercel)
+# ---------------------------------------------------------------------------
+[[redirects]]
+  from = "/api/data"
+  to = "/.netlify/functions/data"
+  status = 200
+
+[[redirects]]
+  from = "/api/save"
+  to = "/.netlify/functions/save"
+  status = 200
+
+[[redirects]]
+  from = "/api/delete"
+  to = "/.netlify/functions/delete"
+  status = 200
+
+[[redirects]]
+  from = "/api/login"
+  to = "/.netlify/functions/login"
+  status = 200
+
+# ---------------------------------------------------------------------------
+# SPA Fallback: all non-asset routes → index.html (client-side router)
+# ---------------------------------------------------------------------------
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# ---------------------------------------------------------------------------
+# Cache Headers
+# ---------------------------------------------------------------------------
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Cache-Control = "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"

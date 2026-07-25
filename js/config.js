@@ -3,10 +3,8 @@
    ========================================================================== */
 
 window.LYKOS_CONFIG = {
-  // Backend Base API URL (Vercel Serverless + Neon Postgres)
-  API_BASE_URL: window.location.hostname.includes('github.io')
-    ? 'https://lykostorneios.vercel.app'
-    : '',
+  // Backend Base API URL (Netlify Functions via /api/* redirects)
+  API_BASE_URL: '',
 
   // Default branding values
   DEFAULT_BRANDING: {
