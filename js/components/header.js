@@ -18,8 +18,11 @@ window.renderHeader = async function () {
   headerContainer.innerHTML = `
     <header class="site-header">
       <div class="container nav-container">
-        <a href="#/" class="brand-logo" style="display: inline-flex; align-items: center; padding: 4px 0;">
+        <a href="/" class="brand-logo" style="display: inline-flex; align-items: center; gap: 10px; padding: 4px 0; text-decoration: none;">
           ${logoContent}
+          <span style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.05em; display: inline-block;">
+            ${teamName.replace(' ', ' <span style="color: var(--accent-neon);">' + (teamName.split(' ')[1] || '') + '</span>')}
+          </span>
         </a>
 
         <ul class="nav-menu" id="nav-menu">
