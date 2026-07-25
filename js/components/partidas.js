@@ -99,13 +99,17 @@ window.renderPartidasPage = async function (container) {
         <div class="featured-match-footer">
           <span style="font-size: 0.85rem; color: var(--text-muted-light);">${match.notes || 'Partida em destaque oficial da temporada.'}</span>
           
-          <div style="display: flex; gap: 10px;">
+          <div style="display: flex; gap: 10px; align-items: center;">
             ${statusStr === 'LIVE' && match.stream_url ? `
               <a href="${match.stream_url}" target="_blank" class="btn-live" style="padding: 10px 22px; font-size: 0.85rem;">
                 Assistir Transmissão Ao Vivo
               </a>
-            ` : ''}
-            <a href="#/partidas/${match.id}" class="btn-primary" style="padding: 10px 22px; font-size: 0.85rem;">
+            ` : (match.stream_url ? `
+              <a href="${match.stream_url}" target="_blank" class="btn-secondary" style="padding: 10px 22px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px;">
+                <span>📺</span> Transmissão
+              </a>
+            ` : '')}
+            <a href="/partidas/${match.id}" class="btn-primary" style="padding: 10px 22px; font-size: 0.85rem;">
               Ver Súmula & Detalhes completos &rarr;
             </a>
           </div>
@@ -168,13 +172,17 @@ window.renderPartidasPage = async function (container) {
           <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border-dark); flex-wrap: wrap; gap: 10px;">
             <span style="font-size: 0.85rem; color: var(--text-muted-light);">${match.notes || 'Partida oficial da temporada.'}</span>
             
-            <div style="display: flex; gap: 10px;">
+            <div style="display: flex; gap: 10px; align-items: center;">
               ${statusStr === 'LIVE' && match.stream_url ? `
                 <a href="${match.stream_url}" target="_blank" class="btn-live">
                   Acompanhar Ao Vivo
                 </a>
-              ` : ''}
-              <a href="#/partidas/${match.id}" class="btn-primary" style="padding: 8px 18px; font-size: 0.78rem;">
+              ` : (match.stream_url ? `
+                <a href="${match.stream_url}" target="_blank" class="btn-secondary" style="padding: 8px 14px; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 6px;">
+                  <span>📺</span> Transmissão
+                </a>
+              ` : '')}
+              <a href="/partidas/${match.id}" class="btn-primary" style="padding: 8px 18px; font-size: 0.78rem;">
                 Detalhes da Partida &rarr;
               </a>
             </div>
