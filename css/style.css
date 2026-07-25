@@ -1029,31 +1029,49 @@ input[type="file"]::-webkit-file-upload-button:hover {
   .starters-responsive-grid { grid-template-columns: 1fr !important; }
 }
 
-/* Smart Collapsible Floating Navbar */
+/* Smart Collapsible Floating Navbar (Ultra Smooth & Fluid Transition) */
 .site-header {
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  max-width: 1240px;
+  width: 92%;
+  overflow: hidden;
+  transition: max-width 0.65s cubic-bezier(0.25, 1, 0.5, 1), 
+              padding 0.65s cubic-bezier(0.25, 1, 0.5, 1), 
+              background 0.5s ease, 
+              border-color 0.5s ease, 
+              box-shadow 0.5s ease, 
+              transform 0.65s cubic-bezier(0.25, 1, 0.5, 1) !important;
 }
 
+.site-header .nav-container {
+  transition: padding 0.65s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.site-header .nav-menu {
+  display: flex !important;
+  opacity: 1;
+  max-width: 800px;
+  transform: translateX(0);
+  transition: opacity 0.45s ease, max-width 0.65s cubic-bezier(0.25, 1, 0.5, 1), transform 0.65s cubic-bezier(0.25, 1, 0.5, 1);
+  pointer-events: auto;
+  white-space: nowrap;
+}
+
+/* COLLAPSED STATE (Smoothly shrinking to pill) */
 .site-header.navbar-collapsed {
-  width: auto !important;
-  min-width: 200px;
-  max-width: 280px;
-  padding: 0 0.5rem !important;
+  max-width: 210px !important;
   background: rgba(8, 6, 18, 0.95) !important;
   border-color: rgba(168, 85, 247, 0.5) !important;
-  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.8), 0 0 15px rgba(168, 85, 247, 0.3) !important;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.8), 0 0 20px rgba(168, 85, 247, 0.35) !important;
 }
 
 .site-header.navbar-collapsed .nav-container {
-  justify-content: center !important;
   padding: 0 1.25rem !important;
-  gap: 0 !important;
 }
 
 .site-header.navbar-collapsed .nav-menu {
-  display: none !important;
-}
-
-.site-header.navbar-collapsed .brand-logo span {
-  display: inline-block !important;
+  opacity: 0 !important;
+  max-width: 0px !important;
+  transform: translateX(20px);
+  pointer-events: none !important;
+  overflow: hidden;
 }
