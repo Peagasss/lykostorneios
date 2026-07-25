@@ -66,13 +66,25 @@ window.renderHomePage = async function (container) {
   starterPlayers = starterPlayers.slice(0, 5);
 
   container.innerHTML = `
-    <!-- MAIN HOME WRAPPER (FULL WIDTH - EDGE TO EDGE) -->
-    <section style="padding-top: 85px; padding-bottom: 3rem; min-height: 80vh; position: relative; width: 100%;">
+    <!-- MAIN HOME WRAPPER (FULL WIDTH - EDGE TO EDGE WITH ELEGANT TOP SPACING) -->
+    <section style="padding-top: 140px; padding-bottom: 4rem; min-height: 80vh; position: relative; width: 100%;">
       <div style="width: 100%; padding: 0 2rem; box-sizing: border-box;">
 
-        <!-- BANNER DE DESTAQUE: 5 JOGADORES PRINCIPAIS DO ELENCO (CLEAN - SEM CAIXA EXTERNA) -->
-        <div style="margin-bottom: 2.5rem; width: 100%; box-sizing: border-box;">
-          <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem;" class="starters-responsive-grid">
+        <!-- BANNER DE DESTAQUE: 5 JOGADORES PRINCIPAIS DO ELENCO (CLEAN - SEM MOLDURA/BORDAS) -->
+        <div style="margin-bottom: 3.5rem; width: 100%; box-sizing: border-box;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem;">
+            <div>
+              <div class="section-title-badge" style="margin-bottom: 6px;">ROSTER TITULAR DE ELITE</div>
+              <h2 style="font-family: var(--font-heading); font-size: 2.2rem; font-weight: 800; color: #ffffff; margin: 0; line-height: 1.1;">
+                LINE-UP <span style="color: var(--accent-neon);">PRINCIPAL</span>
+              </h2>
+            </div>
+            <div style="font-family: var(--font-tech); font-size: 0.85rem; color: var(--text-muted-light); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;">
+              ${settings.team_name || 'LYKOS'} E-SPORTS
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.25rem;" class="starters-responsive-grid">
             ${starterPlayers.map(player => `
               <div class="starter-card glass-card-interactive" data-id="${player.id}" style="border: none; border-radius: var(--radius-sm); overflow: hidden; background: rgba(14, 11, 26, 0.6); display: flex; flex-direction: column; cursor: pointer; transition: all 0.3s ease;">
                 <div style="height: 480px; overflow: hidden; position: relative; background: radial-gradient(circle at center, rgba(168,85,247,0.1) 0%, rgba(10,8,22,0.85) 100%); border-radius: var(--radius-sm);">
@@ -93,7 +105,7 @@ window.renderHomePage = async function (container) {
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;" class="home-split-grid">
           
           <!-- LADO ESQUERDO: NOTIFICAÇÃO PRÓXIMO CONFRONTO HIERÁRQUICO -->
-          <div class="glass-card" style="padding: 2rem; border: 1px solid var(--border-dark-strong); display: flex; flex-direction: column; justify-content: space-between;">
+          <div class="glass-card" style="padding: 2.25rem; border: none; display: flex; flex-direction: column; justify-content: space-between;">
             <div>
               <div style="margin-bottom: 1rem;">
                 <h2 style="font-family: var(--font-heading); font-size: 2.2rem; font-weight: 800; color: #ffffff; line-height: 1.1; margin-bottom: 6px;">
@@ -105,7 +117,7 @@ window.renderHomePage = async function (container) {
               </div>
 
               ${featuredMatch ? `
-                <div style="background: rgba(14, 11, 26, 0.85); border: 1px solid var(--border-dark); border-radius: var(--radius-xs); padding: 1.5rem; margin-top: 1.5rem;">
+                <div style="background: rgba(14, 11, 26, 0.85); border: none; border-radius: var(--radius-xs); padding: 1.5rem; margin-top: 1.5rem;">
                   <div style="font-family: var(--font-heading); font-size: 0.78rem; font-weight: 700; color: var(--accent-neon); text-transform: uppercase; margin-bottom: 1rem;">
                     ${featuredMatch.game} • ${featuredMatch.tournament_name || 'Campeonato'}
                   </div>
@@ -120,7 +132,7 @@ window.renderHomePage = async function (container) {
                     <!-- SCORE / VS -->
                     <div style="text-align: center;">
                       ${(featuredMatch.status || '').toUpperCase() === 'LIVE' ? `<span class="match-status-pill status-live" style="margin-bottom: 6px; display: inline-block;">🔴 AO VIVO</span>` : ''}
-                      <div style="font-family: var(--font-heading); font-size: 1.8rem; font-weight: 800; color: white; padding: 4px 16px; background: rgba(168,85,247,0.15); border-radius: var(--radius-xs); border: 1px solid var(--border-dark);">
+                      <div style="font-family: var(--font-heading); font-size: 1.8rem; font-weight: 800; color: white; padding: 4px 16px; background: rgba(168,85,247,0.15); border-radius: var(--radius-xs); border: none;">
                         ${(featuredMatch.status || '').toUpperCase() === 'FINISHED' || (featuredMatch.status || '').toUpperCase() === 'LIVE' 
                           ? `${featuredMatch.score_lykos || 0} - ${featuredMatch.score_opponent || 0}` 
                           : 'VS'}
@@ -149,7 +161,7 @@ window.renderHomePage = async function (container) {
           </div>
 
           <!-- LADO DIREITO: FAÇA PARTE DA NOSSA TORCIDA OFICIAL (VAI PARA /CONTATO) -->
-          <div class="glass-card" style="padding: 2.5rem; border: 1px solid var(--border-dark-strong); display: flex; flex-direction: column; justify-content: space-between; background: linear-gradient(135deg, rgba(168,85,247,0.2) 0%, rgba(10,8,22,0.9) 100%); position: relative; overflow: hidden;">
+          <div class="glass-card" style="padding: 2.5rem; border: none; display: flex; flex-direction: column; justify-content: space-between; background: linear-gradient(135deg, rgba(168,85,247,0.2) 0%, rgba(10,8,22,0.9) 100%); position: relative; overflow: hidden;">
             <div style="position: absolute; top: -50px; right: -50px; width: 220px; height: 220px; background: rgba(168,85,247,0.25); filter: blur(50px); border-radius: 50%; pointer-events: none;"></div>
 
             <div>
