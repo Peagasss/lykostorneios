@@ -17,7 +17,24 @@ module.exports = async (req, res) => {
 
   // 1. Try Vercel / Neon Postgres first (ultra fast < 20ms)
   if (process.env.POSTGRES_URL) {
-      // Silent migration to add sorting and API key columns if they don't exist yet
+      // 1. Silent schema migration / initialization if database is empty (self-bootstraps new Neon DBs)
+      try {
+        const checkTable = await sql`SELECT to_regclass('public.site_settings');`;
+        if (!checkTable.rows[0] || !checkTable.rows[0].to_regclass) {
+          const fs = require('fs');
+          const path = require('path');
+          const schemaPath = path.join(process.cwd(), 'neon_schema.sql');
+          if (fs.existsSync(schemaPath)) {
+            const schemaSql = fs.readFileSync(schemaPath, 'utf8');
+            await sql.query(schemaSql);
+            console.log('[LykosDB] Neon database schema self-bootstrapped successfully.');
+          }
+        }
+      } catch (schemaErr) {
+        console.warn('[Schema Init Warning]:', schemaErr);
+      }
+
+      // 2. Silent migration to add sorting and API key columns if they don't exist yet
       await Promise.all([
         sql`ALTER TABLE roster ADD COLUMN IF NOT EXISTS sort_order INT DEFAULT 0;`,
         sql`ALTER TABLE staff ADD COLUMN IF NOT EXISTS sort_order INT DEFAULT 0;`,
