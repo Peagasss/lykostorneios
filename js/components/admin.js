@@ -120,11 +120,14 @@ window.renderAdminPage = async function (container) {
       window.LykosDB.getLoginLogs()
     ]);
 
+    activeTab = sessionStorage.getItem('lykos_admin_active_tab') || 'partidas';
+
     // Ensure activeTab is permitted for currentUser
     if (!hasPermission(activeTab)) {
       const allowedTabs = ['partidas', 'torneios', 'elenco', 'staff', 'modalidades', 'trophies', 'about', 'galeria', 'social', 'branding', 'roles'].filter(t => hasPermission(t));
       if (allowedTabs.length > 0) activeTab = allowedTabs[0];
     }
+    sessionStorage.setItem('lykos_admin_active_tab', activeTab);
 
     container.innerHTML = `
       <section class="admin-container">
