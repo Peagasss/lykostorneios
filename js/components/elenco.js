@@ -12,9 +12,12 @@ window.renderElencoPage = async function (container) {
   function renderRosterGrid(filter) {
     let filtered = filter === 'ALL' 
       ? allRoster 
-      : allRoster.filter(p => p.game.toLowerCase() === filter.toLowerCase());
+      : allRoster.filter(p => {
+          const gameName = p?.game || 'não especificado';
+          return gameName.toLowerCase() === filter.toLowerCase();
+        });
 
-    filtered = [...filtered].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+    filtered = [...filtered].sort((a, b) => ((a && a.sort_order) || 0) - ((b && b.sort_order) || 0));
 
     if (filtered.length === 0) {
       return `<div style="grid-column: 1/-1; padding: 4rem; text-align: center; color: var(--text-muted-light);">Nenhum atleta cadastrado nesta categoria.</div>`;

@@ -508,6 +508,13 @@ window.renderAdminPage = async function (container) {
               <div class="form-group"><label class="form-label">Função / Role</label><input type="text" id="roster-role" class="form-input" placeholder="Ex: Duelist" required></div>
             </div>
 
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.5rem;">
+              <div class="form-group"><label class="form-label">Link X (Twitter)</label><input type="url" id="roster-social-x" class="form-input" placeholder="https://x.com/..."></div>
+              <div class="form-group"><label class="form-label">Link Instagram</label><input type="url" id="roster-social-insta" class="form-input" placeholder="https://instagram.com/..."></div>
+            </div>
+
+            <div class="form-group"><label class="form-label">Biografia do Pro-Player</label><textarea id="roster-bio" class="form-textarea" rows="2" placeholder="Trajetória e conquistas do atleta..."></textarea></div>
+
             <h4 style="font-size: 0.85rem; color: var(--accent-neon); text-transform: uppercase; margin: 1rem 0 0.5rem;">Setup & Periféricos</h4>
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.85rem;">
               <input type="text" id="roster-mouse" class="form-input" placeholder="Mouse (Ex: Logitech G Pro X)">
@@ -662,23 +669,27 @@ window.renderAdminPage = async function (container) {
         <div style="background: var(--bg-dark-surface); border: 1px solid var(--border-dark); border-radius: var(--radius-sm); padding: 1.75rem; margin-bottom: 2rem;">
           <h3 style="margin-bottom: 1.25rem; font-size: 1.15rem;">Cadastrar Conquista / Troféu</h3>
           <form id="form-trophy">
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem;">
-              <div class="form-group"><label class="form-label">Título da Conquista</label><input type="text" id="trophy-title" class="form-input" required></div>
-              <div class="form-group"><label class="form-label">Ano do Título</label><input type="text" id="trophy-year" class="form-input" required></div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem;">
+              <div class="form-group"><label class="form-label">Título da Conquista</label><input type="text" id="trophy-title" class="form-input" placeholder="Ex: VCT Americas Champions" required></div>
+              <div class="form-group"><label class="form-label">Ano do Título</label><input type="text" id="trophy-year" class="form-input" placeholder="Ex: 2026" required></div>
               <div class="form-group">
                 <label class="form-label">Modalidade</label>
                 <select id="trophy-game" class="form-select">
                   ${data.modalities.map(m => `<option value="${m.name}">${m.name}</option>`).join('')}
                 </select>
               </div>
+              <div class="form-group"><label class="form-label">Premiação (Prize Pool)</label><input type="text" id="trophy-prize" class="form-input" placeholder="Ex: $250.000 USD"></div>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">Imagem do Troféu (Upload PC)</label>
-              <input type="file" id="trophy-file" class="form-input" accept="image/*">
-              <span class="upload-hint">Tamanho recomendado: 800x600px (Proporção 4:3, JPG/PNG)</span>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.5rem;">
+              <div class="form-group"><label class="form-label">MVP do Torneio</label><input type="text" id="trophy-mvp" class="form-input" placeholder="Ex: ASPAS"></div>
+              <div class="form-group">
+                <label class="form-label">Imagem do Troféu (Upload PC)</label>
+                <input type="file" id="trophy-file" class="form-input" accept="image/*">
+                <span class="upload-hint">Tamanho recomendado: 800x600px (Proporção 4:3, JPG/PNG)</span>
+              </div>
             </div>
-            <div class="form-group"><label class="form-label">Histórico da Campanha</label><textarea id="trophy-desc" class="form-textarea" rows="3"></textarea></div>
+            <div class="form-group"><label class="form-label">Histórico da Campanha</label><textarea id="trophy-desc" class="form-textarea" rows="3" placeholder="Resumo da caminhada até a taça..."></textarea></div>
             <button type="submit" class="btn-primary">Salvar Conquista &rarr;</button>
           </form>
         </div>
@@ -1426,6 +1437,9 @@ window.renderAdminPage = async function (container) {
             nickname: nickEl.value.trim(),
             game: gameEl ? gameEl.value : 'Valorant',
             role: roleEl ? roleEl.value.trim() : 'Player',
+            social_x: (container.querySelector('#roster-social-x') || {}).value || '',
+            social_instagram: (container.querySelector('#roster-social-insta') || {}).value || '',
+            bio: (container.querySelector('#roster-bio') || {}).value || '',
             is_starter: container.querySelector('#roster-is-starter') ? container.querySelector('#roster-is-starter').checked : false,
             mouse: (container.querySelector('#roster-mouse') || {}).value || '',
             keyboard: (container.querySelector('#roster-keyboard') || {}).value || '',
@@ -1436,7 +1450,11 @@ window.renderAdminPage = async function (container) {
             photo_url: photoUrl
           });
           
-          showToastSuccess('Atleta salvo com sucesso!');
+          if (window._lastLykosSaveError) {
+            showToastSuccess(`⚠️ Salvo localmente (Nuvem indisponível: ${window._lastLykosSaveError})`);
+          } else {
+            showToastSuccess('✅ Atleta salvo e sincronizado na nuvem!');
+          }
           renderDashboard();
         } catch (err) {
           console.error('[Admin] Roster Save Error:', err);
@@ -1480,6 +1498,13 @@ window.renderAdminPage = async function (container) {
               <div class="form-group"><label class="form-label">Função / Role</label><input type="text" id="pop-p-role" class="form-input" value="${player.role || ''}" required></div>
             </div>
 
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.5rem;">
+              <div class="form-group"><label class="form-label">Link X (Twitter)</label><input type="url" id="pop-p-x" class="form-input" value="${player.social_x || ''}"></div>
+              <div class="form-group"><label class="form-label">Link Instagram</label><input type="url" id="pop-p-insta" class="form-input" value="${player.social_instagram || ''}"></div>
+            </div>
+
+            <div class="form-group"><label class="form-label">Biografia do Pro-Player</label><textarea id="pop-p-bio" class="form-textarea" rows="2">${player.bio || ''}</textarea></div>
+
             <div class="form-group" style="margin-top: 0.5rem;">
               <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; color: white; font-weight: 700; font-size: 0.88rem;">
                 <input type="checkbox" id="pop-p-starter" style="width: 18px; height: 18px; accent-color: var(--accent-neon);" ${player.is_starter ? 'checked' : ''}>
@@ -1522,6 +1547,9 @@ window.renderAdminPage = async function (container) {
             nickname: form.querySelector('#pop-p-nick').value,
             game: form.querySelector('#pop-p-game').value,
             role: form.querySelector('#pop-p-role').value,
+            social_x: form.querySelector('#pop-p-x') ? form.querySelector('#pop-p-x').value : '',
+            social_instagram: form.querySelector('#pop-p-insta') ? form.querySelector('#pop-p-insta').value : '',
+            bio: form.querySelector('#pop-p-bio') ? form.querySelector('#pop-p-bio').value : '',
             is_starter: form.querySelector('#pop-p-starter') ? form.querySelector('#pop-p-starter').checked : false,
             mouse: form.querySelector('#pop-p-mouse').value,
             keyboard: form.querySelector('#pop-p-keyboard').value,
@@ -1628,6 +1656,7 @@ window.renderAdminPage = async function (container) {
             social_instagram: form.querySelector('#pop-st-insta') ? form.querySelector('#pop-st-insta').value : '',
             photo_url: photoUrl
           });
+          showToastSuccess('Membro da staff atualizado!');
         });
       };
     });
@@ -1635,6 +1664,7 @@ window.renderAdminPage = async function (container) {
     container.querySelectorAll('.delete-staff-btn').forEach(btn => {
       btn.onclick = () => promptDeletion(btn.getAttribute('data-title'), async () => {
         await window.LykosDB.deleteStaff(btn.getAttribute('data-id'));
+        showToastSuccess('Membro da staff removido!');
         renderDashboard();
       });
     });
@@ -1655,6 +1685,7 @@ window.renderAdminPage = async function (container) {
           description: container.querySelector('#mod-desc').value || '',
           icon_url: iconUrl
         });
+        showToastSuccess('Modalidade salva com sucesso!');
         renderDashboard();
       };
     }
@@ -1689,6 +1720,7 @@ window.renderAdminPage = async function (container) {
             description: form.querySelector('#pop-m-desc').value,
             icon_url: iconUrl
           });
+          showToastSuccess('Modalidade atualizada!');
         });
       };
     });
@@ -1715,9 +1747,12 @@ window.renderAdminPage = async function (container) {
           title: container.querySelector('#trophy-title').value,
           year: container.querySelector('#trophy-year').value,
           game: container.querySelector('#trophy-game').value,
+          prize: (container.querySelector('#trophy-prize') || {}).value || '',
+          mvp: (container.querySelector('#trophy-mvp') || {}).value || '',
           description: container.querySelector('#trophy-desc').value || '',
           image_url: imgUrl
         });
+        showToastSuccess('Conquista salva com sucesso!');
         renderDashboard();
       };
     }
@@ -1736,6 +1771,10 @@ window.renderAdminPage = async function (container) {
                 <label class="form-label">Modalidade</label>
                 <select id="pop-t-game" class="form-select">${data.modalities.map(m => `<option value="${m.name}" ${tr.game === m.name ? 'selected' : ''}>${m.name}</option>`).join('')}</select>
               </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.5rem;">
+              <div class="form-group"><label class="form-label">Premiação (Prize Pool)</label><input type="text" id="pop-t-prize" class="form-input" value="${tr.prize || ''}"></div>
+              <div class="form-group"><label class="form-label">MVP do Torneio</label><input type="text" id="pop-t-mvp" class="form-input" value="${tr.mvp || ''}"></div>
             </div>
             <div class="form-group"><label class="form-label">Histórico da Campanha</label><textarea id="pop-t-desc" class="form-textarea" rows="3">${tr.description || ''}</textarea></div>
             <div class="form-group"><label class="form-label">Foto do Troféu (Upload PC)</label><input type="file" id="pop-t-file" class="form-input" accept="image/*"></div>
@@ -1758,9 +1797,12 @@ window.renderAdminPage = async function (container) {
             title: form.querySelector('#pop-t-title').value,
             year: form.querySelector('#pop-t-year').value,
             game: form.querySelector('#pop-t-game').value,
+            prize: form.querySelector('#pop-t-prize') ? form.querySelector('#pop-t-prize').value : '',
+            mvp: form.querySelector('#pop-t-mvp') ? form.querySelector('#pop-t-mvp').value : '',
             description: form.querySelector('#pop-t-desc').value,
             image_url: imgUrl
           });
+          showToastSuccess('Conquista atualizada com sucesso!');
         });
       };
     });
@@ -1848,6 +1890,7 @@ window.renderAdminPage = async function (container) {
           description: container.querySelector('#comm-tourn-desc').value,
           banner_url: bannerUrl
         });
+        showToastSuccess('Torneio cadastrado com sucesso!');
         renderDashboard();
       };
     }
@@ -1875,6 +1918,7 @@ window.renderAdminPage = async function (container) {
               </div>
             </div>
             <div class="form-group"><label class="form-label">Descrição</label><textarea id="pop-ct-desc" class="form-textarea" rows="3">${ct.description || ''}</textarea></div>
+            <div class="form-group"><label class="form-label">Banner do Torneio (Upload PC)</label><input type="file" id="pop-ct-file" class="form-input" accept="image/*"></div>
             <div style="display: flex; gap: 10px; margin-top: 1rem;">
               <button type="submit" class="btn-primary" style="flex: 1;">Atualizar Torneio &rarr;</button>
               <button type="button" class="btn-secondary cancel-pop-btn">Cancelar</button>
@@ -1883,14 +1927,22 @@ window.renderAdminPage = async function (container) {
         `;
 
         openUniversalModal(`Editar Torneio: ${ct.title}`, html, async (form) => {
+          const ctFile = form.querySelector('#pop-ct-file');
+          let bannerUrl = ct.banner_url;
+          if (ctFile && ctFile.files && ctFile.files[0]) {
+            bannerUrl = await window.LykosDB.uploadAsset(ctFile.files[0]);
+          }
+
           await window.LykosDB.saveCommunityTournament({
             ...ct,
             title: form.querySelector('#pop-ct-title').value,
             prize_pool: form.querySelector('#pop-ct-prize').value,
             registration_url: form.querySelector('#pop-ct-url').value,
             status: form.querySelector('#pop-ct-status').value,
-            description: form.querySelector('#pop-ct-desc').value
+            description: form.querySelector('#pop-ct-desc').value,
+            banner_url: bannerUrl
           });
+          showToastSuccess('Torneio atualizado!');
         });
       };
     });
@@ -1921,6 +1973,7 @@ window.renderAdminPage = async function (container) {
           stat_community: container.querySelector('#about-stat-community').value,
           about_image_url: imgUrl
         });
+        showToastSuccess('Informações da Página Sobre salvas com sucesso!');
         renderDashboard();
       };
     }
@@ -2300,7 +2353,7 @@ window.renderAdminPage = async function (container) {
           permissions: selectedPermissions,
           is_master: false
         });
-
+        showToastSuccess('Usuário criado com sucesso!');
         renderDashboard();
       };
     }
@@ -2310,6 +2363,7 @@ window.renderAdminPage = async function (container) {
       btnClearLogs.onclick = async () => {
         if (confirm('Tem certeza de que deseja limpar todo o histórico de logs de login?')) {
           await window.LykosDB.clearLoginLogs();
+          showToastSuccess('Histórico de logs limpo com sucesso!');
           renderDashboard();
         }
       };
@@ -2394,6 +2448,7 @@ window.renderAdminPage = async function (container) {
             password: form.querySelector('#pop-u-password').value,
             permissions: editedPerms
           });
+          showToastSuccess('Permissões e dados do usuário salvos com sucesso!');
         });
 
         setTimeout(() => {

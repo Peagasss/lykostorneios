@@ -162,18 +162,94 @@ let _cachedBundle = null;
 let _sharedDataPromise = null;
 let _sharedDataTimestamp = 0;
 
-// Try to initialize from sessionStorage for instant zero-latency first render
-try {
-  const rawSessionData = sessionStorage.getItem('lykos_bundle_cache');
-  if (rawSessionData) {
-    _cachedBundle = JSON.parse(rawSessionData);
+function getDefaultBundle() {
+  return {
+    settings: { ...DEFAULT_SETTINGS },
+    modalities: [...DEFAULT_MODALITIES],
+    roster: [...DEFAULT_ROSTER],
+    staff: [...DEFAULT_STAFF],
+    matches: [...DEFAULT_MATCHES],
+    trophies: [...DEFAULT_TROPHIES],
+    about: { ...DEFAULT_ABOUT },
+    gallery: [...DEFAULT_GALLERY],
+    social: [...DEFAULT_SOCIAL],
+    recentTournaments: [...DEFAULT_RECENT_TOURNAMENTS],
+    communityTournaments: [...DEFAULT_COMMUNITY_TOURNAMENTS],
+    loginLogs: []
+  };
+}
+
+function mergeArrayById(localArr, apiArr) {
+  if (!Array.isArray(localArr)) return Array.isArray(apiArr) ? apiArr : [];
+  if (!Array.isArray(apiArr)) return localArr;
+
+  const map = new Map();
+  apiArr.forEach(item => {
+    if (item && item.id !== undefined) map.set(String(item.id), item);
+  });
+  localArr.forEach(item => {
+    if (item && item.id !== undefined) map.set(String(item.id), item);
+  });
+  return Array.from(map.values());
+}
+
+function mergeBundles(local, api) {
+  if (!api) return local || getDefaultBundle();
+  if (!local) return api;
+
+  return {
+    settings: { ...(api.settings || {}), ...(local.settings || {}) },
+    about: { ...(api.about || {}), ...(local.about || {}) },
+    modalities: mergeArrayById(local.modalities, api.modalities),
+    roster: mergeArrayById(local.roster, api.roster),
+    staff: mergeArrayById(local.staff, api.staff),
+    matches: mergeArrayById(local.matches, api.matches),
+    trophies: mergeArrayById(local.trophies, api.trophies),
+    gallery: mergeArrayById(local.gallery, api.gallery),
+    social: mergeArrayById(local.social, api.social),
+    recentTournaments: mergeArrayById(local.recentTournaments, api.recentTournaments),
+    communityTournaments: mergeArrayById(local.communityTournaments, api.communityTournaments),
+    loginLogs: mergeArrayById(local.loginLogs, api.loginLogs)
+  };
+}
+
+function getOrCreateBundle() {
+  if (!_cachedBundle) {
+    try {
+      const rawLocal = localStorage.getItem('lykos_local_db_cache');
+      const rawSession = sessionStorage.getItem('lykos_bundle_cache');
+      if (rawLocal) {
+        _cachedBundle = JSON.parse(rawLocal);
+      } else if (rawSession) {
+        _cachedBundle = JSON.parse(rawSession);
+      }
+    } catch (e) {}
   }
-} catch (e) {}
+  if (!_cachedBundle) {
+    _cachedBundle = getDefaultBundle();
+  }
+  return _cachedBundle;
+}
+
+function persistCachedBundle() {
+  if (_cachedBundle) {
+    try {
+      const str = JSON.stringify(_cachedBundle);
+      localStorage.setItem('lykos_local_db_cache', str);
+      sessionStorage.setItem('lykos_bundle_cache', str);
+    } catch (e) {
+      console.warn("[LykosDB] localStorage quota warning:", e);
+      try {
+        sessionStorage.setItem('lykos_bundle_cache', JSON.stringify(_cachedBundle));
+      } catch (err) {}
+    }
+  }
+}
 
 async function fetchFullDataBundle(forceFresh = false) {
+  const currentBundle = getOrCreateBundle();
   const now = Date.now();
   
-  // Return cached bundle instantly if available (cached in memory or sessionStorage)
   if (!forceFresh && _cachedBundle) {
     return _cachedBundle;
   }
@@ -186,7 +262,7 @@ async function fetchFullDataBundle(forceFresh = false) {
   _sharedDataPromise = (async () => {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2500); // 2.5s network timeout limit
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
 
       const apiRes = await fetch(getApiUrl('/api/data?t=' + now), { signal: controller.signal });
       clearTimeout(timeoutId);
@@ -198,15 +274,13 @@ async function fetchFullDataBundle(forceFresh = false) {
       }
       const data = await apiRes.json();
       if (data) {
-        _cachedBundle = data;
-        try {
-          sessionStorage.setItem('lykos_bundle_cache', JSON.stringify(data));
-        } catch (e) {}
+        _cachedBundle = mergeBundles(getOrCreateBundle(), data);
+        persistCachedBundle();
       }
       return _cachedBundle;
     } catch (e) {
-      console.warn('[LykosDB] Fast Fallback / Cache Used due to network timeout:', e.message);
-      return _cachedBundle;
+      console.warn('[LykosDB] Fast Fallback / Local Cache Used:', e.message);
+      return getOrCreateBundle();
     }
   })();
   return _sharedDataPromise;
@@ -218,6 +292,7 @@ function invalidateBundleCache() {
   _sharedDataPromise = null;
   try {
     sessionStorage.removeItem('lykos_bundle_cache');
+    localStorage.removeItem('lykos_local_db_cache');
   } catch (e) {}
 }
 
@@ -246,21 +321,57 @@ async function fetchFromApi(tableName, fallbackDefault) {
   return fallbackDefault;
 }
 
-// STRICT SAVE TO CLOUD - THROWS ERROR IF IT FAILS
+// STRICT SAVE TO CLOUD WITH LOCAL FALLBACK CACHE
 async function saveToApi(tableName, singleItem, eventName = null) {
-  const apiRes = await fetch(getApiUrl('/api/save'), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ entity: tableName, item: singleItem })
-  });
-
-  if (!apiRes.ok) {
-    const errData = await apiRes.json().catch(() => ({}));
-    throw new Error(errData.error || `Erro HTTP ${apiRes.status} da Azure`);
+  const bundle = getOrCreateBundle();
+  const keyMap = {
+    site_settings: 'settings',
+    about_settings: 'about',
+    modalities: 'modalities',
+    roster: 'roster',
+    staff: 'staff',
+    matches: 'matches',
+    trophies: 'trophies',
+    gallery: 'gallery',
+    social_feeds: 'social',
+    recent_tournaments: 'recentTournaments',
+    community_tournaments: 'communityTournaments',
+    login_logs: 'loginLogs'
+  };
+  const mappedKey = keyMap[tableName];
+  if (mappedKey) {
+    if (tableName === 'site_settings' || tableName === 'about_settings') {
+      bundle[mappedKey] = { ...bundle[mappedKey], ...singleItem };
+    } else {
+      if (!Array.isArray(bundle[mappedKey])) bundle[mappedKey] = [];
+      const idx = bundle[mappedKey].findIndex(i => String(i.id) === String(singleItem.id));
+      if (idx !== -1) {
+        bundle[mappedKey][idx] = singleItem;
+      } else {
+        bundle[mappedKey].unshift(singleItem);
+      }
+    }
+    persistCachedBundle();
   }
-  
-  invalidateBundleCache();
-  await fetchFullDataBundle(true);
+
+  window._lastLykosSaveError = null;
+  try {
+    const apiRes = await fetch(getApiUrl('/api/save'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ entity: tableName, item: singleItem })
+    });
+
+    if (!apiRes.ok) {
+      const errData = await apiRes.json().catch(() => ({}));
+      const errMsg = errData.error || `HTTP ${apiRes.status}`;
+      console.warn(`[LykosDB] Notice from API save (${apiRes.status}):`, errMsg);
+      window._lastLykosSaveError = errMsg;
+    }
+  } catch (err) {
+    console.warn(`[LykosDB] API save fallback to local cache:`, err.message);
+    window._lastLykosSaveError = err.message;
+  }
 
   if (eventName) {
     window.dispatchEvent(new CustomEvent(eventName, { detail: singleItem }));
@@ -268,19 +379,38 @@ async function saveToApi(tableName, singleItem, eventName = null) {
 }
 
 async function deleteFromApi(tableName, itemId) {
-  const apiRes = await fetch(getApiUrl('/api/delete'), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ entity: tableName, id: itemId })
-  });
-
-  if (!apiRes.ok) {
-    const errData = await apiRes.json().catch(() => ({}));
-    throw new Error(errData.error || `Erro HTTP ${apiRes.status} da Azure`);
+  const bundle = getOrCreateBundle();
+  const keyMap = {
+    modalities: 'modalities',
+    roster: 'roster',
+    staff: 'staff',
+    matches: 'matches',
+    trophies: 'trophies',
+    gallery: 'gallery',
+    social_feeds: 'social',
+    recent_tournaments: 'recentTournaments',
+    community_tournaments: 'communityTournaments',
+    login_logs: 'loginLogs'
+  };
+  const mappedKey = keyMap[tableName];
+  if (mappedKey && Array.isArray(bundle[mappedKey])) {
+    bundle[mappedKey] = bundle[mappedKey].filter(i => String(i.id) !== String(itemId));
+    persistCachedBundle();
   }
 
-  invalidateBundleCache();
-  await fetchFullDataBundle(true);
+  try {
+    const apiRes = await fetch(getApiUrl('/api/delete'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ entity: tableName, id: itemId })
+    });
+
+    if (!apiRes.ok) {
+      console.warn(`[LykosDB] API delete notice: deleted locally.`);
+    }
+  } catch (err) {
+    console.warn(`[LykosDB] API delete fallback to local cache:`, err.message);
+  }
 }
 
 let _isPollingStarted = false;
@@ -295,7 +425,9 @@ function startRealtimePoller() {
       const res = await fetch(getApiUrl('/api/data?t=' + Date.now())).catch(() => null);
       if (res && res.ok && (res.headers.get('content-type') || '').includes('application/json')) {
         const bundle = await res.json();
-        const currentJson = JSON.stringify(bundle);
+        _cachedBundle = mergeBundles(getOrCreateBundle(), bundle);
+        persistCachedBundle();
+        const currentJson = JSON.stringify(_cachedBundle);
 
         if (currentJson !== _lastBundleJson) {
            const isFirst = _lastBundleJson === '{}';
@@ -586,15 +718,9 @@ window.LykosDB = {
         return;
       }
 
-      let maxWidth = 400;
-      let maxHeight = 400;
-      let quality = 0.75;
-
-      if (file.size > 2 * 1024 * 1024) {
-        maxWidth = 300;
-        maxHeight = 300;
-        quality = 0.7;
-      }
+      const maxWidth = 400;
+      const maxHeight = 400;
+      const quality = 0.6;
 
       const img = new Image();
       const reader = new FileReader();
@@ -626,7 +752,7 @@ window.LykosDB = {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
 
-        const dataUrl = canvas.toDataURL('image/webp', quality);
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
         resolve(dataUrl);
       };
 
