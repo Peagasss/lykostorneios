@@ -319,6 +319,12 @@ window.renderAdminPage = async function (container) {
               </div>
             </div>
 
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label class="form-label">Link de Transmissão (Twitch, YouTube, TikTok, Discord)</label>
+              <input type="url" id="match-stream-url" class="form-input" placeholder="https://twitch.tv/seucanal ou https://youtube.com/..." value="">
+              <span class="upload-hint">Link do botão destacado "ASSISTIR AO VIVO" exibido em partidas no status LIVE.</span>
+            </div>
+
             <button type="submit" class="btn-primary">Salvar Partida &rarr;</button>
           </form>
         </div>
@@ -1016,6 +1022,7 @@ window.renderAdminPage = async function (container) {
           format: container.querySelector('#match-format').value || 'MD3',
           match_date: container.querySelector('#match-date').value,
           status: container.querySelector('#match-status').value,
+          stream_url: container.querySelector('#match-stream-url').value.trim() || '',
           score_lykos: 0,
           score_opponent: 0
         };
@@ -1057,6 +1064,11 @@ window.renderAdminPage = async function (container) {
                   <input type="number" id="pop-m-s2" class="form-input" value="${match.score_opponent || 0}">
                 </div>
               </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 1rem;">
+              <label class="form-label">Link de Transmissão ao Vivo (Twitch, YouTube, etc.)</label>
+              <input type="url" id="pop-m-stream-url" class="form-input" value="${match.stream_url || ''}" placeholder="https://twitch.tv/...">
             </div>
 
             <div class="form-group" style="margin-top: 1rem;">
@@ -1120,20 +1132,21 @@ window.renderAdminPage = async function (container) {
             });
           }
 
-          const updated = {
-            ...match,
-            game: form.querySelector('#pop-m-game').value,
-            opponent_name: form.querySelector('#pop-m-opp').value,
-            opponent_logo: opponentLogo,
-            tournament_name: form.querySelector('#pop-m-tourn').value,
-            match_date: form.querySelector('#pop-m-date').value,
-            status: form.querySelector('#pop-m-status').value,
-            score_lykos: parseInt(form.querySelector('#pop-m-s1').value || 0),
-            score_opponent: parseInt(form.querySelector('#pop-m-s2').value || 0),
-            maps_json: updatedMaps
-          };
-          await window.LykosDB.saveMatch(updated);
-        });
+            const updated = {
+              ...match,
+              game: form.querySelector('#pop-m-game').value,
+              opponent_name: form.querySelector('#pop-m-opp').value,
+              opponent_logo: opponentLogo,
+              tournament_name: form.querySelector('#pop-m-tourn').value,
+              match_date: form.querySelector('#pop-m-date').value,
+              status: form.querySelector('#pop-m-status').value,
+              stream_url: form.querySelector('#pop-m-stream-url').value.trim() || '',
+              score_lykos: parseInt(form.querySelector('#pop-m-s1').value || 0),
+              score_opponent: parseInt(form.querySelector('#pop-m-s2').value || 0),
+              maps_json: updatedMaps
+            };
+            await window.LykosDB.saveMatch(updated);
+          });
 
         // Attach dynamic map row handler in modal
         setTimeout(() => {

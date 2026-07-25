@@ -232,6 +232,32 @@
   color: var(--primary-purple);
 }
 
+.btn-live {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #e63946;
+  color: #ffffff !important;
+  border: none;
+  padding: 8px 18px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 12px rgba(230, 57, 70, 0.4);
+}
+
+.btn-live:hover {
+  background: #ff4d5a;
+  transform: translateY(-1px);
+  box-shadow: 0 0 20px rgba(230, 57, 70, 0.6);
+}
+
 /* Featured Match Hero Component (Partidas) */
 .featured-match-hero {
   background: var(--bg-dark-card);
