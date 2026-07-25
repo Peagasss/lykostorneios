@@ -68,159 +68,35 @@
   color: var(--text-light);
 }
 
-/* Complete Light Mode Color Inversions */
-[data-theme="light"] .section-dark-1,
-[data-theme="light"] .section-dark-2,
-[data-theme="light"] .admin-container {
-  background-color: #f8fafc !important;
-  color: #0f172a !important;
+/* ==========================================================================
+   CYBER-TECH ANIMATIONS & AMBIENT EFFECTS
+   ========================================================================== */
+
+@keyframes float-subtle {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
 }
 
-[data-theme="light"] .section-light-1,
-[data-theme="light"] .section-light-2 {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; filter: blur(40px); }
+  50% { opacity: 0.85; filter: blur(55px); }
 }
 
-[data-theme="light"] .social-platform-badge { color: var(--primary-purple); }
-[data-theme="light"] .social-card h4 { color: #0f172a; }
-
-
-[data-theme="light"] .match-game-label {
-  color: var(--primary-purple) !important;
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(1000%); }
 }
 
-[data-theme="light"] .match-summary-card,
-[data-theme="light"] .player-card,
-[data-theme="light"] .modal-content,
-[data-theme="light"] .site-footer,
-[data-theme="light"] .admin-sidebar-nav,
-[data-theme="light"] [style*="background: var(--bg-dark-surface)"],
-[data-theme="light"] [style*="background: var(--bg-dark-card)"] {
-  background-color: #ffffff !important;
-  border-color: #cbd5e1 !important;
-  color: #0f172a !important;
+.float-effect {
+  animation: float-subtle 4s ease-in-out infinite;
 }
 
-[data-theme="light"] .site-footer {
-  background-color: #ffffff !important;
-  border-top-color: #e2e8f0 !important;
-  color: #0f172a !important;
-}
-
-[data-theme="light"] .site-footer a {
-  color: #475569 !important;
-}
-
-[data-theme="light"] .site-footer a:hover {
-  color: var(--primary-purple) !important;
-}
-
-[data-theme="light"] .game-badge {
-  background: #f1f5f9 !important;
-  color: var(--primary-purple) !important;
-  border: 1px solid #cbd5e1 !important;
-}
-
-[data-theme="light"] .match-status-pill {
-  background: #f1f5f9 !important;
-  color: #0f172a !important;
-  border: 1px solid #cbd5e1 !important;
-}
-
-[data-theme="light"] .social-platform-badge {
-  background: #f1f5f9 !important;
-  color: var(--primary-purple) !important;
-  border: 1px solid #cbd5e1 !important;
-}
-
-[data-theme="light"] h1,
-[data-theme="light"] h2,
-[data-theme="light"] h3,
-[data-theme="light"] h4,
-[data-theme="light"] h5,
-[data-theme="light"] h6,
-[data-theme="light"] strong,
-[data-theme="light"] label,
-[data-theme="light"] .form-label,
-[data-theme="light"] .team-name,
-[data-theme="light"] .player-nickname,
-[data-theme="light"] .section-heading,
-[data-theme="light"] [style*="color: white"],
-[data-theme="light"] [style*="color: #fff"],
-[data-theme="light"] [style*="color:#fff"] {
-  color: #0f172a !important;
-}
-
-[data-theme="light"] .section-subtitle,
-[data-theme="light"] .player-fullname,
-[data-theme="light"] .player-bio,
-[data-theme="light"] [style*="color: var(--text-muted-light)"] {
-  color: #475569 !important;
-}
-
-[data-theme="light"] .btn-primary {
-  background: var(--primary-purple) !important;
-  color: #ffffff !important;
-}
-
-[data-theme="light"] .btn-secondary {
-  background: #f1f5f9 !important;
-  color: #0f172a !important;
-  border-color: #cbd5e1 !important;
-}
-
-[data-theme="light"] .btn-secondary:hover {
-  background: #e2e8f0 !important;
-  color: var(--primary-purple) !important;
-}
-
-[data-theme="light"] .site-header {
-  background: rgba(255, 255, 255, 0.95);
-  border-bottom: 1px solid #cbd5e1;
-}
-
-[data-theme="light"] .nav-link {
-  color: #334155;
-}
-
-[data-theme="light"] .nav-link:hover,
-[data-theme="light"] .nav-link.active {
-  color: var(--primary-purple);
-}
-
-[data-theme="light"] .form-input,
-[data-theme="light"] .form-select,
-[data-theme="light"] .form-textarea {
-  background: #ffffff;
-  color: #0f172a;
-  border-color: #cbd5e1;
-}
-
-[data-theme="light"] .kda-table th {
-  background: #f1f5f9;
-  color: #0f172a;
-  border-bottom-color: #cbd5e1;
-}
-
-[data-theme="light"] .kda-table td {
-  border-bottom-color: #e2e8f0;
-  color: #334155;
-}
-
-[data-theme="light"] .admin-sidebar-nav {
-  background: #ffffff;
-  border-color: #cbd5e1;
-}
-
-[data-theme="light"] .admin-nav-item {
-  color: #334155;
-}
-
-[data-theme="light"] .admin-nav-item:hover,
-[data-theme="light"] .admin-nav-item.active {
-  background: rgba(77, 0, 181, 0.08);
-  color: var(--primary-purple);
+.cyber-glow-bg {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  animation: pulse-glow 6s ease-in-out infinite;
 }
 
 .upload-hint {

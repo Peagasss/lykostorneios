@@ -26,16 +26,19 @@ window.renderGaleriaPage = async function (container) {
   }
 
   container.innerHTML = `
-    <section class="section-dark-1" style="padding-top: 130px;">
-      <div class="container">
+    <section class="section-dark-1" style="padding-top: 130px; position: relative; overflow: hidden;">
+      <div class="hero-glow-arc-container">
+        <div class="hero-glow-arc-bg" style="width: 700px; height: 350px; top: -140px;"></div>
+      </div>
+      <div class="container" style="position: relative; z-index: 2;">
         <h1 class="section-heading">Galeria de <span>Fotos</span></h1>
         <p class="section-subtitle">Reviva os bastidores, palcos de campeonatos e a energia contagiante da alcateia LYKOS.</p>
 
         <div style="display: flex; gap: 8px; margin-bottom: 2.25rem; flex-wrap: wrap;">
-          <button class="btn-primary cat-btn active" data-cat="ALL" style="padding: 6px 18px; border-radius: 4px;">Todas</button>
-          <button class="btn-secondary cat-btn" data-cat="Campeonatos" style="padding: 6px 18px; border-radius: 4px;">Campeonatos</button>
-          <button class="btn-secondary cat-btn" data-cat="Bastidores" style="padding: 6px 18px; border-radius: 4px;">Bastidores</button>
-          <button class="btn-secondary cat-btn" data-cat="Eventos" style="padding: 6px 18px; border-radius: 4px;">Eventos</button>
+          <button class="btn-primary cat-btn active" data-cat="ALL" style="padding: 8px 20px; border-radius: var(--radius-xs); box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);">Todas</button>
+          <button class="btn-secondary cat-btn" data-cat="Campeonatos" style="padding: 8px 20px; border-radius: var(--radius-xs);">Campeonatos</button>
+          <button class="btn-secondary cat-btn" data-cat="Bastidores" style="padding: 8px 20px; border-radius: var(--radius-xs);">Bastidores</button>
+          <button class="btn-secondary cat-btn" data-cat="Eventos" style="padding: 8px 20px; border-radius: var(--radius-xs);">Eventos</button>
         </div>
 
         <div class="gallery-grid" id="gallery-grid-container">
