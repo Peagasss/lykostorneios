@@ -50,8 +50,9 @@ module.exports = async (req, res) => {
   }
 
   // 1. Database Connection Check (Azure / Postgres)
-  const dbUrl = process.env.AZURE_POSTGRES_URL || process.env.NEON_URL || process.env.POSTGRES_URL;
-  if (dbUrl) {
+  try {
+    const dbUrl = process.env.AZURE_POSTGRES_URL || process.env.NEON_URL || process.env.POSTGRES_URL;
+    if (dbUrl) {
       // 1. Silent schema migration / initialization if database is empty
       try {
         const checkTable = await sql`SELECT to_regclass('public.site_settings');`;
@@ -113,10 +114,10 @@ module.exports = async (req, res) => {
       };
 
       return res.status(200).json(payload);
-    } catch (err) {
-      console.error('[Vercel Postgres Data API Error]:', err);
-      return res.status(500).json({ error: err.message });
     }
+  } catch (err) {
+    console.error('[Vercel Postgres Data API Error]:', err);
+    return res.status(500).json({ error: err.message });
   }
 
   return res.status(500).json({ error: 'Postgres database connection string not configured.' });
