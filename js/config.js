@@ -6,6 +6,7 @@ window.LYKOS_CONFIG = {
   // Backend Base API URL (Netlify Functions via /api/* redirects)
   API_BASE_URL: '',
 
+
   // Default branding values
   DEFAULT_BRANDING: {
     team_name: "LYKOS",

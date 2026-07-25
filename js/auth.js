@@ -123,7 +123,7 @@
       const logs = raw ? JSON.parse(raw) : [];
       logs.unshift(log);
       localStorage.setItem('lykos_login_logs', JSON.stringify(logs.slice(0, 200)));
-      // Save to Neon Postgres in background
+      // Save to Azure Postgres in background
       const baseUrl = (window.LYKOS_CONFIG && window.LYKOS_CONFIG.API_BASE_URL) || '';
       fetch(`${baseUrl}/api/save`, {
         method: 'POST',

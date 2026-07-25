@@ -1,11 +1,11 @@
 const { Pool } = require('pg');
-const { createClient } = require('@supabase/supabase-js');
 
 let pool = null;
 
 async function sql(strings, ...values) {
   if (!pool) {
-    const connectionString = process.env.NEON_URL || process.env.POSTGRES_URL;
+    const connectionString = process.env.AZURE_POSTGRES_URL || process.env.NEON_URL || process.env.POSTGRES_URL;
+    if (!connectionString) throw new Error("Postgres connection string is not configured.");
     pool = new Pool({
       connectionString,
       ssl: { rejectUnauthorized: false }
@@ -58,14 +58,14 @@ module.exports = async (req, res) => {
     });
   }
 
-  // Vercel / Neon Postgres
-  if (process.env.POSTGRES_URL) {
+  // Vercel / Azure Postgres
+  if (process.env.AZURE_POSTGRES_URL || process.env.POSTGRES_URL || process.env.NEON_URL) {
     try {
       const result = await sql`SELECT * FROM app_users WHERE LOWER(email) = ${normEmail} LIMIT 1;`;
       const user = result.rows[0];
       if (user && user.password === normPass) {
         const { password: _, ...userWithoutPassword } = user;
-        return res.status(200).json({ user: userWithoutPassword, provider: 'neon-postgres' });
+        return res.status(200).json({ user: userWithoutPassword, provider: 'azure-postgres' });
       }
       return res.status(401).json({ error: 'E-mail ou senha incorretos.' });
     } catch (e) {

@@ -1,5 +1,5 @@
 -- ============================================================================
--- LYKOS E-SPORTS - NEON / VERCEL POSTGRES ALL-IN-ONE SCRIPT
+-- LYKOS E-SPORTS - AZURE / VERCEL POSTGRES ALL-IN-ONE SCRIPT
 -- Enclosed in a single transaction block (DO $$ ... $$;)
 -- ============================================================================
 
