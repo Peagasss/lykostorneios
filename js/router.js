@@ -92,19 +92,20 @@
             }
 
             if (isRouteChange) {
-              appContainer.style.opacity = '0.3';
-              appContainer.style.transform = 'translateY(6px)';
-              appContainer.style.transition = 'opacity 0.15s ease-out, transform 0.15s ease-out';
+              window.scrollTo({ top: 0, behavior: 'instant' });
               
-              window.scrollTo({ top: 0, behavior: 'smooth' });
+              appContainer.style.opacity = '0.7';
+              appContainer.style.willChange = 'opacity';
+              appContainer.style.transition = 'opacity 0.15s ease-out';
+              
+              this.currentRoute = path;
+              this.updateActiveNavLinks(path);
+              await route.renderFunc(appContainer, params);
 
-              setTimeout(async () => {
-                this.currentRoute = path;
-                this.updateActiveNavLinks(path);
-                await route.renderFunc(appContainer, params);
+              requestAnimationFrame(() => {
                 appContainer.style.opacity = '1';
-                appContainer.style.transform = 'translateY(0)';
-              }, 40);
+                appContainer.style.willChange = 'auto';
+              });
               return;
             }
 
