@@ -187,6 +187,10 @@ async function fetchFullDataBundle(forceFresh = false) {
     try {
       const apiRes = await fetch(getApiUrl('/api/data?t=' + now));
       if (!apiRes.ok) throw new Error(`Erro HTTP ${apiRes.status}`);
+      const contentType = apiRes.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        throw new Error(`Resposta inválida do servidor (HTML retornado em vez de JSON)`);
+      }
       const data = await apiRes.json();
       if (data) {
         _cachedBundle = data;
@@ -284,7 +288,7 @@ function startRealtimePoller() {
   setInterval(async () => {
     try {
       const res = await fetch(getApiUrl('/api/data?t=' + Date.now())).catch(() => null);
-      if (res && res.ok) {
+      if (res && res.ok && (res.headers.get('content-type') || '').includes('application/json')) {
         const bundle = await res.json();
         const currentJson = JSON.stringify(bundle);
 

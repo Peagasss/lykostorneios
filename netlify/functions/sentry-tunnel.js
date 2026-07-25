@@ -19,7 +19,9 @@ exports.handler = async (event) => {
   }
 
   try {
-    const envelope = event.body;
+    const envelope = event.isBase64Encoded
+      ? Buffer.from(event.body, 'base64').toString('utf8')
+      : event.body;
     const piece = envelope.split('\n')[0];
     const header = JSON.parse(piece);
     const dsn = url.parse(header.dsn);
