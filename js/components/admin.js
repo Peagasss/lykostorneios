@@ -769,6 +769,21 @@ window.renderAdminPage = async function (container) {
               </span>
             </div>
 
+            <!-- TEXTO DA PÁGINA INICIAL -->
+            <h4 style="font-size: 0.85rem; color: var(--accent-neon); text-transform: uppercase; margin: 1.5rem 0 0.75rem;">Texto da Página Inicial (Hero)</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.5rem;">
+              <div class="form-group">
+                <label class="form-label">Título Principal (Hero)</label>
+                <input type="text" id="brand-hero-title" class="form-input" value="${data.settings.hero_title || 'SANGUE.GARRA.GLÓRIA.'}" placeholder="Ex: SANGUE.GARRA.GLÓRIA.">
+                <span class="upload-hint">Texto grande em destaque na página inicial.</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Subtítulo (Hero)</label>
+                <input type="text" id="brand-hero-subtitle" class="form-input" value="${data.settings.hero_subtitle || ''}" placeholder="Ex: A organização oficial de e-sports de alta performance.">
+                <span class="upload-hint">Texto descritivo abaixo do título principal.</span>
+              </div>
+            </div>
+
             <h4 style="font-size: 0.85rem; color: var(--accent-neon); text-transform: uppercase; margin: 1.5rem 0 0.75rem;">Logos & Ícones do Site</h4>
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
               <div class="form-group" style="background: var(--bg-dark-surface); padding: 12px; border: 1px solid var(--border-dark); border-radius: 6px;">
@@ -1971,6 +1986,8 @@ window.renderAdminPage = async function (container) {
             ...data.settings,
             team_name: container.querySelector('#brand-team-name').value,
             primary_color: container.querySelector('#brand-primary-color').value,
+            hero_title: container.querySelector('#brand-hero-title').value.trim() || data.settings.hero_title,
+            hero_subtitle: container.querySelector('#brand-hero-subtitle').value.trim() || data.settings.hero_subtitle,
             logo_url: logoUrl,
             header_logo_url: headerLogoUrl,
             favicon_url: faviconUrl,
