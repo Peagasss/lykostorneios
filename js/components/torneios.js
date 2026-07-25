@@ -7,15 +7,18 @@ window.renderTorneiosPage = async function (container) {
   const tournaments = await window.LykosDB.getCommunityTournaments();
 
   container.innerHTML = `
-    <section class="section-dark-1" style="padding-top: 130px; min-height: 80vh;">
-      <div class="container">
+    <section class="section-dark-1" style="padding-top: 130px; min-height: 80vh; position: relative; overflow: hidden;">
+      <div class="hero-glow-arc-container">
+        <div class="hero-glow-arc-bg" style="width: 700px; height: 350px; top: -140px;"></div>
+      </div>
+      <div class="container" style="position: relative; z-index: 2;">
         <h1 class="section-heading">Torneios <span>& Parcerias</span></h1>
         <p class="section-subtitle">Divulgação oficial de torneios abertos da comunidade, campeonatos parceiros e circuitos da LYKOS.</p>
 
         ${tournaments && tournaments.length > 0 ? `
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 2.5rem;">
             ${tournaments.map(t => `
-              <div style="background: var(--bg-dark-card); border: 1px solid var(--border-dark); border-radius: var(--radius-xs); overflow: hidden; display: flex; flex-direction: column;">
+              <div class="glass-card glass-card-interactive" style="overflow: hidden; display: flex; flex-direction: column;">
                 <div style="height: 160px; background-image: url('${t.banner_url || t.image_url || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80'}'); background-size: cover; background-position: center; position: relative;">
                   <span class="game-badge" style="top: 12px; left: 12px;">${t.game || 'Geral'}</span>
                   <span class="match-status-pill status-${(t.status || 'open').toLowerCase()}" style="position: absolute; top: 12px; right: 12px;">

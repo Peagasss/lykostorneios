@@ -18,17 +18,20 @@ window.renderContatoPage = async function (container) {
       ];
 
   container.innerHTML = `
-    <section class="section-dark-1" style="padding-top: 130px;">
-      <div class="container" style="max-width: 820px;">
+    <section class="section-dark-1" style="padding-top: 130px; position: relative; overflow: hidden;">
+      <div class="hero-glow-arc-container">
+        <div class="hero-glow-arc-bg" style="width: 700px; height: 350px; top: -140px;"></div>
+      </div>
+      <div class="container" style="max-width: 860px; position: relative; z-index: 2;">
         <div style="text-align: center; margin-bottom: 3rem;">
-          <h1 class="section-heading">Entre em <span>Contato</span></h1>
-          <p class="section-subtitle" style="margin: 0 auto;">
+          <h1 class="section-heading" style="font-size: 3rem;">Entre em <span>Contato</span></h1>
+          <p class="section-subtitle" style="margin: 0 auto; max-width: 650px;">
             Fale com a equipe LYKOS pelo formulário abaixo ou acesse nossas redes sociais oficiais.
           </p>
         </div>
 
         <!-- Contact Form -->
-        <div style="background: var(--bg-dark-surface); border: 1px solid var(--border-dark-strong); border-radius: var(--radius-sm); padding: 2.5rem 2rem; margin-bottom: 2.5rem;">
+        <div class="glass-card" style="padding: 2.75rem 2.25rem; border: 1px solid var(--border-dark-strong); margin-bottom: 2.5rem; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
           <h2 style="font-family: var(--font-heading); font-size: 1.5rem; color: white; margin-bottom: 1.75rem;">📩 Envie uma Mensagem</h2>
 
           <form id="lykos-contact-form" style="display: flex; flex-direction: column; gap: 1.25rem;">

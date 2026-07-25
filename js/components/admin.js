@@ -136,29 +136,29 @@ window.renderAdminPage = async function (container) {
     sessionStorage.setItem('lykos_admin_active_tab', activeTab);
 
     container.innerHTML = `
-      <section class="admin-container">
+      <section class="admin-container" style="padding-top: 100px; position: relative;">
         <div class="container">
           
-          <div class="admin-header">
+          <div class="admin-header glass-card" style="padding: 1.5rem 2rem; border: 1px solid var(--border-dark-strong); margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
             <div>
-              <h1 style="font-size: 1.8rem;">Painel de Gestão <span>LYKOS</span></h1>
-              <p style="color: var(--text-muted-light); font-size: 0.85rem;">Área administrativa oficial de e-sports.</p>
+              <h1 style="font-family: var(--font-heading); font-size: 1.8rem; font-weight: 800; color: #ffffff;">PAINEL DE GESTÃO <span style="color: var(--accent-neon);">LYKOS</span></h1>
+              <p style="color: var(--text-muted-light); font-size: 0.85rem; margin-top: 2px;">Área administrativa oficial de e-sports.</p>
             </div>
 
-            <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 1.25rem;">
               <div style="text-align: right;">
-                <div style="font-weight: 700; font-size: 0.85rem; color: white;">${currentUser.fullName || currentUser.email}</div>
-                <span style="background: rgba(157,80,255,0.15); border: 1px solid var(--border-dark-strong); color: var(--accent-neon); font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">
-                  PERMISSÃO: ${currentUser.is_master ? 'ADMIN MASTER (NÍVEL MAIS ALTO)' : 'PERSONALIZADA'}
+                <div style="font-weight: 700; font-size: 0.88rem; color: white;">${currentUser.fullName || currentUser.email}</div>
+                <span style="background: rgba(168, 85, 247, 0.15); border: 1px solid var(--border-dark-strong); color: var(--accent-neon); font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: var(--radius-xs); text-transform: uppercase;">
+                  ${currentUser.is_master ? 'ADMIN MASTER' : 'PERSONALIZADO'}
                 </span>
               </div>
-              <button id="admin-logout-btn" class="btn-secondary" style="padding: 6px 14px; font-size: 0.78rem;">Sair</button>
+              <button id="admin-logout-btn" class="btn-secondary" style="padding: 8px 16px; font-size: 0.78rem;">Sair</button>
             </div>
           </div>
 
           <div class="admin-layout-grid">
             
-            <div class="admin-sidebar-nav">
+            <div class="admin-sidebar-nav glass-card" style="padding: 1rem; border: 1px solid var(--border-dark-strong);">
               ${hasPermission('partidas') ? `<button class="admin-nav-item ${activeTab === 'partidas' ? 'active' : ''}" data-tab="partidas">Partidas & Súmulas</button>` : ''}
               ${hasPermission('torneios') ? `<button class="admin-nav-item ${activeTab === 'torneios' ? 'active' : ''}" data-tab="torneios">Torneios (Divulgação)</button>` : ''}
               ${hasPermission('elenco') ? `<button class="admin-nav-item ${activeTab === 'elenco' ? 'active' : ''}" data-tab="elenco">Elenco Pro-Players</button>` : ''}
