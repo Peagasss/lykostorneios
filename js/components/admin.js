@@ -5,7 +5,7 @@
 
 window.renderAdminPage = async function (container) {
   let currentUser = window.LykosAuth.getCurrentUser();
-  let activeTab = 'partidas';
+  let activeTab = sessionStorage.getItem('lykos_admin_active_tab') || 'partidas';
   let pendingDeleteAction = null;
 
   if (!currentUser) {
@@ -204,6 +204,7 @@ window.renderAdminPage = async function (container) {
     container.querySelectorAll('.admin-nav-item').forEach(btn => {
       btn.onclick = () => {
         activeTab = btn.getAttribute('data-tab');
+        sessionStorage.setItem('lykos_admin_active_tab', activeTab);
 
         // Update active state on sidebar buttons
         container.querySelectorAll('.admin-nav-item').forEach(b => b.classList.remove('active'));
