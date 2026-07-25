@@ -223,7 +223,8 @@ function startRealtimePoller() {
           { key: 'gallery', storage: 'lykos_gallery' },
           { key: 'social', storage: 'lykos_social' },
           { key: 'recentTournaments', storage: 'lykos_recent_tournaments' },
-          { key: 'communityTournaments', storage: 'lykos_community_tournaments' }
+          { key: 'communityTournaments', storage: 'lykos_community_tournaments' },
+          { key: 'loginLogs', storage: 'lykos_login_logs' }
         ];
 
         syncMap.forEach(item => {
@@ -625,19 +626,6 @@ window.LykosDB = {
   },
 
   async getLoginLogs() {
-    // Fetch from Neon Postgres (backend) for real cross-device logs
-    try {
-      const baseUrl = (window.LYKOS_CONFIG && window.LYKOS_CONFIG.API_BASE_URL) || '';
-      const res = await fetch(`${baseUrl}/api/data`).catch(() => null);
-      if (res && res.ok) {
-        const bundle = await res.json();
-        if (bundle.loginLogs && bundle.loginLogs.length > 0) {
-          localStorage.setItem('lykos_login_logs', JSON.stringify(bundle.loginLogs));
-          return bundle.loginLogs;
-        }
-      }
-    } catch (e) {}
-    // Fallback to local logs
     const raw = localStorage.getItem('lykos_login_logs');
     return safeParse(raw, []);
   },

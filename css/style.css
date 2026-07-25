@@ -620,7 +620,7 @@ input[type="file"]::-webkit-file-upload-button:hover {
 
 .team-box { display: flex; align-items: center; gap: 1.25rem; }
 .team-box.away { flex-direction: row-reverse; text-align: right; }
-.team-logo-img { width: 56px; height: 56px; object-fit: contain; }
+.team-logo-img { width: 56px; height: 56px; object-fit: contain; border-radius: 10px; background: rgba(255,255,255,0.04); }
 .team-name { font-family: var(--font-heading); font-size: 1.35rem; font-weight: 700; color: var(--text-light); }
 .match-vs-center { text-align: center; }
 
