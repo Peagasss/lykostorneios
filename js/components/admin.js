@@ -530,6 +530,16 @@ window.renderAdminPage = async function (container) {
             </div>
 
             <div class="form-group">
+              <label class="form-label">Biografia & Liderança</label>
+              <textarea id="staff-bio" class="form-textarea" rows="2" placeholder="Biografia e trajetória do membro da comissão técnica..."></textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group"><label class="form-label">Link do Perfil no X (Twitter)</label><input type="url" id="staff-social-x" class="form-input" placeholder="https://x.com/..."></div>
+              <div class="form-group"><label class="form-label">Link do Instagram</label><input type="url" id="staff-social-instagram" class="form-input" placeholder="https://instagram.com/..."></div>
+            </div>
+
+            <div class="form-group">
               <label class="form-label">Foto do Membro da Staff (Upload PC)</label>
               <input type="file" id="staff-file" class="form-input" accept="image/*">
               <span class="upload-hint">Tamanho recomendado: 400x400px (Quadrado 1:1, JPG/PNG)</span>
@@ -1459,6 +1469,9 @@ window.renderAdminPage = async function (container) {
             nickname: container.querySelector('#staff-nickname').value || '',
             role: container.querySelector('#staff-role').value,
             game: container.querySelector('#staff-game').value || 'Geral',
+            bio: container.querySelector('#staff-bio') ? container.querySelector('#staff-bio').value : '',
+            social_x: container.querySelector('#staff-social-x') ? container.querySelector('#staff-social-x').value : '',
+            social_instagram: container.querySelector('#staff-social-instagram') ? container.querySelector('#staff-social-instagram').value : '',
             photo_url: photoUrl
           });
           renderDashboard();
@@ -1483,6 +1496,14 @@ window.renderAdminPage = async function (container) {
               <div class="form-group"><label class="form-label">Cargo / Função</label><input type="text" id="pop-st-role" class="form-input" value="${st.role}" required></div>
               <div class="form-group"><label class="form-label">Modalidade / Setor</label><input type="text" id="pop-st-game" class="form-input" value="${st.game || 'Geral'}"></div>
             </div>
+            <div class="form-group">
+              <label class="form-label">Biografia & Liderança</label>
+              <textarea id="pop-st-bio" class="form-textarea" rows="2">${st.bio || ''}</textarea>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group"><label class="form-label">Link do Perfil no X (Twitter)</label><input type="url" id="pop-st-x" class="form-input" value="${st.social_x || ''}"></div>
+              <div class="form-group"><label class="form-label">Link do Instagram</label><input type="url" id="pop-st-insta" class="form-input" value="${st.social_instagram || ''}"></div>
+            </div>
             <div class="form-group"><label class="form-label">Foto do Membro da Staff (Upload PC)</label><input type="file" id="pop-st-file" class="form-input" accept="image/*"></div>
             <div style="display: flex; gap: 10px; margin-top: 1rem;">
               <button type="submit" class="btn-primary" style="flex: 1;">Atualizar Staff &rarr;</button>
@@ -1499,11 +1520,14 @@ window.renderAdminPage = async function (container) {
           }
 
           await window.LykosDB.saveStaff({
-            ...st,
+            id: st.id,
             name: form.querySelector('#pop-st-name').value,
-            nickname: form.querySelector('#pop-st-nick').value,
+            nickname: form.querySelector('#pop-st-nick').value || '',
             role: form.querySelector('#pop-st-role').value,
-            game: form.querySelector('#pop-st-game').value,
+            game: form.querySelector('#pop-st-game').value || 'Geral',
+            bio: form.querySelector('#pop-st-bio') ? form.querySelector('#pop-st-bio').value : '',
+            social_x: form.querySelector('#pop-st-x') ? form.querySelector('#pop-st-x').value : '',
+            social_instagram: form.querySelector('#pop-st-insta') ? form.querySelector('#pop-st-insta').value : '',
             photo_url: photoUrl
           });
         });

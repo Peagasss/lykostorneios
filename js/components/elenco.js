@@ -83,12 +83,13 @@ window.renderElencoPage = async function (container) {
 
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.75rem;">
             ${staffMembers && staffMembers.length > 0 ? [...staffMembers].sort((a,b) => (a.sort_order || 0) - (b.sort_order || 0)).map(st => `
-              <div class="glass-card" style="padding: 1.25rem; display: flex; align-items: center; gap: 1.25rem; border: 1px solid var(--border-dark-strong);">
+              <div class="glass-card glass-card-interactive staff-card" data-id="${st.id}" style="padding: 1.25rem; display: flex; align-items: center; gap: 1.25rem; border: 1px solid var(--border-dark-strong); cursor: pointer;">
                 <img src="${st.photo_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}" alt="${st.name}" style="width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-neon); box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); flex-shrink: 0;">
                 <div>
                   <span class="game-badge" style="position: static; font-size: 0.68rem; padding: 2px 8px; font-family: var(--font-tech);">${st.game || 'Staff'}</span>
                   <div style="font-family: var(--font-heading); font-weight: 800; font-size: 1.15rem; color: #ffffff; margin-top: 4px; line-height: 1.2;">${st.nickname ? st.nickname + ' (' + st.name + ')' : st.name}</div>
                   <div style="font-family: var(--font-tech); font-size: 0.85rem; color: var(--accent-neon); font-weight: 700; letter-spacing: 0.06em; margin-top: 2px;">${st.role}</div>
+                  <div style="font-size: 0.72rem; color: var(--text-muted-light); margin-top: 4px;">Ver Perfil &rarr;</div>
                 </div>
               </div>
             `).join('') : `
@@ -169,6 +170,37 @@ window.renderElencoPage = async function (container) {
           <div style="display: flex; gap: 12px; border-top: 1px solid var(--border-dark); padding-top: 1rem;">
             ${player.social_x ? `<a href="${player.social_x}" target="_blank" class="btn-secondary" style="padding: 6px 14px; font-size: 0.75rem;">Perfil no X</a>` : ''}
             ${player.social_instagram ? `<a href="${player.social_instagram}" target="_blank" class="btn-secondary" style="padding: 6px 14px; font-size: 0.75rem;">Instagram</a>` : ''}
+          </div>
+        `;
+
+        modal.style.display = 'flex';
+      };
+    });
+
+    container.querySelectorAll('.staff-card').forEach(card => {
+      card.onclick = async () => {
+        const id = card.getAttribute('data-id');
+        const st = staffMembers.find(s => String(s.id) === String(id));
+        if (!st) return;
+
+        modalBody.innerHTML = `
+          <div style="display: flex; gap: 1.5rem; align-items: start; margin-bottom: 1.5rem; flex-wrap: wrap;">
+            <img src="${st.photo_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}" alt="${st.name}" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-neon);">
+            <div style="flex: 1;">
+              <span class="game-badge" style="position: static; margin-bottom: 6px; display: inline-block;">${st.game || 'Comissão Técnica'}</span>
+              <h2 style="font-family: var(--font-heading); font-size: 1.8rem; color: var(--text-light); line-height: 1.1;">${st.nickname ? st.nickname + ' (' + st.name + ')' : st.name}</h2>
+              <div style="color: var(--accent-neon); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; margin-top: 4px;">${st.role}</div>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 1.5rem;">
+            <h4 style="font-size: 0.85rem; color: var(--text-muted-light); text-transform: uppercase; margin-bottom: 6px;">Biografia & Liderança</h4>
+            <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-light);">${st.bio || 'Membro oficial da comissão técnica da LYKOS.'}</p>
+          </div>
+
+          <div style="display: flex; gap: 12px; border-top: 1px solid var(--border-dark); padding-top: 1rem;">
+            ${st.social_x ? `<a href="${st.social_x}" target="_blank" class="btn-secondary" style="padding: 6px 14px; font-size: 0.75rem;">Perfil no X</a>` : ''}
+            ${st.social_instagram ? `<a href="${st.social_instagram}" target="_blank" class="btn-secondary" style="padding: 6px 14px; font-size: 0.75rem;">Instagram</a>` : ''}
           </div>
         `;
 

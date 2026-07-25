@@ -1,105 +1,80 @@
-/* ==========================================================================
-   LYKOS E-SPORTS - GALERIA COMPONENT (Serious Minimalist Design)
-   ========================================================================== */
-
 window.renderGaleriaPage = async function (container) {
-  const galleryItems = await window.LykosDB.getGallery();
-
-  function renderGalleryGrid(categoryFilter) {
-    const filtered = categoryFilter === 'ALL'
-      ? galleryItems
-      : galleryItems.filter(item => item.category === categoryFilter);
-
-    if (filtered.length === 0) {
-      return `<div style="grid-column: 1/-1; padding: 3rem; text-align: center; color: var(--text-muted-light);">Nenhuma imagem cadastrada nesta categoria.</div>`;
-    }
-
-    return filtered.map(item => `
-      <div class="gallery-card" data-id="${item.id}">
-        <img src="${item.image_url}" alt="${item.title}">
-        <div class="gallery-overlay">
-          <span class="gallery-tag">${item.category}</span>
-          <h3 class="gallery-title">${item.title}</h3>
-        </div>
-      </div>
-    `).join('');
-  }
+  const [galleryItems, socialFeeds] = await Promise.all([
+    window.LykosDB.getGallery(),
+    window.LykosDB.getSocialFeeds()
+  ]);
 
   container.innerHTML = `
     <section class="section-dark-1" style="padding-top: 130px; position: relative; overflow: hidden;">
       <div class="hero-glow-arc-container">
-        <div class="hero-glow-arc-bg" style="width: 700px; height: 350px; top: -140px;"></div>
+        <div class="hero-glow-arc-bg" style="width: 800px; height: 380px; top: -140px;"></div>
       </div>
+
       <div class="container" style="position: relative; z-index: 2;">
-        <h1 class="section-heading">Galeria de <span>Fotos</span></h1>
-        <p class="section-subtitle">Reviva os bastidores, palcos de campeonatos e a energia contagiante da alcateia LYKOS.</p>
-
-        <div style="display: flex; gap: 8px; margin-bottom: 2.25rem; flex-wrap: wrap;">
-          <button class="btn-primary cat-btn active" data-cat="ALL" style="padding: 8px 20px; border-radius: var(--radius-xs); box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);">Todas</button>
-          <button class="btn-secondary cat-btn" data-cat="Campeonatos" style="padding: 8px 20px; border-radius: var(--radius-xs);">Campeonatos</button>
-          <button class="btn-secondary cat-btn" data-cat="Bastidores" style="padding: 8px 20px; border-radius: var(--radius-xs);">Bastidores</button>
-          <button class="btn-secondary cat-btn" data-cat="Eventos" style="padding: 8px 20px; border-radius: var(--radius-xs);">Eventos</button>
+        <div style="text-align: center; max-width: 800px; margin: 0 auto 3rem auto;">
+          <div class="section-title-badge" style="margin-bottom: 1rem;">HUB OFICIAL DE NOTÍCIAS & MÍDIAS</div>
+          <h1 class="section-heading" style="font-size: 3.2rem;">PORTAL <span>LYKOS NEWS</span></h1>
+          <p class="section-subtitle" style="margin: 0 auto; color: var(--text-muted-light);">
+            Fique por dentro das últimas notícias da organização, bastidores exclusivos e publicações oficiais.
+          </p>
         </div>
 
-        <div class="gallery-grid" id="gallery-grid-container">
-          ${renderGalleryGrid('ALL')}
+        <!-- NOTÍCIAS & FOTOS / MÍDIAS -->
+        <h2 style="font-family: var(--font-heading); font-size: 1.6rem; color: #ffffff; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
+          📰 Notícias & Registros de Mídia
+        </h2>
+
+        <div class="gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.75rem; margin-bottom: 4rem;">
+          ${galleryItems && galleryItems.length > 0 ? galleryItems.map(item => `
+            <div class="glass-card glass-card-interactive" style="border: 1px solid var(--border-dark-strong); display: flex; flex-direction: column; overflow: hidden;">
+              <div style="height: 200px; overflow: hidden; position: relative;">
+                <span class="game-badge" style="top: 12px; left: 12px; font-family: var(--font-tech);">${item.category || 'Notícia'}</span>
+                <img src="${item.image_url}" alt="${item.title}" style="width: 100%; height: 100%; object-fit: cover; transition: var(--transition-smooth);">
+              </div>
+              <div style="padding: 1.5rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                  <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 800; color: #ffffff; margin-bottom: 8px;">${item.title}</h3>
+                  <p style="font-size: 0.85rem; color: var(--text-muted-light); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                    ${item.description || 'Sem texto adicional cadastrado.'}
+                  </p>
+                </div>
+                <div style="margin-top: 1.25rem; font-size: 0.78rem; color: var(--accent-neon); font-weight: 700; text-transform: uppercase;">
+                  Publicação Oficial LYKOS &rarr;
+                </div>
+              </div>
+            </div>
+          `).join('') : `
+            <div style="grid-column: 1/-1; padding: 3rem; text-align: center; color: var(--text-muted-light);">Nenhuma notícia cadastrada no momento.</div>
+          `}
         </div>
+
+        <!-- REDES SOCIAIS & EMBEDS -->
+        ${socialFeeds && socialFeeds.length > 0 ? `
+          <h2 style="font-family: var(--font-heading); font-size: 1.6rem; color: #ffffff; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
+            🔥 Feed & Posts Oficiais das Redes Sociais
+          </h2>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.75rem;">
+            ${socialFeeds.map(feed => `
+              <div class="glass-card" style="padding: 1.5rem; border: 1px solid var(--border-dark-strong);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                  <span class="social-platform-badge" style="font-family: var(--font-tech); font-size: 0.78rem; font-weight: 700; color: var(--accent-neon); background: rgba(168,85,247,0.15); padding: 4px 12px; border-radius: var(--radius-xs); border: 1px solid var(--border-dark-strong);">
+                    ${feed.platform}
+                  </span>
+                  ${feed.post_url ? `<a href="${feed.post_url}" target="_blank" style="font-size: 0.78rem; color: var(--accent-neon); font-weight: 700;">Ver no ${feed.platform} &rarr;</a>` : ''}
+                </div>
+                <h4 style="font-family: var(--font-heading); font-size: 1.1rem; color: white; margin-bottom: 1rem;">${feed.title}</h4>
+                <div style="border-radius: var(--radius-xs); overflow: hidden; background: #000;">
+                  ${feed.embed_url ? `<iframe src="${feed.embed_url}" width="100%" height="380" frameborder="0" scrolling="no" allowtransparency="true" style="border: none;"></iframe>` : ''}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+
       </div>
     </section>
-
-    <div id="lightbox-modal" class="modal-backdrop" style="display: none;">
-      <div class="modal-content" style="max-width: 680px;">
-        <button class="modal-close" id="lightbox-close">&times;</button>
-        <div class="lightbox-body" id="lightbox-content" style="text-align: center;">
-        </div>
-      </div>
-    </div>
   `;
+};
 
-  const catBtns = container.querySelectorAll('.cat-btn');
-  const gridContainer = container.querySelector('#gallery-grid-container');
-
-  catBtns.forEach(btn => {
-    btn.onclick = () => {
-      catBtns.forEach(b => {
-        b.classList.remove('btn-primary', 'active');
-        b.classList.add('btn-secondary');
-      });
-      btn.classList.remove('btn-secondary');
-      btn.classList.add('btn-primary', 'active');
-
-      const category = btn.getAttribute('data-cat');
-      gridContainer.innerHTML = renderGalleryGrid(category);
-      setupLightboxEvents();
-    };
-  });
-
-  const modal = container.querySelector('#lightbox-modal');
-  const modalContent = container.querySelector('#lightbox-content');
-  const modalClose = container.querySelector('#lightbox-close');
-
-  function setupLightboxEvents() {
-    container.querySelectorAll('.gallery-card').forEach(card => {
-      card.onclick = () => {
-        const id = card.getAttribute('data-id');
-        const item = galleryItems.find(g => g.id === id);
-        if (!item) return;
-
-        modalContent.innerHTML = `
-          <img src="${item.image_url}" alt="${item.title}" style="max-width: 100%; max-height: 55vh; border-radius: var(--radius-xs); margin-bottom: 1rem; border: 1px solid var(--border-dark);">
-          <span class="gallery-tag" style="margin: 0 auto 8px;">${item.category}</span>
-          <h3 style="font-family: var(--font-heading); font-size: 1.4rem; color: white; margin-bottom: 8px;">${item.title}</h3>
-          <p style="color: var(--text-muted-light); font-size: 0.9rem; line-height: 1.6;">${item.description || 'Fotografia oficial da LYKOS E-Sports.'}</p>
-        `;
-        modal.style.display = 'flex';
-      };
-    });
-  }
-
-  modalClose.onclick = () => modal.style.display = 'none';
-  modal.onclick = (e) => {
-    if (e.target === modal) modal.style.display = 'none';
-  };
-
-  setupLightboxEvents();
 };

@@ -14,6 +14,9 @@ window.renderHeader = async function () {
 
   const showTorneios = settings.show_tournaments_tab === true;
 
+  const matches = await window.LykosDB.getMatches().catch(() => []);
+  const hasLiveMatch = matches.some(m => (m.status || '').toUpperCase() === 'LIVE');
+
   headerContainer.innerHTML = `
     <header class="site-header" style="position: fixed; top: 12px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 1240px; border-radius: 20px; z-index: 1000; background: rgba(10, 8, 20, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(168, 85, 247, 0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
       <div class="container nav-container" style="display: flex; align-items: center; justify-content: space-between; height: 68px; padding: 0 1.5rem;">
@@ -34,8 +37,13 @@ window.renderHeader = async function () {
           <li><a href="/" class="nav-link" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em;">Home</a></li>
           <li><a href="/sobre" class="nav-link" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em;">Sobre</a></li>
           <li><a href="/elenco" class="nav-link" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em;">Elenco</a></li>
-          <li><a href="/partidas" class="nav-link" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em;">Partidas</a></li>
-          <li><a href="/galeria" class="nav-link" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em;">Galeria</a></li>
+          <li>
+            <a href="/partidas" class="nav-link" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em; display: inline-flex; align-items: center; gap: 6px;">
+              Partidas
+              ${hasLiveMatch ? `<span class="btn-live" style="padding: 2px 8px; font-size: 0.65rem; border-radius: 4px; box-shadow: 0 0 10px rgba(230, 57, 70, 0.6);">🔴 AO VIVO</span>` : ''}
+            </a>
+          </li>
+          <li><a href="/galeria" class="nav-link" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em;">Mídias & News</a></li>
           ${showTorneios ? `<li><a href="/torneios" class="nav-link" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em;">Torneios</a></li>` : ''}
           <li><a href="/contato" class="nav-link" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em;">Contato</a></li>
           <li>
