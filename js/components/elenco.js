@@ -17,22 +17,29 @@ window.renderElencoPage = async function (container) {
     filtered = [...filtered].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
 
     if (filtered.length === 0) {
-      return `<div style="grid-column: 1/-1; padding: 3rem; text-align: center; color: var(--text-muted-light);">Nenhum jogador cadastrado nesta modalidade.</div>`;
+      return `<div style="grid-column: 1/-1; padding: 4rem; text-align: center; color: var(--text-muted-light);">Nenhum atleta cadastrado nesta categoria.</div>`;
     }
 
     return filtered.map(player => `
-      <div class="glass-card glass-card-interactive player-card" data-id="${player.id}" style="padding: 1.25rem;">
-        <div class="player-image-wrap" style="border-radius: var(--radius-sm); overflow: hidden;">
-          <span class="game-badge">${player.game}</span>
-          <img src="${player.photo_url}" alt="${player.nickname}">
+      <div class="glass-card glass-card-interactive player-card float-effect" data-id="${player.id}" style="border: 1px solid var(--border-dark-strong); padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+        <div class="player-image-wrap" style="height: 340px; position: relative; background: radial-gradient(circle at 50% 30%, rgba(168, 85, 247, 0.25) 0%, rgba(10, 8, 20, 0.95) 75%); overflow: hidden;">
+          <span class="game-badge" style="top: 14px; right: 14px; background: rgba(10, 8, 20, 0.85); border: 1px solid var(--border-dark-strong); color: var(--accent-neon); font-family: var(--font-tech); font-size: 0.82rem; font-weight: 700; padding: 4px 12px; border-radius: var(--radius-xs); letter-spacing: 0.08em;">${player.game}</span>
+          <img src="${player.photo_url}" alt="${player.nickname}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: var(--transition-smooth); filter: contrast(1.05);">
+          
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 100px; background: linear-gradient(to top, rgba(6, 5, 12, 1) 0%, transparent 100%);"></div>
         </div>
-        <div class="player-info" style="padding-top: 1rem;">
-          <div class="player-role">${player.role}</div>
-          <div class="player-nickname" style="font-size: 1.35rem; color: #ffffff;">${player.nickname}</div>
-          <div class="player-fullname">${player.name}</div>
-          <p class="player-bio" style="font-size: 0.82rem; margin-top: 6px;">${player.bio || ''}</p>
-          <div style="font-size: 0.78rem; color: var(--accent-neon); font-weight: 700; margin-top: 12px; text-transform: uppercase; letter-spacing: 0.05em;">
-            Ver Ficha & Periféricos &rarr;
+
+        <div class="player-info" style="padding: 1.5rem; background: rgba(14, 11, 26, 0.9); flex: 1; display: flex; flex-direction: column; justify-content: space-between; border-top: 1px solid var(--border-dark);">
+          <div>
+            <div class="player-role" style="font-family: var(--font-tech); font-size: 0.85rem; font-weight: 700; color: var(--accent-neon); letter-spacing: 0.1em; text-transform: uppercase;">${player.role}</div>
+            <div class="player-nickname" style="font-family: var(--font-heading); font-size: 1.8rem; font-weight: 800; color: #ffffff; margin-top: 2px; line-height: 1.1;">${player.nickname}</div>
+            <div class="player-fullname" style="font-size: 0.85rem; color: var(--text-muted-light); margin-top: 4px;">${player.name}</div>
+            <p class="player-bio" style="font-size: 0.84rem; color: var(--text-muted-light); margin-top: 10px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${player.bio || ''}</p>
+          </div>
+
+          <div style="margin-top: 1.25rem; padding-top: 0.85rem; border-top: 1px solid var(--border-dark); display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-family: var(--font-tech); font-size: 0.85rem; font-weight: 700; color: var(--accent-neon); letter-spacing: 0.06em;">SPEC & SETUP</span>
+            <span class="btn-primary" style="padding: 6px 14px; font-size: 0.75rem; border-radius: var(--radius-xs);">Ficha Técnica &rarr;</span>
           </div>
         </div>
       </div>
@@ -40,41 +47,52 @@ window.renderElencoPage = async function (container) {
   }
 
   container.innerHTML = `
-    <section class="section-dark-1" style="padding-top: 130px;">
-      <div class="container">
-        <h1 class="section-heading">Elenco <span>LYKOS</span></h1>
-        <p class="section-subtitle">Conheça os pro-players das nossas modalidades competitivas.</p>
+    <section class="section-dark-1" style="padding-top: 130px; position: relative; overflow: hidden;">
+      <div class="hero-glow-arc-container">
+        <div class="hero-glow-arc-bg" style="width: 850px; height: 420px; top: -160px;"></div>
+        <div class="hero-glow-arc-line" style="width: 800px; height: 350px; top: -130px;"></div>
+      </div>
 
-        <div style="display: flex; gap: 8px; margin-bottom: 2.25rem; flex-wrap: wrap;" id="modality-tabs-container">
-          <button class="btn-primary filter-btn active" data-filter="ALL" style="padding: 6px 18px; border-radius: 4px;">Todos</button>
+      <div class="container" style="position: relative; z-index: 2;">
+        <div style="text-align: center; max-width: 800px; margin: 0 auto 3rem auto;">
+          <div class="section-title-badge" style="margin-bottom: 1rem;">PRO ROSTER & LINEUPS</div>
+          <h1 class="section-heading" style="font-size: 3.5rem; font-weight: 800;">ALCATEIA DE <span>ELITE</span></h1>
+          <p class="section-subtitle" style="margin: 0 auto; font-size: 1.1rem; color: var(--text-muted-light);">Pro-players de alto rendimento representando a LYKOS nas arenas mundiais.</p>
+        </div>
+
+        <!-- CATEGORY MODALITY TABS -->
+        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 3rem; flex-wrap: wrap;" id="modality-tabs-container">
+          <button class="btn-primary filter-btn active" data-filter="ALL" style="padding: 10px 24px; font-size: 0.85rem; border-radius: var(--radius-xs); box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);">Todos os Atletas</button>
           ${modalities.map(mod => `
-            <button class="btn-secondary filter-btn" data-filter="${mod.name}" style="padding: 6px 18px; border-radius: 4px;">
+            <button class="btn-secondary filter-btn" data-filter="${mod.name}" style="padding: 10px 24px; font-size: 0.85rem; border-radius: var(--radius-xs);">
               ${mod.name}
             </button>
           `).join('')}
         </div>
 
-        <div class="roster-grid" id="roster-container">
+        <div class="roster-grid" id="roster-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 2rem;">
           ${renderRosterGrid('ALL')}
         </div>
 
         <!-- COMISSÃO TÉCNICA & DIRETORIA -->
-        <div style="margin-top: 5rem; border-top: 1px solid var(--border-dark); padding-top: 3rem;">
-          <h2 class="section-heading" style="font-size: 1.8rem;">Comissão Técnica & <span>Diretoria</span></h2>
-          <p class="section-subtitle">A equipe por trás da estratégia, preparação física e liderança da organização.</p>
+        <div style="margin-top: 6rem; border-top: 1px solid var(--border-dark-strong); padding-top: 4rem;">
+          <div style="text-align: center; margin-bottom: 3rem;">
+            <h2 class="section-heading" style="font-size: 2.2rem;">COMISSÃO TÉCNICA <span>& DIREÇÃO</span></h2>
+            <p class="section-subtitle" style="margin: 0 auto; max-width: 650px;">A liderança estratégica e suporte de alta performance nos bastidores.</p>
+          </div>
 
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.75rem;">
             ${staffMembers && staffMembers.length > 0 ? [...staffMembers].sort((a,b) => (a.sort_order || 0) - (b.sort_order || 0)).map(st => `
-              <div style="background: var(--bg-dark-card); border: 1px solid var(--border-dark); border-radius: var(--radius-xs); overflow: hidden; display: flex; align-items: center; padding: 1rem; gap: 1rem;">
-                <img src="${st.photo_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}" alt="${st.name}" style="width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-neon);">
+              <div class="glass-card" style="padding: 1.25rem; display: flex; align-items: center; gap: 1.25rem; border: 1px solid var(--border-dark-strong);">
+                <img src="${st.photo_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}" alt="${st.name}" style="width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-neon); box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); flex-shrink: 0;">
                 <div>
-                  <span class="game-badge" style="position: static; font-size: 0.65rem; padding: 2px 6px;">${st.game || 'Staff'}</span>
-                  <div style="font-family: var(--font-heading); font-weight: 700; font-size: 1.1rem; color: white; margin-top: 4px;">${st.nickname ? st.nickname + ' (' + st.name + ')' : st.name}</div>
-                  <div style="font-size: 0.8rem; color: var(--accent-neon); font-weight: 700;">${st.role}</div>
+                  <span class="game-badge" style="position: static; font-size: 0.68rem; padding: 2px 8px; font-family: var(--font-tech);">${st.game || 'Staff'}</span>
+                  <div style="font-family: var(--font-heading); font-weight: 800; font-size: 1.15rem; color: #ffffff; margin-top: 4px; line-height: 1.2;">${st.nickname ? st.nickname + ' (' + st.name + ')' : st.name}</div>
+                  <div style="font-family: var(--font-tech); font-size: 0.85rem; color: var(--accent-neon); font-weight: 700; letter-spacing: 0.06em; margin-top: 2px;">${st.role}</div>
                 </div>
               </div>
             `).join('') : `
-              <div style="color: var(--text-muted-light); font-size: 0.85rem;">Membros da comissão técnica em atualização.</div>
+              <div style="color: var(--text-muted-light); font-size: 0.85rem; text-align: center; grid-column: 1/-1;">Membros da comissão técnica em atualização.</div>
             `}
           </div>
         </div>
