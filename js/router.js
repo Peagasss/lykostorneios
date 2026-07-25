@@ -92,21 +92,7 @@
             }
 
             if (isRouteChange) {
-              window.scrollTo({ top: 0, behavior: 'instant' });
-              
-              appContainer.style.opacity = '0.7';
-              appContainer.style.willChange = 'opacity';
-              appContainer.style.transition = 'opacity 0.15s ease-out';
-              
-              this.currentRoute = path;
-              this.updateActiveNavLinks(path);
-              await route.renderFunc(appContainer, params);
-
-              requestAnimationFrame(() => {
-                appContainer.style.opacity = '1';
-                appContainer.style.willChange = 'auto';
-              });
-              return;
+              window.scrollTo(0, 0);
             }
 
             this.currentRoute = path;
