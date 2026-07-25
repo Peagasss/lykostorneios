@@ -254,43 +254,6 @@ if (typeof window !== 'undefined') {
   }
 }
 
-async function saveSupabaseAndLocal(tableName, storageKey, fullList, singleItem) {
-  localStorage.setItem(storageKey, JSON.stringify(fullList));
-  if (singleItem) {
-    try {
-      const apiRes = await fetch(getApiUrl('/api/save'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ entity: tableName, item: singleItem })
-      });
-      if (!apiRes.ok) {
-        const errData = await apiRes.json().catch(() => ({}));
-        throw new Error(errData.error || `Erro HTTP ${apiRes.status}`);
-      }
-    } catch (e) {
-      console.error(`[LykosDB] Save error for ${tableName}:`, e);
-      throw new Error(`Falha ao salvar no banco de dados remoto: ${e.message}`);
-    }
-  }
-}
-
-async function deleteSupabaseAndLocal(tableName, storageKey, fullList, itemId) {
-  localStorage.setItem(storageKey, JSON.stringify(fullList));
-  if (itemId) {
-    (async () => {
-      try {
-        await fetch(getApiUrl('/api/delete'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ entity: tableName, id: itemId })
-        }).catch(() => null);
-      } catch (e) {
-        console.warn(`[LykosDB] Delete error for ${tableName}:`, e);
-      }
-    })();
-  }
-}
-
 window.LykosDB = {
   getTheme() {
     return localStorage.getItem('lykos_theme') || 'dark';
@@ -302,7 +265,7 @@ window.LykosDB = {
   },
 
   async getSettings() {
-    return fetchSupabaseOrLocal('site_settings', 'lykos_settings', DEFAULT_SETTINGS);
+    return fetchDatabaseOrLocal('site_settings', 'lykos_settings', DEFAULT_SETTINGS);
   },
   async saveSettings(settings) {
     const rawLocal = localStorage.getItem('lykos_settings');
@@ -338,7 +301,7 @@ window.LykosDB = {
   },
 
   async getModalities() {
-    return fetchSupabaseOrLocal('modalities', 'lykos_modalities', DEFAULT_MODALITIES);
+    return fetchDatabaseOrLocal('modalities', 'lykos_modalities', DEFAULT_MODALITIES);
   },
   async saveModality(modality) {
     const modalities = await this.getModalities();
@@ -349,17 +312,17 @@ window.LykosDB = {
       modality.id = 'mod_' + Date.now();
       modalities.push(modality);
     }
-    await saveSupabaseAndLocal('modalities', 'lykos_modalities', modalities, modality);
+    await saveDatabaseAndLocal('modalities', 'lykos_modalities', modalities, modality);
     return modality;
   },
   async deleteModality(id) {
     let modalities = await this.getModalities();
     modalities = modalities.filter(m => String(m.id) !== String(id));
-    await deleteSupabaseAndLocal('modalities', 'lykos_modalities', modalities, id);
+    await deleteDatabaseAndLocal('modalities', 'lykos_modalities', modalities, id);
   },
 
   async getRoster() {
-    return fetchSupabaseOrLocal('roster', 'lykos_roster', DEFAULT_ROSTER);
+    return fetchDatabaseOrLocal('roster', 'lykos_roster', DEFAULT_ROSTER);
   },
   async getPlayerById(id) {
     const roster = await this.getRoster();
@@ -374,17 +337,17 @@ window.LykosDB = {
       player.id = 'p_' + Date.now();
       roster.push(player);
     }
-    await saveSupabaseAndLocal('roster', 'lykos_roster', roster, player);
+    await saveDatabaseAndLocal('roster', 'lykos_roster', roster, player);
     return player;
   },
   async deletePlayer(id) {
     let roster = await this.getRoster();
     roster = roster.filter(p => String(p.id) !== String(id));
-    await deleteSupabaseAndLocal('roster', 'lykos_roster', roster, id);
+    await deleteDatabaseAndLocal('roster', 'lykos_roster', roster, id);
   },
 
   async getStaff() {
-    return fetchSupabaseOrLocal('staff', 'lykos_staff', DEFAULT_STAFF);
+    return fetchDatabaseOrLocal('staff', 'lykos_staff', DEFAULT_STAFF);
   },
   async saveStaff(staffMember) {
     const staff = await this.getStaff();
@@ -395,17 +358,17 @@ window.LykosDB = {
       staffMember.id = 'st_' + Date.now();
       staff.push(staffMember);
     }
-    await saveSupabaseAndLocal('staff', 'lykos_staff', staff, staffMember);
+    await saveDatabaseAndLocal('staff', 'lykos_staff', staff, staffMember);
     return staffMember;
   },
   async deleteStaff(id) {
     let staff = await this.getStaff();
     staff = staff.filter(s => String(s.id) !== String(id));
-    await deleteSupabaseAndLocal('staff', 'lykos_staff', staff, id);
+    await deleteDatabaseAndLocal('staff', 'lykos_staff', staff, id);
   },
 
   async getMatches() {
-    const matches = await fetchSupabaseOrLocal('matches', 'lykos_matches', DEFAULT_MATCHES);
+    const matches = await fetchDatabaseOrLocal('matches', 'lykos_matches', DEFAULT_MATCHES);
     const list = Array.isArray(matches) ? matches : DEFAULT_MATCHES;
     return list.sort((a, b) => {
       const timeA = a && a.match_date ? new Date(a.match_date).getTime() : 0;
@@ -430,17 +393,17 @@ window.LykosDB = {
       match.id = 'm_' + Date.now();
       matches.unshift(match);
     }
-    await saveSupabaseAndLocal('matches', 'lykos_matches', matches, match);
+    await saveDatabaseAndLocal('matches', 'lykos_matches', matches, match);
     return match;
   },
   async deleteMatch(id) {
     let matches = await this.getMatches();
     matches = matches.filter(m => String(m.id) !== String(id));
-    await deleteSupabaseAndLocal('matches', 'lykos_matches', matches, id);
+    await deleteDatabaseAndLocal('matches', 'lykos_matches', matches, id);
   },
 
   async getTrophies() {
-    return fetchSupabaseOrLocal('trophies', 'lykos_trophies', DEFAULT_TROPHIES);
+    return fetchDatabaseOrLocal('trophies', 'lykos_trophies', DEFAULT_TROPHIES);
   },
   async saveTrophy(trophy) {
     const trophies = await this.getTrophies();
@@ -451,17 +414,17 @@ window.LykosDB = {
       trophy.id = 't_' + Date.now();
       trophies.unshift(trophy);
     }
-    await saveSupabaseAndLocal('trophies', 'lykos_trophies', trophies, trophy);
+    await saveDatabaseAndLocal('trophies', 'lykos_trophies', trophies, trophy);
     return trophy;
   },
   async deleteTrophy(id) {
     let trophies = await this.getTrophies();
     trophies = trophies.filter(t => String(t.id) !== String(id));
-    await deleteSupabaseAndLocal('trophies', 'lykos_trophies', trophies, id);
+    await deleteDatabaseAndLocal('trophies', 'lykos_trophies', trophies, id);
   },
 
   async getAboutSettings() {
-    return fetchSupabaseOrLocal('about_settings', 'lykos_about', DEFAULT_ABOUT);
+    return fetchDatabaseOrLocal('about_settings', 'lykos_about', DEFAULT_ABOUT);
   },
   async saveAboutSettings(about) {
     localStorage.setItem('lykos_about', JSON.stringify(about));
@@ -480,7 +443,7 @@ window.LykosDB = {
   },
 
   async getGallery() {
-    return fetchSupabaseOrLocal('gallery', 'lykos_gallery', DEFAULT_GALLERY);
+    return fetchDatabaseOrLocal('gallery', 'lykos_gallery', DEFAULT_GALLERY);
   },
   async saveGalleryItem(item) {
     const gallery = await this.getGallery();
@@ -491,17 +454,17 @@ window.LykosDB = {
       item.id = 'g_' + Date.now();
       gallery.unshift(item);
     }
-    await saveSupabaseAndLocal('gallery', 'lykos_gallery', gallery, item);
+    await saveDatabaseAndLocal('gallery', 'lykos_gallery', gallery, item);
     return item;
   },
   async deleteGalleryItem(id) {
     let gallery = await this.getGallery();
     gallery = gallery.filter(g => String(g.id) !== String(id));
-    await deleteSupabaseAndLocal('gallery', 'lykos_gallery', gallery, id);
+    await deleteDatabaseAndLocal('gallery', 'lykos_gallery', gallery, id);
   },
 
   async getSocialFeeds() {
-    return fetchSupabaseOrLocal('social_feeds', 'lykos_social', DEFAULT_SOCIAL);
+    return fetchDatabaseOrLocal('social_feeds', 'lykos_social', DEFAULT_SOCIAL);
   },
   async saveSocialFeed(feed) {
     const feeds = await this.getSocialFeeds();
@@ -512,17 +475,17 @@ window.LykosDB = {
       feed.id = 's_' + Date.now();
       feeds.unshift(feed);
     }
-    await saveSupabaseAndLocal('social_feeds', 'lykos_social', feeds, feed);
+    await saveDatabaseAndLocal('social_feeds', 'lykos_social', feeds, feed);
     return feed;
   },
   async deleteSocialFeed(id) {
     let feeds = await this.getSocialFeeds();
     feeds = feeds.filter(s => String(s.id) !== String(id));
-    await deleteSupabaseAndLocal('social_feeds', 'lykos_social', feeds, id);
+    await deleteDatabaseAndLocal('social_feeds', 'lykos_social', feeds, id);
   },
 
   async getRecentTournaments() {
-    return fetchSupabaseOrLocal('recent_tournaments', 'lykos_recent_tournaments', DEFAULT_RECENT_TOURNAMENTS);
+    return fetchDatabaseOrLocal('recent_tournaments', 'lykos_recent_tournaments', DEFAULT_RECENT_TOURNAMENTS);
   },
   async saveRecentTournament(tournament) {
     const tournaments = await this.getRecentTournaments();
@@ -533,17 +496,17 @@ window.LykosDB = {
       tournament.id = 'rec_' + Date.now();
       tournaments.unshift(tournament);
     }
-    await saveSupabaseAndLocal('recent_tournaments', 'lykos_recent_tournaments', tournaments, tournament);
+    await saveDatabaseAndLocal('recent_tournaments', 'lykos_recent_tournaments', tournaments, tournament);
     return tournament;
   },
   async deleteRecentTournament(id) {
     let tournaments = await this.getRecentTournaments();
     tournaments = tournaments.filter(t => String(t.id) !== String(id));
-    await deleteSupabaseAndLocal('recent_tournaments', 'lykos_recent_tournaments', tournaments, id);
+    await deleteDatabaseAndLocal('recent_tournaments', 'lykos_recent_tournaments', tournaments, id);
   },
 
   async getCommunityTournaments() {
-    return fetchSupabaseOrLocal('community_tournaments', 'lykos_community_tournaments', DEFAULT_COMMUNITY_TOURNAMENTS);
+    return fetchDatabaseOrLocal('community_tournaments', 'lykos_community_tournaments', DEFAULT_COMMUNITY_TOURNAMENTS);
   },
   async saveCommunityTournament(tournament) {
     const tournaments = await this.getCommunityTournaments();
@@ -554,13 +517,13 @@ window.LykosDB = {
       tournament.id = 'tourn_' + Date.now();
       tournaments.unshift(tournament);
     }
-    await saveSupabaseAndLocal('community_tournaments', 'lykos_community_tournaments', tournaments, tournament);
+    await saveDatabaseAndLocal('community_tournaments', 'lykos_community_tournaments', tournaments, tournament);
     return tournament;
   },
   async deleteCommunityTournament(id) {
     let tournaments = await this.getCommunityTournaments();
     tournaments = tournaments.filter(t => String(t.id) !== String(id));
-    await deleteSupabaseAndLocal('community_tournaments', 'lykos_community_tournaments', tournaments, id);
+    await deleteDatabaseAndLocal('community_tournaments', 'lykos_community_tournaments', tournaments, id);
   },
 
   async getUsers() {
