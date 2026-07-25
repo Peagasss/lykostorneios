@@ -229,15 +229,30 @@
   color: #475569 !important;
 }
 
+@keyframes bg-gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
   font-family: var(--font-body);
-  background-color: var(--bg-dark-base);
+  background: radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.12) 0%, transparent 40%),
+              radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.1) 0%, transparent 45%),
+              linear-gradient(135deg, #05040a 0%, #0c0817 50%, #07050e 100%);
+  background-size: 200% 200%, 200% 200%, 100% 100%;
+  animation: bg-gradient-shift 15s ease infinite;
   color: var(--text-light);
   line-height: 1.6;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+}
+
+body.admin-body {
+  animation: none !important;
+  background: #06050c !important;
 }
 
 h1, h2, h3, h4, h5, h6, .font-heading {

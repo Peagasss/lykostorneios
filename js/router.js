@@ -85,6 +85,12 @@
               params[name] = match[index + 1];
             });
 
+            if (path.startsWith('/admin')) {
+              document.body.classList.add('admin-body');
+            } else {
+              document.body.classList.remove('admin-body');
+            }
+
             if (isRouteChange) window.scrollTo({ top: 0, behavior: 'instant' });
             this.currentRoute = path;
             this.updateActiveNavLinks(path);
