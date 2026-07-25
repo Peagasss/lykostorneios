@@ -271,17 +271,20 @@ if (typeof window !== 'undefined') {
 async function saveSupabaseAndLocal(tableName, storageKey, fullList, singleItem) {
   localStorage.setItem(storageKey, JSON.stringify(fullList));
   if (singleItem) {
-    (async () => {
-      try {
-        await fetch(getApiUrl('/api/save'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ entity: tableName, item: singleItem })
-        }).catch(() => null);
-      } catch (e) {
-        console.warn(`[LykosDB] Save error for ${tableName}:`, e);
+    try {
+      const apiRes = await fetch(getApiUrl('/api/save'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ entity: tableName, item: singleItem })
+      });
+      if (!apiRes.ok) {
+        const errData = await apiRes.json().catch(() => ({}));
+        throw new Error(errData.error || `Erro HTTP ${apiRes.status}`);
       }
-    })();
+    } catch (e) {
+      console.error(`[LykosDB] Save error for ${tableName}:`, e);
+      throw new Error(`Falha ao salvar no banco de dados remoto: ${e.message}`);
+    }
   }
 }
 
@@ -329,18 +332,21 @@ window.LykosDB = {
 
     window.dispatchEvent(new CustomEvent('lykos_branding_updated', { detail: mergedSettings }));
 
-    // Send FULL data (including base64) to Neon Postgres API
-    (async () => {
-      try {
-        await fetch(getApiUrl('/api/save'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ entity: 'site_settings', item: mergedSettings })
-        }).catch(() => null);
-      } catch (e) {
-        console.warn("[LykosDB] saveSettings error:", e);
+    // Send FULL data to Neon Postgres API and await response
+    try {
+      const apiRes = await fetch(getApiUrl('/api/save'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ entity: 'site_settings', item: mergedSettings })
+      });
+      if (!apiRes.ok) {
+        const errData = await apiRes.json().catch(() => ({}));
+        throw new Error(errData.error || `Erro HTTP ${apiRes.status}`);
       }
-    })();
+    } catch (e) {
+      console.error("[LykosDB] saveSettings error:", e);
+      throw new Error(`Não foi possível salvar no banco Neon Postgres. Verifique o tamanho das imagens. Detalhe: ${e.message}`);
+    }
 
     return mergedSettings;
   },
@@ -638,9 +644,63 @@ window.LykosDB = {
   },
 
   async uploadAsset(file) {
-    return new Promise((resolve) => {
+    // Automatic Image Compression to stay under Vercel serverless request limits
+    return new Promise((resolve, reject) => {
+      if (!file || !file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = (err) => reject(err);
+        reader.readAsDataURL(file);
+        return;
+      }
+
+      // Max resolution targets depending on the entity type
+      let maxWidth = 400;
+      let maxHeight = 400;
+      let quality = 0.75;
+
+      // Adjust image size thresholds based on filename or size to be safe
+      if (file.size > 2 * 1024 * 1024) {
+        maxWidth = 300;
+        maxHeight = 300;
+        quality = 0.7;
+      }
+
+      const img = new Image();
       const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target.result);
+      
+      reader.onload = (e) => {
+        img.src = e.target.result;
+      };
+      reader.onerror = (err) => reject(err);
+
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convert to WebP for maximum compression
+        const dataUrl = canvas.toDataURL('image/webp', quality);
+        resolve(dataUrl);
+      };
+
       reader.readAsDataURL(file);
     });
   }

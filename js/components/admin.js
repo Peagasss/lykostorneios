@@ -1302,20 +1302,29 @@ window.renderAdminPage = async function (container) {
           photoUrl = await window.LykosDB.uploadAsset(fileInput.files[0]);
         }
 
-        await window.LykosDB.savePlayer({
-          name: container.querySelector('#roster-name').value,
-          nickname: container.querySelector('#roster-nickname').value,
-          game: container.querySelector('#roster-game').value,
-          role: container.querySelector('#roster-role').value,
-          mouse: container.querySelector('#roster-mouse').value || '',
-          keyboard: container.querySelector('#roster-keyboard').value || '',
-          headset: container.querySelector('#roster-headset').value || '',
-          microphone: container.querySelector('#roster-microphone').value || '',
-          mousepad: container.querySelector('#roster-mousepad').value || '',
-          monitor: container.querySelector('#roster-monitor').value || '',
-          photo_url: photoUrl
-        });
-        renderDashboard();
+        try {
+          const submitBtn = formRoster.querySelector('button[type="submit"]');
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Salvando...';
+          }
+          await window.LykosDB.savePlayer({
+            name: container.querySelector('#roster-name').value,
+            nickname: container.querySelector('#roster-nickname').value,
+            game: container.querySelector('#roster-game').value,
+            role: container.querySelector('#roster-role').value,
+            mouse: container.querySelector('#roster-mouse').value || '',
+            keyboard: container.querySelector('#roster-keyboard').value || '',
+            headset: container.querySelector('#roster-headset').value || '',
+            microphone: container.querySelector('#roster-microphone').value || '',
+            mousepad: container.querySelector('#roster-mousepad').value || '',
+            monitor: container.querySelector('#roster-monitor').value || '',
+            photo_url: photoUrl
+          });
+          renderDashboard();
+        } catch (err) {
+          alert('Erro ao salvar jogador: ' + err.message);
+        }
       };
     }
 
@@ -1403,14 +1412,23 @@ window.renderAdminPage = async function (container) {
           photoUrl = await window.LykosDB.uploadAsset(fileInput.files[0]);
         }
 
-        await window.LykosDB.saveStaff({
-          name: container.querySelector('#staff-name').value,
-          nickname: container.querySelector('#staff-nickname').value || '',
-          role: container.querySelector('#staff-role').value,
-          game: container.querySelector('#staff-game').value || 'Geral',
-          photo_url: photoUrl
-        });
-        renderDashboard();
+        try {
+          const submitBtn = formStaff.querySelector('button[type="submit"]');
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Salvando...';
+          }
+          await window.LykosDB.saveStaff({
+            name: container.querySelector('#staff-name').value,
+            nickname: container.querySelector('#staff-nickname').value || '',
+            role: container.querySelector('#staff-role').value,
+            game: container.querySelector('#staff-game').value || 'Geral',
+            photo_url: photoUrl
+          });
+          renderDashboard();
+        } catch (err) {
+          alert('Erro ao salvar membro da comissão: ' + err.message);
+        }
       };
     }
 
