@@ -91,7 +91,23 @@
               document.body.classList.remove('admin-body');
             }
 
-            if (isRouteChange) window.scrollTo({ top: 0, behavior: 'instant' });
+            if (isRouteChange) {
+              appContainer.style.opacity = '0';
+              appContainer.style.transform = 'translateY(12px)';
+              appContainer.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+              
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+
+              setTimeout(async () => {
+                this.currentRoute = path;
+                this.updateActiveNavLinks(path);
+                await route.renderFunc(appContainer, params);
+                appContainer.style.opacity = '1';
+                appContainer.style.transform = 'translateY(0)';
+              }, 120);
+              return;
+            }
+
             this.currentRoute = path;
             this.updateActiveNavLinks(path);
             await route.renderFunc(appContainer, params);

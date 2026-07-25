@@ -173,8 +173,8 @@ try {
 async function fetchFullDataBundle(forceFresh = false) {
   const now = Date.now();
   
-  // Return cached bundle instantly if available and fresh (within 30s), unless forced
-  if (!forceFresh && _cachedBundle && (now - _sharedDataTimestamp < 30000)) {
+  // Return cached bundle instantly if available (cached in memory or sessionStorage)
+  if (!forceFresh && _cachedBundle) {
     return _cachedBundle;
   }
   
@@ -185,11 +185,16 @@ async function fetchFullDataBundle(forceFresh = false) {
   _sharedDataTimestamp = now;
   _sharedDataPromise = (async () => {
     try {
-      const apiRes = await fetch(getApiUrl('/api/data?t=' + now));
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2500); // 2.5s network timeout limit
+
+      const apiRes = await fetch(getApiUrl('/api/data?t=' + now), { signal: controller.signal });
+      clearTimeout(timeoutId);
+
       if (!apiRes.ok) throw new Error(`Erro HTTP ${apiRes.status}`);
       const contentType = apiRes.headers.get('content-type') || '';
       if (!contentType.includes('application/json')) {
-        throw new Error(`Resposta inválida do servidor (HTML retornado em vez de JSON)`);
+        throw new Error(`Resposta inválida do servidor`);
       }
       const data = await apiRes.json();
       if (data) {
@@ -200,7 +205,7 @@ async function fetchFullDataBundle(forceFresh = false) {
       }
       return _cachedBundle;
     } catch (e) {
-      console.error('[LykosDB] Cloud Fetch Error:', e);
+      console.warn('[LykosDB] Fast Fallback / Cache Used due to network timeout:', e.message);
       return _cachedBundle;
     }
   })();
