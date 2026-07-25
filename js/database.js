@@ -261,7 +261,9 @@ function startRealtimePoller() {
              if (bundle.settings) {
                window.dispatchEvent(new CustomEvent('lykos_branding_updated', { detail: bundle.settings }));
              }
-             if (window.LykosRouter && window.LykosRouter.handleRoute) {
+             // Avoid force re-rendering route if user is currently inside /admin
+             const isInsideAdmin = window.location.pathname.startsWith('/admin') || window.location.hash.startsWith('#/admin');
+             if (!isInsideAdmin && window.LykosRouter && window.LykosRouter.handleRoute) {
                window.LykosRouter.handleRoute().catch(() => {});
              }
            }
