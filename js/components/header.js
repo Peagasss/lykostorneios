@@ -7,20 +7,19 @@ window.renderHeader = async function () {
   if (!headerContainer) return;
 
   const settings = await window.LykosDB.getSettings();
-  const currentTheme = window.LykosDB.getTheme();
   const teamName = settings.team_name || 'LYKOS';
   
   const headerLogoSrc = settings.header_logo_url || settings.logo_url || 'assets/logo.png';
-  const logoContent = `<img src="${headerLogoSrc}" alt="${teamName} Logo" style="max-height: 52px; height: 52px; width: auto; object-fit: contain; vertical-align: middle;" onerror="this.src='assets/logo.png'">`;
+  const logoContent = `<img src="${headerLogoSrc}" alt="${teamName} Logo" style="max-height: 42px; height: 42px; width: auto; object-fit: contain; vertical-align: middle;" onerror="this.src='assets/logo.png'">`;
 
   const showTorneios = settings.show_tournaments_tab === true;
 
   headerContainer.innerHTML = `
-    <header class="site-header">
-      <div class="container nav-container">
-        <a href="/" class="brand-logo" style="display: inline-flex; align-items: center; gap: 10px; padding: 4px 0; text-decoration: none;">
+    <header class="site-header" style="position: fixed; top: 12px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 1240px; border-radius: 20px; z-index: 1000; background: rgba(10, 8, 20, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(168, 85, 247, 0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+      <div class="container nav-container" style="display: flex; align-items: center; justify-content: space-between; height: 68px; padding: 0 1.5rem;">
+        <a href="/" class="brand-logo" style="display: inline-flex; align-items: center; gap: 10px; text-decoration: none;">
           ${logoContent}
-          <span style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.05em; display: inline-block;">
+          <span style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: #ffffff; text-transform: uppercase; letter-spacing: 0.06em; display: inline-block;">
             ${(() => {
               const parts = teamName.trim().split(' ');
               if (parts.length === 1) return parts[0];
@@ -31,22 +30,22 @@ window.renderHeader = async function () {
           </span>
         </a>
 
-        <ul class="nav-menu" id="nav-menu">
-          <li><a href="/" class="nav-link">Home</a></li>
-          <li><a href="/sobre" class="nav-link">Sobre</a></li>
-          <li><a href="/elenco" class="nav-link">Elenco</a></li>
-          <li><a href="/partidas" class="nav-link">Partidas</a></li>
-          <li><a href="/galeria" class="nav-link">Galeria</a></li>
-          ${showTorneios ? `<li><a href="/torneios" class="nav-link">Torneios</a></li>` : ''}
-          <li><a href="/contato" class="nav-link">Contato</a></li>
+        <ul class="nav-menu" id="nav-menu" style="display: flex; align-items: center; gap: 1.75rem; list-style: none; margin: 0; padding: 0;">
+          <li><a href="/" class="nav-link" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em;">Home</a></li>
+          <li><a href="/sobre" class="nav-link" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em;">Sobre</a></li>
+          <li><a href="/elenco" class="nav-link" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em;">Elenco</a></li>
+          <li><a href="/partidas" class="nav-link" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em;">Partidas</a></li>
+          <li><a href="/galeria" class="nav-link" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em;">Galeria</a></li>
+          ${showTorneios ? `<li><a href="/torneios" class="nav-link" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em;">Torneios</a></li>` : ''}
+          <li><a href="/contato" class="nav-link" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em;">Contato</a></li>
           <li>
-            <button class="theme-toggle-btn" id="theme-toggle" title="Alternar Tema Claro / Escuro">
-              ${currentTheme === 'dark' ? '☀️' : '🌙'}
-            </button>
+            <a href="/admin" class="btn-primary" style="padding: 8px 16px; font-size: 0.75rem; border-radius: 10px; box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);">
+              Painel Admin &rarr;
+            </a>
           </li>
         </ul>
 
-        <button class="mobile-menu-toggle" id="mobile-toggle" aria-label="Abrir menu">
+        <button class="mobile-menu-toggle" id="mobile-toggle" aria-label="Abrir menu" style="display: none; background: none; color: #ffffff; font-size: 1.4rem; cursor: pointer; border: none;">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
         </button>
       </div>
