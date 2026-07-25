@@ -1028,3 +1028,32 @@ input[type="file"]::-webkit-file-upload-button:hover {
 @media (max-width: 480px) {
   .starters-responsive-grid { grid-template-columns: 1fr !important; }
 }
+
+/* Smart Collapsible Floating Navbar */
+.site-header {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.site-header.navbar-collapsed {
+  width: auto !important;
+  min-width: 200px;
+  max-width: 280px;
+  padding: 0 0.5rem !important;
+  background: rgba(8, 6, 18, 0.95) !important;
+  border-color: rgba(168, 85, 247, 0.5) !important;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.8), 0 0 15px rgba(168, 85, 247, 0.3) !important;
+}
+
+.site-header.navbar-collapsed .nav-container {
+  justify-content: center !important;
+  padding: 0 1.25rem !important;
+  gap: 0 !important;
+}
+
+.site-header.navbar-collapsed .nav-menu {
+  display: none !important;
+}
+
+.site-header.navbar-collapsed .brand-logo span {
+  display: inline-block !important;
+}

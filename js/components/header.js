@@ -75,6 +75,41 @@ window.renderHeader = async function () {
       link.onclick = () => navMenu.classList.remove('mobile-open');
     });
   }
+
+  // SMART COLLAPSIBLE NAVBAR ON SCROLL & HOVER
+  const headerElem = headerContainer.querySelector('.site-header');
+  if (headerElem) {
+    let isHovered = false;
+
+    function checkScrollNavbar() {
+      if (window.scrollY > 80 && !isHovered) {
+        headerElem.classList.add('navbar-collapsed');
+      } else {
+        headerElem.classList.remove('navbar-collapsed');
+      }
+    }
+
+    // Scroll listener
+    window.removeEventListener('scroll', window._lykosNavbarScrollHandler);
+    window._lykosNavbarScrollHandler = checkScrollNavbar;
+    window.addEventListener('scroll', window._lykosNavbarScrollHandler, { passive: true });
+
+    // Mouse hover listener with padding/margin safety
+    headerElem.onmouseenter = () => {
+      isHovered = true;
+      headerElem.classList.remove('navbar-collapsed');
+    };
+
+    headerElem.onmouseleave = () => {
+      isHovered = false;
+      if (window.scrollY > 80) {
+        headerElem.classList.add('navbar-collapsed');
+      }
+    };
+
+    // Initial check
+    checkScrollNavbar();
+  }
 };
 
 window.addEventListener('lykos_branding_updated', () => window.renderHeader());
