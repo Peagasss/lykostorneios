@@ -125,11 +125,11 @@
     }
 
     updateActiveNavLinks(currentPath) {
-      const links = document.querySelectorAll('.nav-link, a[href]');
+      const links = document.querySelectorAll('.site-header .nav-link, .nav-menu .nav-link');
       links.forEach(link => {
         const href = link.getAttribute('href') || '';
         const targetRoute = href.replace('#', '');
-        if (currentPath === targetRoute || (targetRoute !== '/' && currentPath.startsWith(targetRoute))) {
+        if (currentPath === targetRoute || (targetRoute !== '/' && targetRoute !== '' && currentPath.startsWith(targetRoute))) {
           link.classList.add('active');
         } else {
           link.classList.remove('active');
