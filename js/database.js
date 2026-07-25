@@ -158,8 +158,8 @@ function getApiUrl(endpoint) {
   return `${baseUrl}${endpoint}`;
 }
 
-// Helpers for Neon Postgres Vercel API sync with instant local cache (stale-while-revalidate)
-async function fetchSupabaseOrLocal(tableName, storageKey, fallbackDefault) {
+// Helpers for Azure PostgreSQL Vercel API sync
+async function fetchDatabaseOrLocal(tableName, storageKey, fallbackDefault) {
   const raw = localStorage.getItem(storageKey);
   const localData = safeParse(raw, null);
 
@@ -331,7 +331,7 @@ window.LykosDB = {
       }
     } catch (e) {
       console.error("[LykosDB] saveSettings error:", e);
-      throw new Error(`Não foi possível salvar no banco Neon Postgres. Verifique o tamanho das imagens. Detalhe: ${e.message}`);
+      throw new Error(`Não foi possível salvar no banco Azure PostgreSQL. Detalhe: ${e.message}`);
     }
 
     return mergedSettings;
