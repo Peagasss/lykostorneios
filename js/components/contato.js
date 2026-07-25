@@ -95,9 +95,8 @@ window.renderContatoPage = async function (container) {
           </div>
           <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
             ${socials.map(s => `
-              <a href="${s.url}" target="_blank" class="glass-card-interactive" style="background: rgba(14, 11, 26, 0.8); border: none; padding: 12px 24px; border-radius: 30px; display: inline-flex; align-items: center; gap: 10px; color: white; text-decoration: none; font-family: var(--font-heading); font-size: 0.88rem; font-weight: 700; transition: all 0.3s ease;">
+              <a href="${s.url}" target="_blank" class="glass-card-interactive" style="background: rgba(14, 11, 26, 0.8); border: none; padding: 12px 26px; border-radius: 30px; display: inline-flex; align-items: center; justify-content: center; color: white; text-decoration: none; font-family: var(--font-heading); font-size: 0.88rem; font-weight: 700; transition: all 0.3s ease;">
                 <span>${s.name}</span>
-                <span style="color: var(--accent-neon); font-size: 0.8rem;">&rarr;</span>
               </a>
             `).join('')}
           </div>

@@ -82,6 +82,12 @@ window.renderHeader = async function () {
     let isHovered = false;
 
     function checkScrollNavbar() {
+      // Disable collapse animation on /admin page
+      if (window.location.pathname === '/admin') {
+        headerElem.classList.remove('navbar-collapsed');
+        return;
+      }
+
       if (window.scrollY > 80 && !isHovered) {
         headerElem.classList.add('navbar-collapsed');
       } else {
