@@ -46,11 +46,6 @@ window.renderHeader = async function () {
           <li><a href="/galeria" class="nav-link" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em;">Mídias & News</a></li>
           ${showTorneios ? `<li><a href="/torneios" class="nav-link" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em;">Torneios</a></li>` : ''}
           <li><a href="/contato" class="nav-link" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em;">Contato</a></li>
-          <li>
-            <a href="/admin" class="btn-primary" style="padding: 8px 16px; font-size: 0.75rem; border-radius: 10px; box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);">
-              Painel Admin &rarr;
-            </a>
-          </li>
         </ul>
 
         <button class="mobile-menu-toggle" id="mobile-toggle" aria-label="Abrir menu" style="display: none; background: none; color: #ffffff; font-size: 1.4rem; cursor: pointer; border: none;">

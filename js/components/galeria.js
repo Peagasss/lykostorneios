@@ -76,5 +76,3 @@ window.renderGaleriaPage = async function (container) {
     </section>
   `;
 };
-
-};
