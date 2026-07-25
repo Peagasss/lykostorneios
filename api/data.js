@@ -1,5 +1,4 @@
 const { Pool } = require('pg');
-const { createClient } = require('@supabase/supabase-js');
 
 let pool = null;
 
@@ -51,17 +50,17 @@ module.exports = async (req, res) => {
   // 1. Database Connection Check (Azure / Postgres)
   const dbUrl = process.env.AZURE_POSTGRES_URL || process.env.NEON_URL || process.env.POSTGRES_URL;
   if (dbUrl) {
-      // 1. Silent schema migration / initialization if database is empty (self-bootstraps new Neon DBs)
+      // 1. Silent schema migration / initialization if database is empty
       try {
         const checkTable = await sql`SELECT to_regclass('public.site_settings');`;
         if (!checkTable.rows[0] || !checkTable.rows[0].to_regclass) {
           const fs = require('fs');
           const path = require('path');
-          const schemaPath = path.join(process.cwd(), 'neon_schema.sql');
+          const schemaPath = path.join(process.cwd(), 'schema.sql');
           if (fs.existsSync(schemaPath)) {
             const schemaSql = fs.readFileSync(schemaPath, 'utf8');
             await sql.query(schemaSql);
-            console.log('[LykosDB] Neon database schema self-bootstrapped successfully.');
+            console.log('[LykosDB] Database schema self-bootstrapped successfully.');
           }
         }
       } catch (schemaErr) {

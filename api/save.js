@@ -53,11 +53,11 @@ module.exports = async (req, res) => {
         if (!checkTable.rows[0] || !checkTable.rows[0].to_regclass) {
           const fs = require('fs');
           const path = require('path');
-          const schemaPath = path.join(process.cwd(), 'neon_schema.sql');
+          const schemaPath = path.join(process.cwd(), 'schema.sql');
           if (fs.existsSync(schemaPath)) {
             const schemaSql = fs.readFileSync(schemaPath, 'utf8');
             await sql.query(schemaSql);
-            console.log('[LykosDB] Neon database schema self-bootstrapped successfully from Save API.');
+            console.log('[LykosDB] Database schema self-bootstrapped successfully from Save API.');
           }
         }
       } catch (schemaErr) {
