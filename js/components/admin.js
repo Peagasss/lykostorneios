@@ -399,8 +399,9 @@ window.renderAdminPage = async function (container) {
                 <strong style="margin-left: 8px;">${data.settings.team_name} vs ${m.opponent_name}</strong> (${m.tournament_name})
               </div>
               <div style="display: flex; gap: 6px;">
-                <button class="btn-edit pop-edit-match-btn" data-id="${m.id}">Editar</button>
-                <button class="btn-danger delete-match-btn" data-id="${m.id}" data-title="${data.settings.team_name} vs ${m.opponent_name}">Excluir</button>
+                <button class="btn-primary pop-edit-sumula-btn" data-id="${m.id}" style="padding: 4px 10px; font-size: 0.75rem;">📋 Editar Súmula (K/D/A)</button>
+                <button class="btn-edit pop-edit-match-btn" data-id="${m.id}" style="padding: 4px 10px; font-size: 0.75rem;">Editar</button>
+                <button class="btn-danger delete-match-btn" data-id="${m.id}" data-title="${data.settings.team_name} vs ${m.opponent_name}" style="padding: 4px 10px; font-size: 0.75rem;">Excluir</button>
               </div>
             </div>
           `).join('')}
@@ -1373,6 +1374,7 @@ window.renderAdminPage = async function (container) {
           }
 
           await window.LykosDB.saveMatch({ ...match, player_kdas: updatedKdas });
+          showToastSuccess('Súmula K/D/A atualizada com sucesso!');
         });
       };
     });
