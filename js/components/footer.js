@@ -34,7 +34,6 @@ window.renderFooter = async function () {
             <a href="/galeria" style="font-size: 0.82rem; color: var(--text-muted-light);">Galeria</a>
             ${showTorneios ? `<a href="/torneios" style="font-size: 0.82rem; color: var(--text-muted-light);">Torneios</a>` : ''}
             <a href="/contato" style="font-size: 0.82rem; color: var(--text-muted-light);">Contato</a>
-            <a href="/admin" style="font-size: 0.82rem; color: var(--accent-neon); font-weight: 600;">Painel Admin</a>
           </div>
 
           <div style="display: flex; gap: 12px; flex-wrap: wrap;">
