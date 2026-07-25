@@ -777,7 +777,7 @@ window.renderAdminPage = async function (container) {
               <label class="form-label" style="color: #34d399; font-weight: 700;">Chave de API do ImgBB (Opcional - Evita Estouro de Cota)</label>
               <input type="text" id="brand-imgbb-key" class="form-input" value="${data.settings.imgbb_api_key || ''}" placeholder="Cole sua API Key do ImgBB (Ex: abc123xyz...)">
               <span class="upload-hint" style="color: #a7f3d0; margin-top: 6px; display: block; line-height: 1.4;">
-                Recomendado! Cadastre-se grátis em <a href="https://api.imgbb.com/" target="_blank" style="color: #34d399; text-decoration: underline;">api.imgbb.com</a> para obter sua chave. Ao preencher, todos os uploads do site serão hospedados gratuitamente na nuvem do ImgBB, liberando espaço no banco de dados Neon Postgres.
+                Recomendado! Cadastre-se grátis em <a href="https://api.imgbb.com/" target="_blank" style="color: #34d399; text-decoration: underline;">api.imgbb.com</a> para obter sua chave. Ao preencher, todos os uploads do site serão hospedados gratuitamente na nuvem do ImgBB, liberando espaço no banco de dados Azure Postgres.
               </span>
             </div>
 

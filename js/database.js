@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LYKOS E-SPORTS - DATA ACCESS LAYER (With Supabase Sync & Local Fallback)
+   LYKOS E-SPORTS - DATA ACCESS LAYER (With Azure Sync & Local Fallback)
    ========================================================================== */
 
 function safeParse(jsonString, fallback) {
@@ -212,6 +212,40 @@ async function fetchDatabaseOrLocal(tableName, storageKey, fallbackDefault) {
   return localData !== null ? localData : fallbackDefault;
 }
 
+// Save to LocalStorage and Postgres
+async function saveDatabaseAndLocal(tableName, storageKey, dataArray, singleItem) {
+  localStorage.setItem(storageKey, JSON.stringify(dataArray));
+  try {
+    const apiRes = await fetch(getApiUrl('/api/save'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ entity: tableName, item: singleItem })
+    });
+    if (!apiRes.ok) {
+      console.warn(`[LykosDB] Failed to save ${tableName} to Azure Postgres:`, await apiRes.text());
+    }
+  } catch (e) {
+    console.warn(`[LykosDB] Error saving ${tableName} to Azure Postgres:`, e);
+  }
+}
+
+// Delete from LocalStorage and Postgres
+async function deleteDatabaseAndLocal(tableName, storageKey, dataArray, itemId) {
+  localStorage.setItem(storageKey, JSON.stringify(dataArray));
+  try {
+    const apiRes = await fetch(getApiUrl('/api/delete'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ entity: tableName, id: itemId })
+    });
+    if (!apiRes.ok) {
+      console.warn(`[LykosDB] Failed to delete ${tableName} from Azure Postgres:`, await apiRes.text());
+    }
+  } catch (e) {
+    console.warn(`[LykosDB] Error deleting ${tableName} from Azure Postgres:`, e);
+  }
+}
+
 // Background Real-Time Poller (Polls /api/data every 4 seconds for live sync without F5)
 let _isPollingStarted = false;
 function startRealtimePoller() {
@@ -299,7 +333,7 @@ window.LykosDB = {
 
     window.dispatchEvent(new CustomEvent('lykos_branding_updated', { detail: mergedSettings }));
 
-    // Send FULL data to Neon Postgres API and await response
+    // Send FULL data to Azure Postgres API and await response
     try {
       const apiRes = await fetch(getApiUrl('/api/save'), {
         method: 'POST',

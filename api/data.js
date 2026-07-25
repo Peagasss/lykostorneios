@@ -5,6 +5,7 @@ let pool = null;
 async function sql(strings, ...values) {
   if (!pool) {
     const connectionString = process.env.AZURE_POSTGRES_URL || process.env.NEON_URL || process.env.POSTGRES_URL;
+    if (!connectionString) throw new Error("Postgres connection string is not configured.");
     pool = new Pool({
       connectionString,
       ssl: { rejectUnauthorized: false }
@@ -25,6 +26,7 @@ async function sql(strings, ...values) {
 sql.query = async (text, params) => {
   if (!pool) {
     const connectionString = process.env.AZURE_POSTGRES_URL || process.env.NEON_URL || process.env.POSTGRES_URL;
+    if (!connectionString) throw new Error("Postgres connection string is not configured.");
     pool = new Pool({
       connectionString,
       ssl: { rejectUnauthorized: false }
