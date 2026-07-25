@@ -17,7 +17,12 @@ module.exports = async (req, res) => {
 
   // 1. Try Vercel / Neon Postgres first (ultra fast < 20ms)
   if (process.env.POSTGRES_URL) {
-    try {
+      // Silent migration to add sorting column if it doesn't exist yet
+      await Promise.all([
+        sql`ALTER TABLE roster ADD COLUMN IF NOT EXISTS sort_order INT DEFAULT 0;`,
+        sql`ALTER TABLE staff ADD COLUMN IF NOT EXISTS sort_order INT DEFAULT 0;`
+      ]).catch(err => console.warn('[Migration Warning]:', err));
+
       const [
         settingsRes, matchesRes, rosterRes, staffRes,
         modalitiesRes, trophiesRes, aboutRes, galleryRes,
@@ -25,8 +30,8 @@ module.exports = async (req, res) => {
       ] = await Promise.all([
         sql`SELECT * FROM site_settings WHERE id = 1 LIMIT 1;`,
         sql`SELECT * FROM matches;`,
-        sql`SELECT * FROM roster;`,
-        sql`SELECT * FROM staff;`,
+        sql`SELECT * FROM roster ORDER BY sort_order ASC, created_at DESC;`,
+        sql`SELECT * FROM staff ORDER BY sort_order ASC, created_at DESC;`,
         sql`SELECT * FROM modalities;`,
         sql`SELECT * FROM trophies;`,
         sql`SELECT * FROM about_settings WHERE id = 1 LIMIT 1;`,

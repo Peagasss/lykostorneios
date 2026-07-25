@@ -10,9 +10,11 @@ window.renderElencoPage = async function (container) {
   ]);
 
   function renderRosterGrid(filter) {
-    const filtered = filter === 'ALL' 
+    let filtered = filter === 'ALL' 
       ? allRoster 
       : allRoster.filter(p => p.game.toLowerCase() === filter.toLowerCase());
+
+    filtered = [...filtered].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
 
     if (filtered.length === 0) {
       return `<div style="grid-column: 1/-1; padding: 3rem; text-align: center; color: var(--text-muted-light);">Nenhum jogador cadastrado nesta modalidade.</div>`;
@@ -62,7 +64,7 @@ window.renderElencoPage = async function (container) {
           <p class="section-subtitle">A equipe por trás da estratégia, preparação física e liderança da organização.</p>
 
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
-            ${staffMembers && staffMembers.length > 0 ? staffMembers.map(st => `
+            ${staffMembers && staffMembers.length > 0 ? [...staffMembers].sort((a,b) => (a.sort_order || 0) - (b.sort_order || 0)).map(st => `
               <div style="background: var(--bg-dark-card); border: 1px solid var(--border-dark); border-radius: var(--radius-xs); overflow: hidden; display: flex; align-items: center; padding: 1rem; gap: 1rem;">
                 <img src="${st.photo_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}" alt="${st.name}" style="width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-neon);">
                 <div>

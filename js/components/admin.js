@@ -469,8 +469,12 @@ window.renderAdminPage = async function (container) {
 
         <h3 style="margin-bottom: 1rem; font-size: 1.15rem;">Atletas do Elenco</h3>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem;">
-          ${data.roster.map(p => `
+          ${data.roster.map((p, idx) => `
             <div style="background: var(--bg-dark-surface); border: 1px solid var(--border-dark); border-radius: var(--radius-xs); padding: 1rem; display: flex; gap: 0.85rem; align-items: center;">
+              <div style="display: flex; flex-direction: column; gap: 4px; margin-right: 4px;">
+                <button class="btn-secondary move-roster-up" data-id="${p.id}" style="padding: 2px 6px; font-size: 0.7rem; font-weight: bold; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border-dark); border-radius: 3px; cursor: pointer;" title="Mover para cima">▲</button>
+                <button class="btn-secondary move-roster-down" data-id="${p.id}" style="padding: 2px 6px; font-size: 0.7rem; font-weight: bold; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border-dark); border-radius: 3px; cursor: pointer;" title="Mover para baixo">▼</button>
+              </div>
               <img src="${p.photo_url}" alt="${p.nickname}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;">
               <div style="flex: 1;">
                 <span class="game-badge" style="position: static; font-size: 0.65rem;">${p.game}</span>
@@ -512,8 +516,12 @@ window.renderAdminPage = async function (container) {
 
         <h3 style="margin-bottom: 1rem; font-size: 1.15rem;">Comissão Técnica Cadastrada</h3>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem;">
-          ${data.staffMembers.map(st => `
+          ${data.staffMembers.map((st, idx) => `
             <div style="background: var(--bg-dark-surface); border: 1px solid var(--border-dark); border-radius: var(--radius-xs); padding: 1rem; display: flex; gap: 0.85rem; align-items: center;">
+              <div style="display: flex; flex-direction: column; gap: 4px; margin-right: 4px;">
+                <button class="btn-secondary move-staff-up" data-id="${st.id}" style="padding: 2px 6px; font-size: 0.7rem; font-weight: bold; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border-dark); border-radius: 3px; cursor: pointer;" title="Mover para cima">▲</button>
+                <button class="btn-secondary move-staff-down" data-id="${st.id}" style="padding: 2px 6px; font-size: 0.7rem; font-weight: bold; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border-dark); border-radius: 3px; cursor: pointer;" title="Mover para baixo">▼</button>
+              </div>
               <img src="${st.photo_url}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover;">
               <div style="flex: 1;">
                 <div style="font-weight: 700; color: white;">${st.name}</div>
@@ -2248,6 +2256,100 @@ window.renderAdminPage = async function (container) {
         await window.LykosDB.deleteUser(btn.getAttribute('data-id'));
         renderDashboard();
       });
+    });
+
+    // 3.1 MOVE ROSTER UP/DOWN HANDLERS
+    container.querySelectorAll('.move-roster-up').forEach(btn => {
+      btn.onclick = async () => {
+        const id = btn.getAttribute('data-id');
+        const idx = data.roster.findIndex(p => String(p.id) === String(id));
+        if (idx > 0) {
+          const item1 = data.roster[idx];
+          const item2 = data.roster[idx - 1];
+          const temp = item1.sort_order || 0;
+          item1.sort_order = item2.sort_order || 0;
+          item2.sort_order = temp;
+          if (item1.sort_order === item2.sort_order) {
+            item2.sort_order = idx - 1;
+            item1.sort_order = idx;
+          }
+          await Promise.all([
+            window.LykosDB.savePlayer(item1),
+            window.LykosDB.savePlayer(item2)
+          ]);
+          renderDashboard();
+        }
+      };
+    });
+
+    container.querySelectorAll('.move-roster-down').forEach(btn => {
+      btn.onclick = async () => {
+        const id = btn.getAttribute('data-id');
+        const idx = data.roster.findIndex(p => String(p.id) === String(id));
+        if (idx !== -1 && idx < data.roster.length - 1) {
+          const item1 = data.roster[idx];
+          const item2 = data.roster[idx + 1];
+          const temp = item1.sort_order || 0;
+          item1.sort_order = item2.sort_order || 0;
+          item2.sort_order = temp;
+          if (item1.sort_order === item2.sort_order) {
+            item1.sort_order = idx;
+            item2.sort_order = idx + 1;
+          }
+          await Promise.all([
+            window.LykosDB.savePlayer(item1),
+            window.LykosDB.savePlayer(item2)
+          ]);
+          renderDashboard();
+        }
+      };
+    });
+
+    // 4.1 MOVE STAFF UP/DOWN HANDLERS
+    container.querySelectorAll('.move-staff-up').forEach(btn => {
+      btn.onclick = async () => {
+        const id = btn.getAttribute('data-id');
+        const idx = data.staffMembers.findIndex(s => String(s.id) === String(id));
+        if (idx > 0) {
+          const item1 = data.staffMembers[idx];
+          const item2 = data.staffMembers[idx - 1];
+          const temp = item1.sort_order || 0;
+          item1.sort_order = item2.sort_order || 0;
+          item2.sort_order = temp;
+          if (item1.sort_order === item2.sort_order) {
+            item2.sort_order = idx - 1;
+            item1.sort_order = idx;
+          }
+          await Promise.all([
+            window.LykosDB.saveStaff(item1),
+            window.LykosDB.saveStaff(item2)
+          ]);
+          renderDashboard();
+        }
+      };
+    });
+
+    container.querySelectorAll('.move-staff-down').forEach(btn => {
+      btn.onclick = async () => {
+        const id = btn.getAttribute('data-id');
+        const idx = data.staffMembers.findIndex(s => String(s.id) === String(id));
+        if (idx !== -1 && idx < data.staffMembers.length - 1) {
+          const item1 = data.staffMembers[idx];
+          const item2 = data.staffMembers[idx + 1];
+          const temp = item1.sort_order || 0;
+          item1.sort_order = item2.sort_order || 0;
+          item2.sort_order = temp;
+          if (item1.sort_order === item2.sort_order) {
+            item1.sort_order = idx;
+            item2.sort_order = idx + 1;
+          }
+          await Promise.all([
+            window.LykosDB.saveStaff(item1),
+            window.LykosDB.saveStaff(item2)
+          ]);
+          renderDashboard();
+        }
+      };
     });
   }
 
