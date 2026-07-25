@@ -27,7 +27,17 @@
   <script
     src="https://js.sentry-cdn.com/61581a6dd8e67c9a918cc24d05eab869.min.js"
     crossorigin="anonymous"
+    data-lazy="no"
   ></script>
+  <script>
+    if (window.Sentry) {
+      Sentry.onLoad(function() {
+        Sentry.init({
+          tunnel: '/api/sentry-tunnel'
+        });
+      });
+    }
+  </script>
 </head>
 <body>
 

@@ -35,6 +35,11 @@
   to = "/.netlify/functions/login"
   status = 200
 
+[[redirects]]
+  from = "/api/sentry-tunnel"
+  to = "/.netlify/functions/sentry-tunnel"
+  status = 200
+
 # ---------------------------------------------------------------------------
 # SPA Fallback: all non-asset routes → index.html (client-side router)
 # ---------------------------------------------------------------------------
