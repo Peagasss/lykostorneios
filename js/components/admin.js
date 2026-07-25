@@ -502,7 +502,7 @@ window.renderAdminPage = async function (container) {
               <div class="form-group">
                 <label class="form-label">Modalidade</label>
                 <select id="roster-game" class="form-select" required>
-                  ${data.modalities.map(m => `<option value="${m.name}">${m.name}</option>`).join('')}
+                  ${(data.modalities && data.modalities.length > 0) ? data.modalities.map(m => `<option value="${m.name}">${m.name}</option>`).join('') : '<option value="Valorant">Valorant</option><option value="CS2">CS2</option>'}
                 </select>
               </div>
               <div class="form-group"><label class="form-label">Função / Role</label><input type="text" id="roster-role" class="form-input" placeholder="Ex: Duelist" required></div>
@@ -1398,29 +1398,44 @@ window.renderAdminPage = async function (container) {
         try {
           if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.innerText = 'Processando & Salvando...';
+            submitBtn.innerText = 'Salvando Atleta...';
           }
 
           const fileInput = container.querySelector('#roster-file');
           let photoUrl = 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=800&q=80';
+          
           if (fileInput && fileInput.files && fileInput.files[0]) {
-            photoUrl = await window.LykosDB.uploadAsset(fileInput.files[0]);
+            try {
+              photoUrl = await window.LykosDB.uploadAsset(fileInput.files[0]);
+            } catch (upErr) {
+              console.warn('[Admin] Image upload fallback used:', upErr);
+            }
+          }
+
+          const nameEl = container.querySelector('#roster-name');
+          const nickEl = container.querySelector('#roster-nickname');
+          const gameEl = container.querySelector('#roster-game');
+          const roleEl = container.querySelector('#roster-role');
+
+          if (!nameEl || !nickEl) {
+            throw new Error('Campos obrigatórios não encontrados');
           }
 
           await window.LykosDB.savePlayer({
-            name: container.querySelector('#roster-name').value,
-            nickname: container.querySelector('#roster-nickname').value,
-            game: container.querySelector('#roster-game').value,
-            role: container.querySelector('#roster-role').value,
+            name: nameEl.value.trim(),
+            nickname: nickEl.value.trim(),
+            game: gameEl ? gameEl.value : 'Valorant',
+            role: roleEl ? roleEl.value.trim() : 'Player',
             is_starter: container.querySelector('#roster-is-starter') ? container.querySelector('#roster-is-starter').checked : false,
-            mouse: container.querySelector('#roster-mouse').value || '',
-            keyboard: container.querySelector('#roster-keyboard').value || '',
-            headset: container.querySelector('#roster-headset').value || '',
-            microphone: container.querySelector('#roster-microphone').value || '',
-            mousepad: container.querySelector('#roster-mousepad').value || '',
-            monitor: container.querySelector('#roster-monitor').value || '',
+            mouse: (container.querySelector('#roster-mouse') || {}).value || '',
+            keyboard: (container.querySelector('#roster-keyboard') || {}).value || '',
+            headset: (container.querySelector('#roster-headset') || {}).value || '',
+            microphone: (container.querySelector('#roster-microphone') || {}).value || '',
+            mousepad: (container.querySelector('#roster-mousepad') || {}).value || '',
+            monitor: (container.querySelector('#roster-monitor') || {}).value || '',
             photo_url: photoUrl
           });
+          
           showToastSuccess('Atleta salvo com sucesso!');
           renderDashboard();
         } catch (err) {
