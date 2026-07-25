@@ -70,25 +70,12 @@ window.renderHomePage = async function (container) {
     <section style="padding-top: 140px; padding-bottom: 4rem; min-height: 80vh; position: relative; width: 100%;">
       <div style="width: 100%; padding: 0 2rem; box-sizing: border-box;">
 
-        <!-- BANNER DE DESTAQUE: 5 JOGADORES PRINCIPAIS DO ELENCO (CLEAN - SEM MOLDURA/BORDAS) -->
+        <!-- BANNER DE DESTAQUE: 5 JOGADORES PRINCIPAIS DO ELENCO (CLEAN) -->
         <div style="margin-bottom: 3.5rem; width: 100%; box-sizing: border-box;">
-          <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem;">
-            <div>
-              <div class="section-title-badge" style="margin-bottom: 6px;">ROSTER TITULAR DE ELITE</div>
-              <h2 style="font-family: var(--font-heading); font-size: 2.2rem; font-weight: 800; color: #ffffff; margin: 0; line-height: 1.1;">
-                LINE-UP <span style="color: var(--accent-neon);">PRINCIPAL</span>
-              </h2>
-            </div>
-            <div style="font-family: var(--font-tech); font-size: 0.85rem; color: var(--text-muted-light); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;">
-              ${settings.team_name || 'LYKOS'} E-SPORTS
-            </div>
-          </div>
-
           <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.25rem;" class="starters-responsive-grid">
             ${starterPlayers.map(player => `
-              <div class="starter-card glass-card-interactive" data-id="${player.id}" style="border: none; border-radius: var(--radius-sm); overflow: hidden; background: rgba(14, 11, 26, 0.6); display: flex; flex-direction: column; cursor: pointer; transition: all 0.3s ease;">
+              <a href="/elenco" class="starter-card glass-card-interactive" style="border: none; border-radius: var(--radius-sm); overflow: hidden; background: rgba(14, 11, 26, 0.6); display: flex; flex-direction: column; cursor: pointer; transition: all 0.3s ease; text-decoration: none;">
                 <div style="height: 480px; overflow: hidden; position: relative; background: radial-gradient(circle at center, rgba(168,85,247,0.1) 0%, rgba(10,8,22,0.85) 100%); border-radius: var(--radius-sm);">
-                  <span class="game-badge" style="top: 12px; left: 12px; font-family: var(--font-tech); font-size: 0.68rem; z-index: 2;">${player.game}</span>
                   <img src="${player.photo_url}" alt="${player.nickname}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.4s ease;">
                   
                   <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem 1rem; background: linear-gradient(to top, rgba(8,6,16,0.98) 0%, rgba(8,6,16,0.6) 70%, transparent 100%); text-align: center; z-index: 2;">
@@ -96,7 +83,7 @@ window.renderHomePage = async function (container) {
                     <div style="font-size: 0.8rem; color: var(--accent-neon); font-weight: 700; text-transform: uppercase; margin-top: 2px;">${player.role || 'Player'}</div>
                   </div>
                 </div>
-              </div>
+              </a>
             `).join('')}
           </div>
         </div>
@@ -186,56 +173,5 @@ window.renderHomePage = async function (container) {
       </div>
     </section>
 
-    <!-- PLAYER POP-UP MODAL FOR HOME -->
-    <div id="home-player-modal" class="modal-backdrop" style="display: none;">
-      <div class="modal-content glass-card" style="max-width: 600px; border: 1px solid var(--border-dark-strong);">
-        <button class="modal-close" id="home-player-modal-close">&times;</button>
-        <div id="home-player-modal-body"></div>
-      </div>
-    </div>
-  `;
-
-  const modal = container.querySelector('#home-player-modal');
-  const modalBody = container.querySelector('#home-player-modal-body');
-  const modalClose = container.querySelector('#home-player-modal-close');
-
-  container.querySelectorAll('.starter-card').forEach(card => {
-    card.onclick = async () => {
-      const id = card.getAttribute('data-id');
-      const player = await window.LykosDB.getPlayerById(id);
-      if (!player) return;
-
-      modalBody.innerHTML = `
-        <div style="display: flex; gap: 1.25rem; align-items: start; margin-bottom: 1.25rem;">
-          <img src="${player.photo_url}" alt="${player.nickname}" style="width: 110px; height: 110px; border-radius: var(--radius-xs); object-fit: cover; border: 1px solid var(--border-dark);">
-          <div>
-            <span class="game-badge" style="position: static; margin-bottom: 4px; display: inline-block;">${player.game}</span>
-            <h2 style="font-family: var(--font-heading); font-size: 1.8rem; color: white;">${player.nickname}</h2>
-            <div style="font-size: 0.85rem; color: var(--text-muted-light);">${player.name}</div>
-            <div style="color: var(--accent-neon); font-size: 0.8rem; font-weight: 700; margin-top: 4px; text-transform: uppercase;">${player.role}</div>
-          </div>
-        </div>
-
-        <div style="margin-bottom: 1.25rem;">
-          <p style="font-size: 0.88rem; line-height: 1.6; color: white;">${player.bio || 'Atleta titular da organização.'}</p>
-        </div>
-
-        <div style="display: flex; gap: 10px;">
-          ${player.social_x ? `<a href="${player.social_x}" target="_blank" class="btn-secondary" style="padding: 5px 12px; font-size: 0.75rem;">X (Twitter)</a>` : ''}
-          ${player.social_instagram ? `<a href="${player.social_instagram}" target="_blank" class="btn-secondary" style="padding: 5px 12px; font-size: 0.75rem;">Instagram</a>` : ''}
-        </div>
-      `;
-
-      modal.style.display = 'flex';
-    };
-  });
-
-  if (modalClose) {
-    modalClose.onclick = () => modal.style.display = 'none';
-  }
-  if (modal) {
-    modal.onclick = (e) => {
-      if (e.target === modal) modal.style.display = 'none';
-    };
-  }
+  // Clean router navigation handled by <a> links to /elenco
 };
