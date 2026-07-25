@@ -46,6 +46,12 @@ window.renderContatoPage = async function (container) {
             </div>
 
             <div>
+              <label style="display: block; color: var(--text-muted-light); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Assunto *</label>
+              <input id="contact-subject" type="text" placeholder="Ex: Peneira, Parceria, Imprensa..." required
+                style="width: 100%; padding: 12px 14px; background: var(--bg-dark-base); border: 1px solid var(--border-dark); border-radius: var(--radius-xs); color: white; font-size: 0.95rem; outline: none; box-sizing: border-box;">
+            </div>
+
+            <div>
               <label style="display: block; color: var(--text-muted-light); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Mensagem *</label>
               <textarea id="contact-message" placeholder="Escreva sua mensagem aqui..." required rows="5"
                 style="width: 100%; padding: 12px 14px; background: var(--bg-dark-base); border: 1px solid var(--border-dark); border-radius: var(--radius-xs); color: white; font-size: 0.95rem; outline: none; resize: vertical; box-sizing: border-box;"></textarea>
@@ -108,11 +114,12 @@ function attachContactFormHandler() {
 
     const name    = document.getElementById('contact-name').value.trim();
     const email   = document.getElementById('contact-email').value.trim();
+    const subject = document.getElementById('contact-subject').value.trim();
     const message = document.getElementById('contact-message').value.trim();
     const btn     = document.getElementById('contact-submit');
     const feedback = document.getElementById('contact-feedback');
 
-    if (!name || !email || !message) return;
+    if (!name || !email || !subject || !message) return;
 
     btn.disabled = true;
     btn.textContent = 'Enviando...';
@@ -122,6 +129,7 @@ function attachContactFormHandler() {
       await window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
         from_name:  name,
         from_email: email,
+        subject:    subject,
         message:    message
       });
 
@@ -129,7 +137,7 @@ function attachContactFormHandler() {
       feedback.style.background = 'rgba(34,197,94,0.12)';
       feedback.style.border = '1px solid rgba(34,197,94,0.3)';
       feedback.style.color = '#22c55e';
-      feedback.textContent = '✅ Mensagem enviada com sucesso! Entraremos em contato em breve.';
+      feedback.textContent = 'Mensagem enviada com sucesso. Entraremos em contato em breve.';
       form.reset();
     } catch (err) {
       console.error('[EmailJS] Error:', err);
@@ -137,7 +145,7 @@ function attachContactFormHandler() {
       feedback.style.background = 'rgba(239,68,68,0.12)';
       feedback.style.border = '1px solid rgba(239,68,68,0.3)';
       feedback.style.color = '#ef4444';
-      feedback.textContent = '❌ Erro ao enviar mensagem. Tente novamente ou entre em contato pelas redes sociais.';
+      feedback.textContent = 'Erro ao enviar a mensagem. Tente novamente ou entre em contato pelas redes sociais.';
     } finally {
       btn.disabled = false;
       btn.textContent = 'Enviar Mensagem →';
