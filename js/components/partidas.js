@@ -56,19 +56,14 @@ window.renderPartidasPage = async function (container) {
     else if (statusStr === 'FINISHED') highlightTitle = 'ÚLTIMO RESULTADO';
 
     return `
-      <div class="featured-match-hero">
-        <div class="featured-match-header">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span class="featured-title-tag">${highlightTitle}</span>
-            <span class="game-badge" style="position: static;">${match.game || 'E-Sports'}</span>
-          </div>
-          <span class="match-status-pill status-${statusLower}">
-            ${statusStr === 'LIVE' ? '🔴 AO VIVO' : statusStr}
+      <div class="glass-card" style="padding: 2.25rem; border: 1px solid var(--border-dark-strong); margin-bottom: 3rem; position: relative;">
+        <div class="featured-match-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <span class="featured-title-tag" style="background: rgba(168, 85, 247, 0.15); border: 1px solid var(--border-dark-strong); color: var(--accent-neon); font-family: var(--font-heading); font-size: 0.78rem; font-weight: 700; padding: 6px 14px; border-radius: var(--radius-xs); text-transform: uppercase;">
+            ${highlightTitle}
           </span>
-        </div>
-
-        <div class="featured-tournament-info">
-          ${match.tournament_name || 'Torneio Oficial'} ${match.format ? '• ' + match.format : ''}
+          <span class="featured-tournament-info" style="font-family: var(--font-heading); font-size: 0.85rem; color: var(--text-muted-light); font-weight: 600;">
+            ${match.game || 'E-Sports'} • ${match.tournament_name || 'Confronto Oficial'}
+          </span>
         </div>
 
         <div class="match-summary-card featured-card-inner">

@@ -27,7 +27,8 @@
   --border-dark-strong: rgba(168, 85, 247, 0.45);
   --border-light: #e2e8f0;
 
-  --font-heading: 'Space Grotesk', -apple-system, sans-serif;
+  --font-heading: 'Montserrat', -apple-system, sans-serif;
+  --font-tech: 'Rajdhani', sans-serif;
   --font-body: 'Inter', -apple-system, sans-serif;
 
   --radius-xs: 8px;

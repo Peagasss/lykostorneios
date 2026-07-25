@@ -10,30 +10,36 @@ window.renderAdminPage = async function (container) {
 
   if (!currentUser) {
     container.innerHTML = `
-      <section class="admin-container">
-        <div class="container" style="max-width: 440px;">
-          <div style="background: var(--bg-dark-surface); border: 1px solid var(--border-dark-strong); border-radius: var(--radius-sm); padding: 2.25rem;">
-            <div style="text-align: center; margin-bottom: 2rem;">
-              <div class="brand-logo" style="justify-content: center; font-size: 2rem; margin-bottom: 8px;">
-                LYK<span class="logo-accent">OS</span>
+      <section class="admin-container" style="position: relative; min-height: 90vh; display: flex; align-items: center; justify-content: center; overflow: hidden; padding-top: 100px;">
+        <!-- CYBER GLOW ARC BACKGROUND -->
+        <div class="hero-glow-arc-container">
+          <div class="hero-glow-arc-bg" style="width: 700px; height: 400px; top: -150px;"></div>
+          <div class="hero-glow-arc-line" style="width: 650px; height: 320px; top: -120px;"></div>
+        </div>
+
+        <div class="container" style="max-width: 460px; position: relative; z-index: 2;">
+          <div class="glass-card" style="padding: 2.75rem 2.25rem; border: 1px solid var(--border-dark-strong); box-shadow: 0 20px 50px rgba(0,0,0,0.6);">
+            <div style="text-align: center; margin-bottom: 2.25rem;">
+              <div class="section-title-badge" style="margin-bottom: 12px; font-size: 0.72rem; padding: 4px 12px;">
+                RESTRICTED AREA
               </div>
-              <h2 style="font-size: 1.35rem;">Painel de Gestão</h2>
-              <p style="font-size: 0.8rem; color: var(--text-muted-light); margin-top: 4px;">Área restrita a membros autorizados.</p>
+              <h2 style="font-family: var(--font-heading); font-size: 1.8rem; font-weight: 800; letter-spacing: -0.02em; color: #ffffff;">PAINEL DE <span style="color: var(--accent-neon);">GESTÃO</span></h2>
+              <p style="font-size: 0.85rem; color: var(--text-muted-light); margin-top: 6px;">Autenticação segura de membros autorizados.</p>
             </div>
 
             <form id="auth-form">
-              <div class="form-group">
-                <label class="form-label">E-mail</label>
-                <input type="email" id="auth-email" class="form-input" placeholder="seu-email@lykos-esports.com" required>
+              <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label class="form-label" style="font-family: var(--font-heading); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted-light); margin-bottom: 6px; display: block;">E-mail Corporativo</label>
+                <input type="email" id="auth-email" class="form-input" placeholder="admin@lykos-esports.com" required style="background: rgba(10, 8, 20, 0.8); border: 1px solid var(--border-dark-strong); color: #ffffff; padding: 12px 16px; border-radius: var(--radius-xs); width: 100%; box-sizing: border-box;">
               </div>
 
-              <div class="form-group">
-                <label class="form-label">Senha</label>
-                <input type="password" id="auth-password" class="form-input" placeholder="••••••••••••••••" required>
+              <div class="form-group" style="margin-bottom: 1.75rem;">
+                <label class="form-label" style="font-family: var(--font-heading); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted-light); margin-bottom: 6px; display: block;">Senha de Acesso</label>
+                <input type="password" id="auth-password" class="form-input" placeholder="••••••••••••••••" required style="background: rgba(10, 8, 20, 0.8); border: 1px solid var(--border-dark-strong); color: #ffffff; padding: 12px 16px; border-radius: var(--radius-xs); width: 100%; box-sizing: border-box;">
               </div>
 
-              <button type="submit" class="btn-primary" style="width: 100%;">Acessar Painel &rarr;</button>
-              <div id="auth-error" style="color: #ff4d4d; font-size: 0.8rem; margin-top: 1rem; text-align: center; display: none;"></div>
+              <button type="submit" class="btn-primary" style="width: 100%; padding: 14px; font-size: 0.88rem; box-shadow: 0 0 25px rgba(168, 85, 247, 0.45); border-radius: var(--radius-xs);">Entrar no Painel &rarr;</button>
+              <div id="auth-error" style="color: #ff4d4d; font-size: 0.82rem; margin-top: 1.25rem; text-align: center; display: none; padding: 8px; background: rgba(255, 77, 77, 0.1); border: 1px solid rgba(255, 77, 77, 0.3); border-radius: var(--radius-xs);"></div>
             </form>
           </div>
         </div>

@@ -11,48 +11,52 @@ window.renderSobrePage = async function (container) {
   ]);
 
   container.innerHTML = `
-    <section class="section-dark-1" style="padding-top: 130px; text-align: center;">
-      <div class="container">
-        <h1 class="section-heading">Sobre a <span>${settings.team_name}</span></h1>
-        <p class="section-subtitle" style="margin: 0 auto 2rem;">
+    <section class="section-dark-1" style="padding-top: 130px; text-align: center; position: relative; overflow: hidden;">
+      <div class="hero-glow-arc-container">
+        <div class="hero-glow-arc-bg" style="width: 700px; height: 350px; top: -140px;"></div>
+      </div>
+      <div class="container" style="position: relative; z-index: 2;">
+        <h1 class="section-heading" style="font-size: 3.2rem;">Sobre a <span>${settings.team_name}</span></h1>
+        <p class="section-subtitle" style="margin: 0 auto 2.5rem; max-width: 750px; font-size: 1.1rem; line-height: 1.7;">
           ${aboutSettings.history_text}
         </p>
       </div>
     </section>
 
-    <section class="section-light-1">
+    <section class="section-dark-2">
       <div class="container">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;">
-          <div>
-            <h2 class="section-heading section-heading-dark">Mentalidade <span>Vencedora</span></h2>
-            <p style="margin-bottom: 1.5rem; color: var(--text-muted-dark); line-height: 1.7;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3.5rem; align-items: center;">
+          <div class="glass-card" style="padding: 2.5rem;">
+            <h2 class="section-heading" style="font-size: 2rem;">Mentalidade <span>Vencedora</span></h2>
+            <p style="margin-bottom: 2rem; color: var(--text-muted-light); line-height: 1.7; font-size: 0.95rem;">
               ${aboutSettings.mission_text}
             </p>
-            <div style="display: flex; gap: 2rem;">
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; text-align: center; border-top: 1px solid var(--border-dark); padding-top: 1.5rem;">
               <div>
-                <h3 style="font-size: 2rem; color: var(--primary-purple); font-family: var(--font-heading);">${aboutSettings.stat_trophies}</h3>
-                <p style="font-size: 0.8rem; color: var(--text-muted-dark);">Troféus Oficiais</p>
+                <div style="font-family: var(--font-tech); font-size: 2.4rem; font-weight: 700; color: var(--accent-neon); line-height: 1;">${aboutSettings.stat_trophies}</div>
+                <p style="font-size: 0.78rem; color: var(--text-muted-light); text-transform: uppercase; margin-top: 4px; font-weight: 600;">Troféus</p>
               </div>
               <div>
-                <h3 style="font-size: 2rem; color: var(--primary-purple); font-family: var(--font-heading);">${aboutSettings.stat_winrate}</h3>
-                <p style="font-size: 0.8rem; color: var(--text-muted-dark);">Winrate Histórico</p>
+                <div style="font-family: var(--font-tech); font-size: 2.4rem; font-weight: 700; color: var(--accent-neon); line-height: 1;">${aboutSettings.stat_winrate}</div>
+                <p style="font-size: 0.78rem; color: var(--text-muted-light); text-transform: uppercase; margin-top: 4px; font-weight: 600;">Winrate</p>
               </div>
               <div>
-                <h3 style="font-size: 2rem; color: var(--primary-purple); font-family: var(--font-heading);">${aboutSettings.stat_community}</h3>
-                <p style="font-size: 0.8rem; color: var(--text-muted-dark);">Fãs Conectados</p>
+                <div style="font-family: var(--font-tech); font-size: 2.4rem; font-weight: 700; color: var(--accent-neon); line-height: 1;">${aboutSettings.stat_community}</div>
+                <p style="font-size: 0.78rem; color: var(--text-muted-light); text-transform: uppercase; margin-top: 4px; font-weight: 600;">Comunidade</p>
               </div>
             </div>
           </div>
 
-          <div>
-            <img src="${aboutSettings.about_image_url || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80'}" alt="LYKOS Arena" style="width: 100%; border-radius: var(--radius-xs); border: 1px solid var(--border-light); max-height: 420px; object-fit: cover;">
+          <div style="position: relative;">
+            <img src="${aboutSettings.about_image_url || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80'}" alt="LYKOS Arena" style="width: 100%; border-radius: var(--radius-md); border: 1px solid var(--border-dark-strong); max-height: 420px; object-fit: cover; box-shadow: 0 15px 40px rgba(0,0,0,0.5);">
           </div>
         </div>
       </div>
     </section>
 
     <!-- TROPHY CABINET -->
-    <section class="section-dark-2">
+    <section class="section-dark-1">
       <div class="container">
         <h2 class="section-heading">Nossas <span>Conquistas</span></h2>
         <p class="section-subtitle">Títulos históricos conquistados pelos nossos atletas nas principais arenas mundiais.</p>
