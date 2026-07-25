@@ -124,6 +124,12 @@ module.exports = async (req, res) => {
         ON CONFLICT (id) DO UPDATE SET
           email = EXCLUDED.email, "fullName" = EXCLUDED."fullName", password = EXCLUDED.password, permissions = EXCLUDED.permissions, is_master = EXCLUDED.is_master;
       `;
+    } else if (entity === 'login_logs') {
+      await sql`
+        INSERT INTO login_logs (id, user_email, user_name, timestamp)
+        VALUES (${String(item.id)}, ${item.user_email}, ${item.user_name || ''}, ${item.timestamp})
+        ON CONFLICT (id) DO NOTHING;
+      `;
     }
 
     return res.status(200).json({ success: true });

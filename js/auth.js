@@ -11,10 +11,29 @@
     'about', 'galeria', 'social', 'branding', 'roles'
   ];
 
+  const SESSION_EXPIRY_HOURS = 8;
+
   window.LykosAuth = {
     getCurrentUser() {
-      const user = localStorage.getItem(CURRENT_USER_KEY);
-      return user ? JSON.parse(user) : null;
+      const raw = localStorage.getItem(CURRENT_USER_KEY);
+      if (!raw) return null;
+      try {
+        const parsed = JSON.parse(raw);
+        // Check token expiry
+        if (parsed._expiresAt && Date.now() > parsed._expiresAt) {
+          localStorage.removeItem(CURRENT_USER_KEY);
+          return null;
+        }
+        return parsed;
+      } catch (e) {
+        return null;
+      }
+    },
+
+    _saveSession(user) {
+      const session = { ...user, _expiresAt: Date.now() + SESSION_EXPIRY_HOURS * 60 * 60 * 1000 };
+      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(session));
+      return session;
     },
 
     async login(email, password) {
@@ -32,15 +51,8 @@
           permissions: ALL_PERMISSIONS,
           password: 'admin123'
         };
-        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(masterUser));
-        if (window.LykosDB && window.LykosDB.addLoginLog) {
-          await window.LykosDB.addLoginLog({
-            id: 'log_' + Date.now(),
-            user_email: masterUser.email,
-            user_name: masterUser.fullName,
-            timestamp: new Date().toISOString()
-          });
-        }
+        this._saveSession(masterUser);
+        this._recordLog(masterUser);
         window.dispatchEvent(new CustomEvent('lykos_auth_changed', { detail: masterUser }));
         return masterUser;
       }
@@ -54,16 +66,8 @@
         if (!user.permissions) {
           user.permissions = user.is_master ? ALL_PERMISSIONS : ['partidas'];
         }
-        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
-        // Fire log in background
-        if (window.LykosDB && window.LykosDB.addLoginLog) {
-          window.LykosDB.addLoginLog({
-            id: 'log_' + Date.now(),
-            user_email: user.email,
-            user_name: user.fullName || user.email,
-            timestamp: new Date().toISOString()
-          }).catch(() => {});
-        }
+        this._saveSession(user);
+        this._recordLog(user);
         window.dispatchEvent(new CustomEvent('lykos_auth_changed', { detail: user }));
         return user;
       }
@@ -92,9 +96,7 @@
 
       user = await fetchApiPromise;
 
-      if (!user) {
-        throw new Error('E-mail ou senha incorretos.');
-      }
+      if (!user) throw new Error('E-mail ou senha incorretos.');
 
       if (!user.permissions) {
         user.permissions = user.is_master ? ALL_PERMISSIONS : ['partidas'];
@@ -103,36 +105,31 @@
       // Sync local list
       localUsers.push(user);
       localStorage.setItem('lykos_users', JSON.stringify(localUsers));
-      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
-
-      if (window.LykosDB && window.LykosDB.addLoginLog) {
-        window.LykosDB.addLoginLog({
-          id: 'log_' + Date.now(),
-          user_email: user.email,
-          user_name: user.fullName || user.email,
-          timestamp: new Date().toISOString()
-        }).catch(() => {});
-      }
-
+      this._saveSession(user);
+      this._recordLog(user);
       window.dispatchEvent(new CustomEvent('lykos_auth_changed', { detail: user }));
       return user;
+    },
 
-      // Ensure user permissions array exists
-      if (!user.permissions) {
-        user.permissions = user.is_master ? ALL_PERMISSIONS : ['partidas'];
-      }
-
-      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
-      if (window.LykosDB && window.LykosDB.addLoginLog) {
-        await window.LykosDB.addLoginLog({
-          id: 'log_' + Date.now(),
-          user_email: user.email,
-          user_name: user.fullName || user.email,
-          timestamp: new Date().toISOString()
-        });
-      }
-      window.dispatchEvent(new CustomEvent('lykos_auth_changed', { detail: user }));
-      return user;
+    _recordLog(user) {
+      const log = {
+        id: 'log_' + Date.now(),
+        user_email: user.email,
+        user_name: user.fullName || user.email,
+        timestamp: new Date().toISOString()
+      };
+      // Save to localStorage
+      const raw = localStorage.getItem('lykos_login_logs');
+      const logs = raw ? JSON.parse(raw) : [];
+      logs.unshift(log);
+      localStorage.setItem('lykos_login_logs', JSON.stringify(logs.slice(0, 200)));
+      // Save to Neon Postgres in background
+      const baseUrl = (window.LYKOS_CONFIG && window.LYKOS_CONFIG.API_BASE_URL) || '';
+      fetch(`${baseUrl}/api/save`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ entity: 'login_logs', item: log })
+      }).catch(() => {});
     },
 
     logout() {

@@ -21,7 +21,7 @@ module.exports = async (req, res) => {
       const [
         settingsRes, matchesRes, rosterRes, staffRes,
         modalitiesRes, trophiesRes, aboutRes, galleryRes,
-        socialRes, recentRes, communityRes
+        socialRes, recentRes, communityRes, loginLogsRes
       ] = await Promise.all([
         sql`SELECT * FROM site_settings WHERE id = 1 LIMIT 1;`,
         sql`SELECT * FROM matches;`,
@@ -33,7 +33,8 @@ module.exports = async (req, res) => {
         sql`SELECT * FROM gallery;`,
         sql`SELECT * FROM social_feeds;`,
         sql`SELECT * FROM recent_tournaments;`,
-        sql`SELECT * FROM community_tournaments;`
+        sql`SELECT * FROM community_tournaments;`,
+        sql`SELECT * FROM login_logs ORDER BY timestamp DESC LIMIT 200;`
       ]);
 
       const payload = {
@@ -48,6 +49,7 @@ module.exports = async (req, res) => {
         social: socialRes.rows || [],
         recentTournaments: recentRes.rows || [],
         communityTournaments: communityRes.rows || [],
+        loginLogs: loginLogsRes.rows || [],
         provider: 'neon-postgres',
         updatedAt: new Date().toISOString()
       };
