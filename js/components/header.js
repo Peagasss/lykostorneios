@@ -23,13 +23,13 @@ window.renderHeader = async function () {
         </a>
 
         <ul class="nav-menu" id="nav-menu">
-          <li><a href="#/" class="nav-link">Home</a></li>
-          <li><a href="#/sobre" class="nav-link">Sobre</a></li>
-          <li><a href="#/elenco" class="nav-link">Elenco</a></li>
-          <li><a href="#/partidas" class="nav-link">Partidas</a></li>
-          <li><a href="#/galeria" class="nav-link">Galeria</a></li>
-          ${showTorneios ? `<li><a href="#/torneios" class="nav-link">Torneios</a></li>` : ''}
-          <li><a href="#/contato" class="nav-link">Contato</a></li>
+          <li><a href="/" class="nav-link">Home</a></li>
+          <li><a href="/sobre" class="nav-link">Sobre</a></li>
+          <li><a href="/elenco" class="nav-link">Elenco</a></li>
+          <li><a href="/partidas" class="nav-link">Partidas</a></li>
+          <li><a href="/galeria" class="nav-link">Galeria</a></li>
+          ${showTorneios ? `<li><a href="/torneios" class="nav-link">Torneios</a></li>` : ''}
+          <li><a href="/contato" class="nav-link">Contato</a></li>
           <li>
             <button class="theme-toggle-btn" id="theme-toggle" title="Alternar Tema Claro / Escuro">
               ${currentTheme === 'dark' ? '☀️' : '🌙'}

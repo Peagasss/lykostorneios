@@ -1,6 +1,6 @@
 /* ==========================================================================
-   LYKOS E-SPORTS - CLIENT SIDE SPA ROUTER (Fail-Safe Error Handler)
-   Routes: #/, #/sobre, #/elenco, #/partidas, #/partidas/:id, #/galeria, #/contato, #/admin
+   LYKOS E-SPORTS - CLIENT SIDE SPA ROUTER (HTML5 History API + Hash Fallback)
+   Clean URLs: /sobre, /elenco, /partidas, /partidas/:id, /galeria, /contato, /admin
    ========================================================================== */
 
 (function () {
@@ -8,7 +8,25 @@
     constructor() {
       this.routes = [];
       this.currentRoute = null;
+
+      // Handle back / forward browser navigation
+      window.addEventListener('popstate', () => this.handleRoute());
       window.addEventListener('hashchange', () => this.handleRoute());
+
+      // Intercept anchor click navigation for clean URLs
+      document.addEventListener('click', (e) => {
+        const anchor = e.target.closest('a');
+        if (!anchor) return;
+        const href = anchor.getAttribute('href');
+        if (!href) return;
+
+        // Clean link click (e.g., href="/sobre" or href="#/sobre")
+        if (href.startsWith('/') || href.startsWith('#/')) {
+          e.preventDefault();
+          const targetPath = href.startsWith('#') ? href.slice(1) : href;
+          this.navigate(targetPath);
+        }
+      });
     }
 
     addRoute(pattern, renderFunc) {
@@ -22,10 +40,19 @@
       this.routes.push({ pattern, regex, paramNames, renderFunc });
     }
 
+    getPath() {
+      // Prefer clean pathname, fallback to hash if present
+      if (window.location.hash && window.location.hash.startsWith('#/')) {
+        return window.location.hash.slice(1);
+      }
+      let pathname = window.location.pathname || '/';
+      if (!pathname.startsWith('/')) pathname = '/' + pathname;
+      return pathname;
+    }
+
     async handleRoute() {
       try {
-        let hash = window.location.hash.slice(1) || '/';
-        if (!hash.startsWith('/')) hash = '/' + hash;
+        let path = this.getPath();
 
         const appContainer = document.getElementById('app-content');
         if (!appContainer) return;
@@ -33,15 +60,15 @@
         window.scrollTo(0, 0);
 
         for (const route of this.routes) {
-          const match = hash.match(route.regex);
+          const match = path.match(route.regex);
           if (match) {
             const params = {};
             route.paramNames.forEach((name, index) => {
               params[name] = match[index + 1];
             });
 
-            this.currentRoute = hash;
-            this.updateActiveNavLinks(hash);
+            this.currentRoute = path;
+            this.updateActiveNavLinks(path);
             await route.renderFunc(appContainer, params);
             return;
           }
@@ -71,12 +98,12 @@
       }
     }
 
-    updateActiveNavLinks(hash) {
-      const links = document.querySelectorAll('.nav-link');
+    updateActiveNavLinks(currentPath) {
+      const links = document.querySelectorAll('.nav-link, a[href]');
       links.forEach(link => {
         const href = link.getAttribute('href') || '';
         const targetRoute = href.replace('#', '');
-        if (hash === targetRoute || (targetRoute !== '/' && hash.startsWith(targetRoute))) {
+        if (currentPath === targetRoute || (targetRoute !== '/' && currentPath.startsWith(targetRoute))) {
           link.classList.add('active');
         } else {
           link.classList.remove('active');
@@ -85,7 +112,11 @@
     }
 
     navigate(path) {
-      window.location.hash = path;
+      if (!path.startsWith('/')) path = '/' + path;
+      if (window.location.pathname !== path) {
+        window.history.pushState({}, '', path);
+      }
+      this.handleRoute();
     }
   }
 

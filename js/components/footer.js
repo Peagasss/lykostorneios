@@ -27,14 +27,14 @@ window.renderFooter = async function () {
           </a>
 
           <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
-            <a href="#/" style="font-size: 0.82rem; color: var(--text-muted-light);">Home</a>
-            <a href="#/sobre" style="font-size: 0.82rem; color: var(--text-muted-light);">Sobre</a>
-            <a href="#/elenco" style="font-size: 0.82rem; color: var(--text-muted-light);">Elenco</a>
-            <a href="#/partidas" style="font-size: 0.82rem; color: var(--text-muted-light);">Partidas</a>
-            <a href="#/galeria" style="font-size: 0.82rem; color: var(--text-muted-light);">Galeria</a>
-            ${showTorneios ? `<a href="#/torneios" style="font-size: 0.82rem; color: var(--text-muted-light);">Torneios</a>` : ''}
-            <a href="#/contato" style="font-size: 0.82rem; color: var(--text-muted-light);">Contato</a>
-            <a href="#/admin" style="font-size: 0.82rem; color: var(--accent-neon); font-weight: 600;">Painel Admin</a>
+            <a href="/" style="font-size: 0.82rem; color: var(--text-muted-light);">Home</a>
+            <a href="/sobre" style="font-size: 0.82rem; color: var(--text-muted-light);">Sobre</a>
+            <a href="/elenco" style="font-size: 0.82rem; color: var(--text-muted-light);">Elenco</a>
+            <a href="/partidas" style="font-size: 0.82rem; color: var(--text-muted-light);">Partidas</a>
+            <a href="/galeria" style="font-size: 0.82rem; color: var(--text-muted-light);">Galeria</a>
+            ${showTorneios ? `<a href="/torneios" style="font-size: 0.82rem; color: var(--text-muted-light);">Torneios</a>` : ''}
+            <a href="/contato" style="font-size: 0.82rem; color: var(--text-muted-light);">Contato</a>
+            <a href="/admin" style="font-size: 0.82rem; color: var(--accent-neon); font-weight: 600;">Painel Admin</a>
           </div>
 
           <div style="display: flex; gap: 12px; flex-wrap: wrap;">
