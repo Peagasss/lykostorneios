@@ -158,31 +158,60 @@ function getApiUrl(endpoint) {
   return `${baseUrl}${endpoint}`;
 }
 
+let _cachedBundle = null;
 let _sharedDataPromise = null;
 let _sharedDataTimestamp = 0;
 
-async function fetchFullDataBundle() {
+// Try to initialize from sessionStorage for instant zero-latency first render
+try {
+  const rawSessionData = sessionStorage.getItem('lykos_bundle_cache');
+  if (rawSessionData) {
+    _cachedBundle = JSON.parse(rawSessionData);
+  }
+} catch (e) {}
+
+async function fetchFullDataBundle(forceFresh = false) {
   const now = Date.now();
+  
+  // Return cached bundle instantly if available and fresh (within 30s), unless forced
+  if (!forceFresh && _cachedBundle && (now - _sharedDataTimestamp < 30000)) {
+    return _cachedBundle;
+  }
+  
   if (_sharedDataPromise && (now - _sharedDataTimestamp < 2000)) {
     return _sharedDataPromise;
   }
+  
   _sharedDataTimestamp = now;
   _sharedDataPromise = (async () => {
     try {
       const apiRes = await fetch(getApiUrl('/api/data?t=' + now));
-      if (!apiRes.ok) {
-        throw new Error(`Erro HTTP ${apiRes.status}`);
+      if (!apiRes.ok) throw new Error(`Erro HTTP ${apiRes.status}`);
+      const data = await apiRes.json();
+      if (data) {
+        _cachedBundle = data;
+        try {
+          sessionStorage.setItem('lykos_bundle_cache', JSON.stringify(data));
+        } catch (e) {}
       }
-      return await apiRes.json();
+      return _cachedBundle;
     } catch (e) {
-      console.error('[LykosDB] Strict Cloud Fetch Error:', e);
-      return null;
+      console.error('[LykosDB] Cloud Fetch Error:', e);
+      return _cachedBundle;
     }
   })();
   return _sharedDataPromise;
 }
 
-// NO MORE LOCALSTORAGE CACHING FOR BUSINESS DATA
+function invalidateBundleCache() {
+  _cachedBundle = null;
+  _sharedDataTimestamp = 0;
+  _sharedDataPromise = null;
+  try {
+    sessionStorage.removeItem('lykos_bundle_cache');
+  } catch (e) {}
+}
+
 async function fetchFromApi(tableName, fallbackDefault) {
   const bundle = await fetchFullDataBundle();
   if (bundle) {
@@ -221,6 +250,9 @@ async function saveToApi(tableName, singleItem, eventName = null) {
     throw new Error(errData.error || `Erro HTTP ${apiRes.status} da Azure`);
   }
   
+  invalidateBundleCache();
+  await fetchFullDataBundle(true);
+
   if (eventName) {
     window.dispatchEvent(new CustomEvent(eventName, { detail: singleItem }));
   }
@@ -237,6 +269,9 @@ async function deleteFromApi(tableName, itemId) {
     const errData = await apiRes.json().catch(() => ({}));
     throw new Error(errData.error || `Erro HTTP ${apiRes.status} da Azure`);
   }
+
+  invalidateBundleCache();
+  await fetchFullDataBundle(true);
 }
 
 let _isPollingStarted = false;
