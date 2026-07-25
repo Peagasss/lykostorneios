@@ -64,8 +64,21 @@ window.renderGaleriaPage = async function (container) {
                   ${feed.post_url ? `<a href="${feed.post_url}" target="_blank" style="font-size: 0.78rem; color: var(--accent-neon); font-weight: 700;">Ver no ${feed.platform} &rarr;</a>` : ''}
                 </div>
                 <h4 style="font-family: var(--font-heading); font-size: 1.1rem; color: white; margin-bottom: 1rem;">${feed.title}</h4>
-                <div style="border-radius: var(--radius-xs); overflow: hidden; background: #000;">
-                  ${feed.embed_url ? `<iframe src="${feed.embed_url}" width="100%" height="380" frameborder="0" scrolling="no" allowtransparency="true" style="border: none;"></iframe>` : ''}
+                <div class="embed-container" style="border-radius: var(--radius-xs); overflow: hidden; background: #000; position: relative;">
+                  ${(() => {
+                    const embed = (feed.embed_url || '').trim();
+                    if (!embed) return '';
+                    if (embed.includes('<iframe') || embed.includes('<blockquote')) {
+                      return embed;
+                    }
+                    let finalUrl = embed;
+                    if (embed.includes('youtube.com/watch?v=')) {
+                      finalUrl = embed.replace('watch?v=', 'embed/');
+                    } else if (embed.includes('youtu.be/')) {
+                      finalUrl = embed.replace('youtu.be/', 'youtube.com/embed/');
+                    }
+                    return `<iframe src="${finalUrl}" width="100%" height="320" frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" style="border: none; width: 100%;"></iframe>`;
+                  })()}
                 </div>
               </div>
             `).join('')}
@@ -119,5 +132,34 @@ window.renderGaleriaPage = async function (container) {
     newsModal.onclick = (e) => {
       if (e.target === newsModal) newsModal.style.display = 'none';
     };
+  }
+
+  // Trigger Instagram & Twitter embed parsers if present
+  if (container.querySelector('.instagram-media')) {
+    if (window.instgrm && window.instgrm.Embeds) {
+      window.instgrm.Embeds.process();
+    } else {
+      let script = document.querySelector('script[src*="instagram.com/embed.js"]');
+      if (!script) {
+        script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.instagram.com/embed.js';
+        document.body.appendChild(script);
+      }
+    }
+  }
+
+  if (container.querySelector('.twitter-tweet') || container.querySelector('.x-tweet')) {
+    if (window.twttr && window.twttr.widgets) {
+      window.twttr.widgets.load();
+    } else {
+      let script = document.querySelector('script[src*="platform.twitter.com/widgets.js"]');
+      if (!script) {
+        script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://platform.twitter.com/widgets.js';
+        document.body.appendChild(script);
+      }
+    }
   }
 };
