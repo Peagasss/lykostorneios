@@ -23,18 +23,13 @@
   <!-- Design System & Stylesheet -->
   <link rel="stylesheet" href="css/style.css">
 
-  <!-- Sentry Error Monitoring (GitHub Student Pack) -->
-  <script
-    src="https://js.sentry-cdn.com/61581a6dd8e67c9a918cc24d05eab869.min.js"
-    crossorigin="anonymous"
-    data-lazy="no"
-  ></script>
+  <!-- Sentry Error Monitoring via jsDelivr CDN + Tunnel (Anti-AdBlock) -->
+  <script src="https://cdn.jsdelivr.net/npm/@sentry/browser@8.0.0/build/bundle.min.js" crossorigin="anonymous"></script>
   <script>
     if (window.Sentry) {
-      Sentry.onLoad(function() {
-        Sentry.init({
-          tunnel: '/api/sentry-tunnel'
-        });
+      Sentry.init({
+        dsn: "https://61581a6dd8e67c9a918cc24d05eab869@o4511793090789376.ingest.us.sentry.io/4511796524613632",
+        tunnel: "/api/sentry-tunnel"
       });
     }
   </script>
