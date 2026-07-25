@@ -57,7 +57,7 @@
         const appContainer = document.getElementById('app-content');
         if (!appContainer) return;
 
-        window.scrollTo(0, 0);
+        const isRouteChange = this.currentRoute !== path;
 
         for (const route of this.routes) {
           const match = path.match(route.regex);
@@ -67,6 +67,7 @@
               params[name] = match[index + 1];
             });
 
+            if (isRouteChange) window.scrollTo({ top: 0, behavior: 'instant' });
             this.currentRoute = path;
             this.updateActiveNavLinks(path);
             await route.renderFunc(appContainer, params);
@@ -75,6 +76,7 @@
         }
 
         // Default fallback to home if route not found
+        if (isRouteChange) window.scrollTo({ top: 0, behavior: 'instant' });
         this.updateActiveNavLinks('/');
         const homeRoute = this.routes.find(r => r.pattern === '/');
         if (homeRoute) await homeRoute.renderFunc(appContainer, {});
