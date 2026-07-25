@@ -21,17 +21,17 @@ window.renderElencoPage = async function (container) {
     }
 
     return filtered.map(player => `
-      <div class="player-card" data-id="${player.id}">
-        <div class="player-image-wrap">
+      <div class="glass-card glass-card-interactive player-card" data-id="${player.id}" style="padding: 1.25rem;">
+        <div class="player-image-wrap" style="border-radius: var(--radius-sm); overflow: hidden;">
           <span class="game-badge">${player.game}</span>
           <img src="${player.photo_url}" alt="${player.nickname}">
         </div>
-        <div class="player-info">
+        <div class="player-info" style="padding-top: 1rem;">
           <div class="player-role">${player.role}</div>
-          <div class="player-nickname">${player.nickname}</div>
+          <div class="player-nickname" style="font-size: 1.35rem; color: #ffffff;">${player.nickname}</div>
           <div class="player-fullname">${player.name}</div>
-          <p class="player-bio">${player.bio || ''}</p>
-          <div style="font-size: 0.75rem; color: var(--accent-neon); font-weight: 700; margin-top: 10px;">
+          <p class="player-bio" style="font-size: 0.82rem; margin-top: 6px;">${player.bio || ''}</p>
+          <div style="font-size: 0.78rem; color: var(--accent-neon); font-weight: 700; margin-top: 12px; text-transform: uppercase; letter-spacing: 0.05em;">
             Ver Ficha & Periféricos &rarr;
           </div>
         </div>

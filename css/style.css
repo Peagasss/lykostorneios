@@ -5,36 +5,38 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap');
 
 :root, [data-theme="dark"] {
-  --primary-purple: #4d00b5;
-  --accent-neon: #9d50ff;
-  --accent-hover: #6b11ff;
+  --primary-purple: #7c3aed;
+  --accent-neon: #a855f7;
+  --accent-hover: #9333ea;
+  --accent-glow: rgba(168, 85, 247, 0.4);
 
-  --bg-dark-base: #07060b;
-  --bg-dark-surface: #0e0c16;
-  --bg-dark-card: #141120;
+  --bg-dark-base: #06050c;
+  --bg-dark-surface: rgba(14, 11, 26, 0.75);
+  --bg-dark-card: rgba(22, 17, 40, 0.65);
 
   --bg-light-base: #ffffff;
   --bg-light-surface: #f8fafc;
   --bg-light-card: #ffffff;
 
   --text-light: #ffffff;
-  --text-muted-light: #9499ad;
+  --text-muted-light: #94a3b8;
   --text-dark: #0f172a;
   --text-muted-dark: #64748b;
 
-  --border-dark: #241e38;
-  --border-dark-strong: #3b325c;
+  --border-dark: rgba(147, 51, 234, 0.22);
+  --border-dark-strong: rgba(168, 85, 247, 0.45);
   --border-light: #e2e8f0;
 
   --font-heading: 'Space Grotesk', -apple-system, sans-serif;
   --font-body: 'Inter', -apple-system, sans-serif;
 
-  --radius-xs: 6px;
-  --radius-sm: 10px;
-  --radius-md: 14px;
+  --radius-xs: 8px;
+  --radius-sm: 14px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
 
   --transition-fast: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-smooth: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-smooth: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 [data-theme="light"] {
@@ -562,29 +564,177 @@ input[type="file"]::-webkit-file-upload-button:hover {
 
 @keyframes pulse-live { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
 
-/* Header & Public Nav */
+/* ==========================================================================
+   CYBER-TECH DARK MODE FUTURISTIC EXTENSIONS (Inspired by Reference)
+   ========================================================================== */
+
+/* 1. Hero Glow Arc */
+.hero-glow-arc-container {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 1400px;
+  height: 600px;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.hero-glow-arc-bg {
+  position: absolute;
+  top: -220px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 900px;
+  height: 480px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.4) 0%, rgba(124, 58, 237, 0.15) 45%, rgba(6, 5, 12, 0) 75%);
+  filter: blur(50px);
+}
+
+.hero-glow-arc-line {
+  position: absolute;
+  top: -180px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 850px;
+  height: 400px;
+  border-radius: 50%;
+  border: 2px solid rgba(192, 132, 252, 0.45);
+  box-shadow: 0 0 35px rgba(168, 85, 247, 0.6), inset 0 0 25px rgba(168, 85, 247, 0.3);
+}
+
+/* 2. Glassmorphism Card System */
+.glass-card {
+  background: var(--bg-dark-surface);
+  border: 1px solid var(--border-dark);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.5), transparent);
+  opacity: 0.6;
+}
+
+.glass-card:hover {
+  border-color: var(--border-dark-strong);
+  box-shadow: 0 10px 30px -10px rgba(168, 85, 247, 0.25);
+  transform: translateY(-3px);
+}
+
+.glass-card-interactive:hover {
+  background: rgba(124, 58, 237, 0.18) !important;
+  border-color: var(--accent-neon) !important;
+}
+
+/* 3. Big Stat Numbers (01, 02, 03) */
+.cyber-stat-card {
+  background: rgba(14, 11, 26, 0.7);
+  border: 1px solid var(--border-dark);
+  border-radius: var(--radius-md);
+  padding: 2rem;
+  position: relative;
+  transition: var(--transition-smooth);
+}
+
+.cyber-stat-card:hover {
+  border-color: var(--accent-neon);
+  box-shadow: 0 8px 25px -8px rgba(168, 85, 247, 0.3);
+}
+
+.cyber-stat-num {
+  font-family: var(--font-heading);
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1;
+  background: linear-gradient(135deg, #ffffff 0%, var(--accent-neon) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.75rem;
+}
+
+.cyber-stat-title {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+.cyber-stat-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted-light);
+  line-height: 1.5;
+}
+
+/* 4. Tech Partner Trust Pills Bar */
+.trust-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  padding: 1.25rem 2rem;
+  background: rgba(14, 11, 26, 0.8);
+  border: 1px solid var(--border-dark);
+  border-radius: var(--radius-lg);
+  margin-top: 3rem;
+  backdrop-filter: blur(12px);
+}
+
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-heading);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted-light);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.trust-item span.highlight {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* 5. Floating Accent Banner */
+.purple-highlight-section {
+  background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 50%, #7c3aed 100%);
+  border-radius: var(--radius-lg);
+  padding: 3.5rem 2.5rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 15px 40px -10px rgba(124, 58, 237, 0.4);
+}
+
+/* Header Glass Upgrade */
 .site-header {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   z-index: 1000;
-  background: var(--bg-dark-base);
+  background: rgba(6, 5, 12, 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-dark);
 }
 
-.nav-container { display: flex; align-items: center; justify-content: space-between; height: 76px; }
-.brand-logo { display: flex; align-items: center; gap: 10px; font-family: var(--font-heading); font-size: 1.6rem; font-weight: 700; color: var(--text-light); letter-spacing: 0.06em; }
-.brand-logo img { height: 38px; width: auto; }
-.brand-logo .logo-accent { color: var(--accent-neon); }
-
-.nav-menu { display: flex; align-items: center; gap: 2rem; list-style: none; }
-.nav-link { font-family: var(--font-heading); font-size: 0.82rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em; transition: var(--transition-fast); padding: 6px 0; }
-.nav-link:hover, .nav-link.active { color: var(--text-light); }
-
-.mobile-menu-toggle { display: none; background: none; color: var(--text-light); font-size: 1.4rem; }
-
-/* HERO SECTION */
 .hero-section {
   position: relative;
   min-height: 85vh;
