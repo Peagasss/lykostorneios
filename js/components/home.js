@@ -182,7 +182,6 @@ window.renderHomePage = async function (container) {
 
       </div>
     </section>
-  `;
 
     <!-- PLAYER POP-UP MODAL FOR HOME -->
     <div id="home-player-modal" class="modal-backdrop" style="display: none;">
