@@ -106,7 +106,7 @@ window.renderPartidasPage = async function (container) {
               </a>
             ` : (match.stream_url ? `
               <a href="${match.stream_url}" target="_blank" class="btn-secondary" style="padding: 10px 22px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px;">
-                <span>📺</span> Transmissão
+                Transmissão
               </a>
             ` : '')}
             <a href="/partidas/${match.id}" class="btn-primary" style="padding: 10px 22px; font-size: 0.85rem;">
@@ -179,7 +179,7 @@ window.renderPartidasPage = async function (container) {
                 </a>
               ` : (match.stream_url ? `
                 <a href="${match.stream_url}" target="_blank" class="btn-secondary" style="padding: 8px 14px; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 6px;">
-                  <span>📺</span> Transmissão
+                  Transmissão
                 </a>
               ` : '')}
               <a href="/partidas/${match.id}" class="btn-primary" style="padding: 8px 18px; font-size: 0.78rem;">
