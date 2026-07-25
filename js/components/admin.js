@@ -96,6 +96,44 @@ window.renderAdminPage = async function (container) {
     return pass.split('').sort(() => 0.5 - Math.random()).join('');
   }
 
+  function showToastSuccess(message = 'Alteração salva com sucesso!') {
+    let toast = document.getElementById('lykos-admin-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'lykos-admin-toast';
+      toast.style.cssText = `
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 99999;
+        background: rgba(14, 11, 26, 0.95);
+        border: 1px solid var(--accent-neon);
+        box-shadow: 0 10px 30px rgba(168, 85, 247, 0.4);
+        color: #ffffff;
+        padding: 14px 22px;
+        border-radius: var(--radius-xs);
+        font-family: var(--font-heading);
+        font-size: 0.9rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        transform: translateY(100px);
+        opacity: 0;
+      `;
+      document.body.appendChild(toast);
+    }
+    toast.innerHTML = `<span style="color: var(--accent-neon); font-size: 1.2rem;">✅</span> <span>${message}</span>`;
+    toast.style.transform = 'translateY(0)';
+    toast.style.opacity = '1';
+
+    setTimeout(() => {
+      toast.style.transform = 'translateY(100px)';
+      toast.style.opacity = '0';
+    }, 3500);
+  }
+
   function hasPermission(tabName) {
     if (!currentUser) return false;
     if (currentUser.is_master || (currentUser.permissions && currentUser.permissions.includes('all'))) return true;
@@ -1081,6 +1119,7 @@ window.renderAdminPage = async function (container) {
           score_opponent: 0
         };
         await window.LykosDB.saveMatch(matchData);
+        showToastSuccess('Partida salva com sucesso!');
         renderDashboard();
       };
     }
@@ -1200,6 +1239,7 @@ window.renderAdminPage = async function (container) {
               maps_json: updatedMaps
             };
             await window.LykosDB.saveMatch(updated);
+            showToastSuccess('Partida atualizada!');
           });
 
         // Attach dynamic map row handler in modal
@@ -1367,6 +1407,7 @@ window.renderAdminPage = async function (container) {
             monitor: container.querySelector('#roster-monitor').value || '',
             photo_url: photoUrl
           });
+          showToastSuccess('Atleta salvo com sucesso!');
           renderDashboard();
         } catch (err) {
           alert('Erro ao salvar jogador: ' + err.message);
@@ -1436,6 +1477,7 @@ window.renderAdminPage = async function (container) {
             monitor: form.querySelector('#pop-p-monitor').value,
             photo_url: photoUrl
           });
+          showToastSuccess('Atleta atualizado com sucesso!');
         });
       };
     });
@@ -1443,6 +1485,7 @@ window.renderAdminPage = async function (container) {
     container.querySelectorAll('.delete-roster-btn').forEach(btn => {
       btn.onclick = () => promptDeletion(btn.getAttribute('data-title'), async () => {
         await window.LykosDB.deletePlayer(btn.getAttribute('data-id'));
+        showToastSuccess('Atleta removido!');
         renderDashboard();
       });
     });
@@ -1474,6 +1517,7 @@ window.renderAdminPage = async function (container) {
             social_instagram: container.querySelector('#staff-social-instagram') ? container.querySelector('#staff-social-instagram').value : '',
             photo_url: photoUrl
           });
+          showToastSuccess('Membro da comissão técnica salvo!');
           renderDashboard();
         } catch (err) {
           alert('Erro ao salvar membro da comissão: ' + err.message);
@@ -1844,6 +1888,7 @@ window.renderAdminPage = async function (container) {
           description: container.querySelector('#gal-desc').value || '',
           image_url: imgUrl
         });
+        showToastSuccess('Notícia / Mídia publicada com sucesso!');
         renderDashboard();
       };
     }
@@ -1860,13 +1905,15 @@ window.renderAdminPage = async function (container) {
               <div class="form-group">
                 <label class="form-label">Categoria</label>
                 <select id="pop-g-cat" class="form-select">
+                  <option value="Notícia" ${g.category === 'Notícia' ? 'selected' : ''}>Notícia Oficial</option>
                   <option value="Campeonatos" ${g.category === 'Campeonatos' ? 'selected' : ''}>Campeonatos</option>
                   <option value="Bastidores" ${g.category === 'Bastidores' ? 'selected' : ''}>Bastidores</option>
+                  <option value="Vídeo" ${g.category === 'Vídeo' ? 'selected' : ''}>Vídeo / Highlights</option>
                   <option value="Eventos" ${g.category === 'Eventos' ? 'selected' : ''}>Eventos</option>
                 </select>
               </div>
             </div>
-            <div class="form-group"><label class="form-label">Descrição</label><textarea id="pop-g-desc" class="form-textarea" rows="2">${g.description || ''}</textarea></div>
+            <div class="form-group"><label class="form-label">Descrição</label><textarea id="pop-g-desc" class="form-textarea" rows="4">${g.description || ''}</textarea></div>
             <div class="form-group"><label class="form-label">Nova Foto (Upload PC)</label><input type="file" id="pop-g-file" class="form-input" accept="image/*"></div>
             <div style="display: flex; gap: 10px; margin-top: 1rem;">
               <button type="submit" class="btn-primary" style="flex: 1;">Atualizar Imagem &rarr;</button>
@@ -1889,6 +1936,7 @@ window.renderAdminPage = async function (container) {
             description: form.querySelector('#pop-g-desc').value,
             image_url: imgUrl
           });
+          showToastSuccess('Notícia / Mídia atualizada!');
         });
       };
     });
@@ -1896,6 +1944,7 @@ window.renderAdminPage = async function (container) {
     container.querySelectorAll('.delete-gallery-btn').forEach(btn => {
       btn.onclick = () => promptDeletion(btn.getAttribute('data-title'), async () => {
         await window.LykosDB.deleteGalleryItem(btn.getAttribute('data-id'));
+        showToastSuccess('Notícia removida!');
         renderDashboard();
       });
     });
@@ -1909,8 +1958,9 @@ window.renderAdminPage = async function (container) {
           platform: container.querySelector('#social-platform').value,
           title: container.querySelector('#social-title').value,
           embed_url: container.querySelector('#social-embed-url').value,
-          post_url: container.querySelector('#social-post-url').value
+          post_url: container.querySelector('#social-post-url').value || ''
         });
+        showToastSuccess('Post de rede social incorporado!');
         renderDashboard();
       };
     }
@@ -2099,7 +2149,7 @@ window.renderAdminPage = async function (container) {
 
           await window.LykosDB.saveSettings(newSettings);
 
-          alert('✓ Configurações de marca e Favicon salvas com sucesso!');
+          showToastSuccess('Configurações salvas com sucesso!');
           renderDashboard();
         } catch (err) {
           console.error('[Admin] Error saving branding settings:', err);

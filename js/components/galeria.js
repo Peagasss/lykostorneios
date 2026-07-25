@@ -26,7 +26,7 @@ window.renderGaleriaPage = async function (container) {
 
         <div class="gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.75rem; margin-bottom: 4rem;">
           ${galleryItems && galleryItems.length > 0 ? galleryItems.map(item => `
-            <div class="glass-card glass-card-interactive" style="border: 1px solid var(--border-dark-strong); display: flex; flex-direction: column; overflow: hidden;">
+            <div class="glass-card glass-card-interactive news-card" data-id="${item.id}" style="border: 1px solid var(--border-dark-strong); display: flex; flex-direction: column; overflow: hidden; cursor: pointer;">
               <div style="height: 200px; overflow: hidden; position: relative;">
                 <span class="game-badge" style="top: 12px; left: 12px; font-family: var(--font-tech);">${item.category || 'Notícia'}</span>
                 <img src="${item.image_url}" alt="${item.title}" style="width: 100%; height: 100%; object-fit: cover; transition: var(--transition-smooth);">
@@ -39,7 +39,7 @@ window.renderGaleriaPage = async function (container) {
                   </p>
                 </div>
                 <div style="margin-top: 1.25rem; font-size: 0.78rem; color: var(--accent-neon); font-weight: 700; text-transform: uppercase;">
-                  Publicação Oficial LYKOS &rarr;
+                  Ler Notícia Completa &rarr;
                 </div>
               </div>
             </div>
@@ -74,5 +74,50 @@ window.renderGaleriaPage = async function (container) {
 
       </div>
     </section>
+
+    <!-- NEWS MODAL READER -->
+    <div id="news-reader-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-content glass-card" style="max-width: 750px; padding: 2.5rem; border: 1px solid var(--border-dark-strong);">
+        <button class="modal-close" id="news-modal-close" style="top: 20px; right: 20px;">&times;</button>
+        <div id="news-modal-body"></div>
+      </div>
+    </div>
   `;
+
+  const newsModal = container.querySelector('#news-reader-modal');
+  const newsModalBody = container.querySelector('#news-modal-body');
+  const newsModalClose = container.querySelector('#news-modal-close');
+
+  container.querySelectorAll('.news-card').forEach(card => {
+    card.onclick = () => {
+      const id = card.getAttribute('data-id');
+      const item = galleryItems.find(g => String(g.id) === String(id));
+      if (!item) return;
+
+      newsModalBody.innerHTML = `
+        <div style="margin-bottom: 1.5rem;">
+          <span class="game-badge" style="position: static; font-family: var(--font-tech); display: inline-block; margin-bottom: 10px;">${item.category || 'Notícia'}</span>
+          <h2 style="font-family: var(--font-heading); font-size: 2.2rem; font-weight: 800; color: #ffffff; line-height: 1.2; margin-bottom: 10px;">${item.title}</h2>
+          <div style="font-size: 0.8rem; color: var(--accent-neon); font-weight: 700;">PUBLICAÇÃO OFICIAL LYKOS</div>
+        </div>
+
+        <img src="${item.image_url}" alt="${item.title}" style="width: 100%; max-height: 380px; object-fit: cover; border-radius: var(--radius-xs); margin-bottom: 1.75rem; border: 1px solid var(--border-dark-strong);">
+
+        <div style="font-size: 0.98rem; line-height: 1.8; color: var(--text-light); white-space: pre-line;">
+          ${item.description || 'Sem descrição adicional para esta notícia.'}
+        </div>
+      `;
+
+      newsModal.style.display = 'flex';
+    };
+  });
+
+  if (newsModalClose) {
+    newsModalClose.onclick = () => newsModal.style.display = 'none';
+  }
+  if (newsModal) {
+    newsModal.onclick = (e) => {
+      if (e.target === newsModal) newsModal.style.display = 'none';
+    };
+  }
 };
