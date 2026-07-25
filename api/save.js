@@ -15,6 +15,25 @@ module.exports = async (req, res) => {
   if (!entity || !item) return res.status(400).json({ error: 'Faltam dados para salvar.' });
 
   try {
+    // 1. Silent schema migration / initialization if database is empty (self-bootstraps new Neon DBs)
+    if (process.env.POSTGRES_URL) {
+      try {
+        const checkTable = await sql`SELECT to_regclass('public.site_settings');`;
+        if (!checkTable.rows[0] || !checkTable.rows[0].to_regclass) {
+          const fs = require('fs');
+          const path = require('path');
+          const schemaPath = path.join(process.cwd(), 'neon_schema.sql');
+          if (fs.existsSync(schemaPath)) {
+            const schemaSql = fs.readFileSync(schemaPath, 'utf8');
+            await sql.query(schemaSql);
+            console.log('[LykosDB] Neon database schema self-bootstrapped successfully from Save API.');
+          }
+        }
+      } catch (schemaErr) {
+        console.warn('[Schema Init Warning from Save API]:', schemaErr);
+      }
+    }
+
     if (entity === 'site_settings') {
       await sql`
         INSERT INTO site_settings (id, team_name, logo_url, header_logo_url, favicon_url, primary_color, show_tournaments_tab, hero_title, hero_subtitle, discord_url, instagram_url, x_url, facebook_url, contact_socials_json, hero_image_url, imgbb_api_key, updated_at)

@@ -3,10 +3,7 @@
 -- Enclosed in a single transaction block (DO $$ ... $$;)
 -- ============================================================================
 
-DO $$
-BEGIN
-
-  -- 1. SITE SETTINGS
+-- 1. SITE SETTINGS
   CREATE TABLE IF NOT EXISTS site_settings (
     id INT PRIMARY KEY DEFAULT 1,
     team_name TEXT DEFAULT 'LYKOS',
@@ -180,4 +177,4 @@ BEGIN
     timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
   );
 
-END $$;
+-- Schema end
