@@ -165,7 +165,7 @@ async function fetchSupabaseOrLocal(tableName, storageKey, fallbackDefault) {
   // Try Vercel Backend API (Neon Postgres)
   const remotePromise = (async () => {
     try {
-      const apiRes = await fetch(getApiUrl('/api/data')).catch(() => null);
+      const apiRes = await fetch(getApiUrl('/api/data?t=' + Date.now())).catch(() => null);
       if (apiRes && apiRes.ok) {
         const bundle = await apiRes.json();
         const keyMap = {
@@ -216,7 +216,7 @@ function startRealtimePoller() {
 
   setInterval(async () => {
     try {
-      const res = await fetch(getApiUrl('/api/data')).catch(() => null);
+      const res = await fetch(getApiUrl('/api/data?t=' + Date.now())).catch(() => null);
       if (res && res.ok) {
         const bundle = await res.json();
         let anyChanged = false;

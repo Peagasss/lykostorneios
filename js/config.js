@@ -4,9 +4,9 @@
 
 window.LYKOS_CONFIG = {
   // Backend Base API URL (Vercel Serverless + Neon Postgres)
-  API_BASE_URL: window.location.hostname.includes('vercel.app')
-    ? ''
-    : 'https://lykostorneios.vercel.app',
+  API_BASE_URL: window.location.hostname.includes('github.io')
+    ? 'https://lykostorneios.vercel.app'
+    : '',
 
   // Default branding values
   DEFAULT_BRANDING: {
