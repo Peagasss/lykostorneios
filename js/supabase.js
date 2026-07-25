@@ -163,53 +163,35 @@ async function fetchSupabaseOrLocal(tableName, storageKey, fallbackDefault) {
   const raw = localStorage.getItem(storageKey);
   const localData = safeParse(raw, null);
 
-  // Try Vercel Backend API (Neon Postgres)
-  const remotePromise = (async () => {
-    try {
-      const apiRes = await fetch(getApiUrl('/api/data?t=' + Date.now())).catch(() => null);
-      if (apiRes && apiRes.ok) {
-        const bundle = await apiRes.json();
-        const keyMap = {
-          site_settings: 'settings',
-          about_settings: 'about',
-          modalities: 'modalities',
-          roster: 'roster',
-          staff: 'staff',
-          matches: 'matches',
-          trophies: 'trophies',
-          gallery: 'gallery',
-          social_feeds: 'social',
-          recent_tournaments: 'recentTournaments',
-          community_tournaments: 'communityTournaments'
-        };
-        const mappedKey = keyMap[tableName];
-        if (mappedKey && bundle[mappedKey]) {
-          const data = bundle[mappedKey];
-          localStorage.setItem(storageKey, JSON.stringify(data));
-          return data;
-        }
+  try {
+    const apiRes = await fetch(getApiUrl('/api/data?t=' + Date.now())).catch(() => null);
+    if (apiRes && apiRes.ok) {
+      const bundle = await apiRes.json();
+      const keyMap = {
+        site_settings: 'settings',
+        about_settings: 'about',
+        modalities: 'modalities',
+        roster: 'roster',
+        staff: 'staff',
+        matches: 'matches',
+        trophies: 'trophies',
+        gallery: 'gallery',
+        social_feeds: 'social',
+        recent_tournaments: 'recentTournaments',
+        community_tournaments: 'communityTournaments'
+      };
+      const mappedKey = keyMap[tableName];
+      if (mappedKey && bundle[mappedKey]) {
+        const data = bundle[mappedKey];
+        localStorage.setItem(storageKey, JSON.stringify(data));
+        return data;
       }
-    } catch (e) {
-      console.warn(`[LykosDB] Backend fetch error for ${tableName}:`, e);
     }
-    return null;
-  })();
+  } catch (e) {
+    console.warn(`[LykosDB] Backend fetch error for ${tableName}:`, e);
+  }
 
-  const initialData = localData !== null ? localData : fallbackDefault;
-  remotePromise.then((freshData) => {
-    if (freshData) {
-      const freshStr = JSON.stringify(freshData);
-      if (freshStr !== raw) {
-        if (tableName === 'site_settings') {
-          window.dispatchEvent(new CustomEvent('lykos_branding_updated', { detail: freshData }));
-        }
-        if (window.LykosRouter && window.LykosRouter.handleRoute) {
-          window.LykosRouter.handleRoute().catch(() => {});
-        }
-      }
-    }
-  });
-  return initialData;
+  return localData !== null ? localData : fallbackDefault;
 }
 
 // Background Real-Time Poller (Polls /api/data every 4 seconds for live sync without F5)
