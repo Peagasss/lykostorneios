@@ -172,6 +172,5 @@ window.renderHomePage = async function (container) {
 
       </div>
     </section>
-
-  // Clean router navigation handled by <a> links to /elenco
+  `;
 };
