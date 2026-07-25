@@ -1,3 +1,6 @@
+if (process.env.NEON_URL) {
+  process.env.POSTGRES_URL = process.env.NEON_URL;
+}
 const { sql } = require('@vercel/postgres');
 
 module.exports = async (req, res) => {

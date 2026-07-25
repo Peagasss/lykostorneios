@@ -1,3 +1,6 @@
+if (process.env.NEON_URL) {
+  process.env.POSTGRES_URL = process.env.NEON_URL;
+}
 const { sql } = require('@vercel/postgres');
 const { createClient } = require('@supabase/supabase-js');
 
