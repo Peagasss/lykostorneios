@@ -197,12 +197,15 @@ async function fetchSupabaseOrLocal(tableName, storageKey, fallbackDefault) {
 
   const initialData = localData !== null ? localData : fallbackDefault;
   remotePromise.then((freshData) => {
-    if (freshData && localData === null) {
-      if (tableName === 'site_settings') {
-        window.dispatchEvent(new CustomEvent('lykos_branding_updated', { detail: freshData }));
-      }
-      if (window.LykosRouter && window.LykosRouter.handleRoute) {
-        window.LykosRouter.handleRoute().catch(() => {});
+    if (freshData) {
+      const freshStr = JSON.stringify(freshData);
+      if (freshStr !== raw) {
+        if (tableName === 'site_settings') {
+          window.dispatchEvent(new CustomEvent('lykos_branding_updated', { detail: freshData }));
+        }
+        if (window.LykosRouter && window.LykosRouter.handleRoute) {
+          window.LykosRouter.handleRoute().catch(() => {});
+        }
       }
     }
   });
