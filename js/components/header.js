@@ -81,9 +81,14 @@ window.renderHeader = async function () {
   if (headerElem) {
     let isHovered = false;
 
+    function isAdminPage() {
+      const p = window.location.pathname || '';
+      const h = window.location.hash || '';
+      return p.startsWith('/admin') || h.startsWith('#/admin');
+    }
+
     function checkScrollNavbar() {
-      // Disable collapse animation on /admin page
-      if (window.location.pathname === '/admin') {
+      if (isAdminPage()) {
         headerElem.classList.remove('navbar-collapsed');
         return;
       }
@@ -108,6 +113,10 @@ window.renderHeader = async function () {
 
     headerElem.onmouseleave = () => {
       isHovered = false;
+      if (isAdminPage()) {
+        headerElem.classList.remove('navbar-collapsed');
+        return;
+      }
       if (window.scrollY > 80) {
         headerElem.classList.add('navbar-collapsed');
       }
