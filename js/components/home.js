@@ -60,18 +60,18 @@ window.renderHomePage = async function (container) {
     <section style="padding-top: 140px; padding-bottom: 4rem; min-height: 80vh; position: relative; width: 100%;">
       <div style="width: 100%; padding: 0 2rem; box-sizing: border-box;">
 
-        <!-- BANNER DE DESTAQUE: 5 JOGADORES PRINCIPAIS DO ELENCO (COLADOS, 9:16) -->
-        <div style="margin-bottom: 3.5rem; width: 100%; box-sizing: border-box;">
+        <!-- BANNER DE DESTAQUE: 5 JOGADORES PRINCIPAIS DO ELENCO (COMPACTOS LADO A LADO) -->
+        <div style="margin-bottom: 3rem; width: 100%; box-sizing: border-box;">
           ${starterPlayers.length > 0 ? `
             <div style="display: grid; grid-template-columns: repeat(${Math.min(starterPlayers.length, 5)}, 1fr); gap: 0.5rem;" class="starters-responsive-grid">
               ${starterPlayers.slice(0, 5).map(player => `
                 <a href="/elenco" class="starter-card glass-card-interactive" style="border: none; border-radius: var(--radius-sm); overflow: hidden; background: rgba(14, 11, 26, 0.6); display: flex; flex-direction: column; cursor: pointer; transition: all 0.3s ease; text-decoration: none;">
-                  <div style="aspect-ratio: 9 / 16; width: 100%; overflow: hidden; position: relative; background: radial-gradient(circle at center, rgba(168,85,247,0.1) 0%, rgba(10,8,22,0.85) 100%); border-radius: var(--radius-sm);">
+                  <div style="height: 320px; width: 100%; overflow: hidden; position: relative; background: radial-gradient(circle at center, rgba(168,85,247,0.1) 0%, rgba(10,8,22,0.85) 100%); border-radius: var(--radius-sm);">
                     <img src="${player.photo_url}" alt="${player.nickname}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.4s ease;">
                     
-                    <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1.25rem 0.5rem; background: linear-gradient(to top, rgba(8,6,16,0.98) 0%, rgba(8,6,16,0.6) 70%, transparent 100%); text-align: center; z-index: 2;">
-                      <div style="font-family: var(--font-heading); font-size: 1.4rem; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.03em;">${player.nickname}</div>
-                      <div style="font-size: 0.78rem; color: var(--accent-neon); font-weight: 700; text-transform: uppercase; margin-top: 2px;">${player.role || 'Player'}</div>
+                    <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1rem 0.5rem; background: linear-gradient(to top, rgba(8,6,16,0.98) 0%, rgba(8,6,16,0.6) 70%, transparent 100%); text-align: center; z-index: 2;">
+                      <div style="font-family: var(--font-heading); font-size: 1.15rem; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${player.nickname}</div>
+                      <div style="font-size: 0.72rem; color: var(--accent-neon); font-weight: 700; text-transform: uppercase; margin-top: 2px;">${player.role || 'Player'}</div>
                     </div>
                   </div>
                 </a>
