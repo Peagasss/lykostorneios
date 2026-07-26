@@ -528,7 +528,7 @@ window.renderAdminPage = async function (container) {
             <div class="form-group" style="margin-top: 1rem;">
               <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; color: white; font-weight: 700; font-size: 0.88rem;">
                 <input type="checkbox" id="roster-is-starter" style="width: 18px; height: 18px; accent-color: var(--accent-neon);">
-                <span>⭐ Exibir no Banner do 5 Principal (Home)</span>
+                <span>Exibir no Banner do 5 Principal (Home)</span>
               </label>
             </div>
 
@@ -554,7 +554,7 @@ window.renderAdminPage = async function (container) {
                 <img src="${p.photo_url}" alt="${p.nickname}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
                 <div style="flex: 1; min-width: 0; overflow: hidden;">
                   <span class="game-badge" style="position: static; font-size: 0.65rem;">${p.game}</span>
-                  ${p.is_starter ? `<span style="background: rgba(168,85,247,0.2); border: 1px solid var(--accent-neon); color: var(--accent-neon); font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; font-weight: 700; margin-left: 4px;">⭐ 5 Principal</span>` : ''}
+                  ${p.is_starter ? `<span style="background: rgba(168,85,247,0.2); border: 1px solid var(--accent-neon); color: var(--accent-neon); font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; font-weight: 700; margin-left: 4px;">5 Principal</span>` : ''}
                   <div style="font-family: var(--font-heading); font-weight: 700; font-size: 0.95rem; color: white; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${p.nickname}</div>
                   <div style="font-size: 0.75rem; color: var(--text-muted-light); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${p.name}</div>
                 </div>
@@ -1508,7 +1508,7 @@ window.renderAdminPage = async function (container) {
             <div class="form-group" style="margin-top: 0.5rem;">
               <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; color: white; font-weight: 700; font-size: 0.88rem;">
                 <input type="checkbox" id="pop-p-starter" style="width: 18px; height: 18px; accent-color: var(--accent-neon);" ${player.is_starter ? 'checked' : ''}>
-                <span>⭐ Exibir no Banner do 5 Principal (Home)</span>
+                <span>Exibir no Banner do 5 Principal (Home)</span>
               </label>
             </div>
 
