@@ -20,19 +20,21 @@ window.renderHeader = async function () {
   headerContainer.innerHTML = `
     <header class="site-header" style="position: fixed; top: 12px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 1240px; border-radius: 20px; z-index: 1000; background: rgba(10, 8, 20, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(168, 85, 247, 0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
       <div class="container nav-container" style="display: flex; align-items: center; justify-content: space-between; height: 68px; padding: 0 1.5rem;">
-        <a href="/" class="brand-logo" style="display: inline-flex; align-items: center; gap: 10px; text-decoration: none;">
-          ${logoContent}
-          <span style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: #ffffff; text-transform: uppercase; letter-spacing: 0.06em; display: inline-block;">
-            ${(() => {
-              const parts = teamName.trim().split(' ');
-              if (parts.length === 1) return parts[0];
-              const first = parts[0];
-              const rest = parts.slice(1).join(' ');
-              return `${first} <span style="color: var(--accent-neon);">${rest}</span>`;
-            })()}
-          </span>
-          ${hasLiveMatch ? `<a href="/partidas" class="btn-live" style="padding: 3px 10px; font-size: 0.68rem; border-radius: 4px; box-shadow: 0 0 12px rgba(230, 57, 70, 0.7); text-decoration: none; margin-left: 4px; vertical-align: middle;">🔴 AO VIVO</a>` : ''}
-        </a>
+        <div class="brand-wrapper" style="display: flex; align-items: center; gap: 8px;">
+          <a href="/" class="brand-logo" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none;">
+            ${logoContent}
+            <span style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: #ffffff; text-transform: uppercase; letter-spacing: 0.06em; display: inline-block;">
+              ${(() => {
+                const parts = teamName.trim().split(' ');
+                if (parts.length === 1) return parts[0];
+                const first = parts[0];
+                const rest = parts.slice(1).join(' ');
+                return `${first} <span style="color: var(--accent-neon);">${rest}</span>`;
+              })()}
+            </span>
+          </a>
+          ${hasLiveMatch ? `<a href="/partidas" class="btn-live" style="padding: 2px 8px; font-size: 0.65rem; border-radius: 4px; box-shadow: 0 0 10px rgba(230, 57, 70, 0.7); text-decoration: none; margin-left: 2px;">🔴 AO VIVO</a>` : ''}
+        </div>
 
         <ul class="nav-menu" id="nav-menu" style="display: flex; align-items: center; gap: 1.75rem; list-style: none; margin: 0; padding: 0;">
           <li><a href="/" class="nav-link" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em;">Home</a></li>
