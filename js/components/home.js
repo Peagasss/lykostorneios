@@ -79,11 +79,7 @@ window.renderHomePage = async function (container) {
                   </a>
                 `;
               } else {
-                return `
-                  <div class="starter-card-empty" style="aspect-ratio: 9 / 16; width: 100%; border: 1px dashed var(--border-dark-strong); border-radius: var(--radius-sm); background: rgba(14, 11, 26, 0.3); display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted-light); padding: 0.5rem; text-align: center;">
-                    <div style="font-family: var(--font-tech); font-size: 0.75rem; font-weight: 700; color: rgba(255,255,255,0.25); text-transform: uppercase; letter-spacing: 0.05em;">VAGA DISPONÍVEL</div>
-                  </div>
-                `;
+                return `<div style="aspect-ratio: 9 / 16; width: 100%;"></div>`;
               }
             }).join('')}
           </div>
