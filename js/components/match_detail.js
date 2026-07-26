@@ -5,7 +5,15 @@
 
 window.renderMatchDetailPage = async function (container, params) {
   try {
-    const matchId = params ? params.id : null;
+    let matchId = params ? params.id : null;
+    if (!matchId || matchId === 'undefined') {
+      const parts = (window.location.pathname || '').split('/');
+      matchId = parts[parts.length - 1];
+    }
+    if (!matchId && window.location.hash) {
+      const hashParts = window.location.hash.split('/');
+      matchId = hashParts[hashParts.length - 1];
+    }
     const match = matchId ? await window.LykosDB.getMatchById(matchId) : null;
     const settings = await window.LykosDB.getSettings();
     const teamName = settings.team_name || 'LYKOS';
