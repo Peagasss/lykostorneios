@@ -1122,7 +1122,7 @@ window.renderAdminPage = async function (container) {
       formMatch.onsubmit = async (e) => {
         e.preventDefault();
         const oppFile = container.querySelector('#match-opponent-file');
-        let opponentLogo = '';
+        let opponentLogo = 'assets/logo-adversario-padrao.webp';
         if (oppFile && oppFile.files && oppFile.files[0]) {
           opponentLogo = await window.LykosDB.uploadAsset(oppFile.files[0]);
         }

@@ -84,7 +84,7 @@ window.renderPartidasPage = async function (container) {
           </div>
 
           <div class="team-box away">
-            <img src="${match.opponent_logo || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=200&q=80'}" alt="${match.opponent_name || 'Adversário'}" class="team-logo-img">
+            <img src="${match.opponent_logo || 'assets/logo-adversario-padrao.webp'}" alt="${match.opponent_name || 'Adversário'}" class="team-logo-img">
             <div>
               <div class="team-name" style="font-size: 1.6rem;">${match.opponent_name || 'Adversário'}</div>
             </div>
