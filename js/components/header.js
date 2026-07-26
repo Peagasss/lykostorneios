@@ -31,6 +31,7 @@ window.renderHeader = async function () {
               return `${first} <span style="color: var(--accent-neon);">${rest}</span>`;
             })()}
           </span>
+          ${hasLiveMatch ? `<a href="/partidas" class="btn-live" style="padding: 3px 10px; font-size: 0.68rem; border-radius: 4px; box-shadow: 0 0 12px rgba(230, 57, 70, 0.7); text-decoration: none; margin-left: 4px; vertical-align: middle;">🔴 AO VIVO</a>` : ''}
         </a>
 
         <ul class="nav-menu" id="nav-menu" style="display: flex; align-items: center; gap: 1.75rem; list-style: none; margin: 0; padding: 0;">
@@ -38,9 +39,8 @@ window.renderHeader = async function () {
           <li><a href="/sobre" class="nav-link" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em;">Sobre</a></li>
           <li><a href="/elenco" class="nav-link" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em;">Elenco</a></li>
           <li>
-            <a href="/partidas" class="nav-link" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em; display: inline-flex; align-items: center; gap: 6px;">
+            <a href="/partidas" class="nav-link" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em;">
               Partidas
-              ${hasLiveMatch ? `<span class="btn-live" style="padding: 2px 8px; font-size: 0.65rem; border-radius: 4px; box-shadow: 0 0 10px rgba(230, 57, 70, 0.6);">🔴 AO VIVO</span>` : ''}
             </a>
           </li>
           <li><a href="/galeria" class="nav-link" style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted-light); letter-spacing: 0.08em;">Mídias & News</a></li>

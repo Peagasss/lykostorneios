@@ -162,7 +162,7 @@ window.renderMatchDetailPage = async function (container, params) {
             </div>
 
             <div class="team-box away">
-              <img src="${match.opponent_logo || 'assets/logo-adversario-padrao.webp'}" alt="${match.opponent_name || 'Adversário'}" class="team-logo-img" style="width: 64px; height: 64px;">
+              <img src="${match.opponent_logo || settings.default_opponent_logo || 'assets/logo-adversario-padrao.webp'}" alt="${match.opponent_name || 'Adversário'}" class="team-logo-img" style="width: 64px; height: 64px;">
               <div>
                 <div class="team-name" style="font-size: 1.6rem;">${match.opponent_name || 'Adversário'}</div>
               </div>

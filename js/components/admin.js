@@ -904,7 +904,7 @@ window.renderAdminPage = async function (container) {
             </div>
 
             <h4 style="font-size: 0.85rem; color: var(--accent-neon); text-transform: uppercase; margin: 1.5rem 0 0.75rem;">Logos & Ícones do Site</h4>
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem;">
               <div class="form-group" style="background: var(--bg-dark-surface); padding: 12px; border: 1px solid var(--border-dark); border-radius: 6px;">
                 <label class="form-label">1. Logo Oficial das Partidas</label>
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
@@ -936,6 +936,17 @@ window.renderAdminPage = async function (container) {
                 <input type="text" id="brand-favicon-url" class="form-input" value="${data.settings.favicon_url || ''}" placeholder="URL do favicon (ex: assets/favicon.png ou https://...)" style="margin-bottom: 6px;">
                 <input type="file" id="brand-favicon-file" class="form-input" accept="image/*">
                 <span class="upload-hint">Upload de arquivo ou cole a URL acima.</span>
+              </div>
+
+              <div class="form-group" style="background: var(--bg-dark-surface); padding: 12px; border: 1px solid var(--border-dark); border-radius: 6px;">
+                <label class="form-label">4. Logo Padrão dos Adversários</label>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                  <img id="brand-default-opp-logo-preview" src="${data.settings.default_opponent_logo || 'assets/logo-adversario-padrao.webp'}" style="width: 44px; height: 44px; object-fit: contain; background: rgba(0,0,0,0.4); border-radius: 4px; border: 1px solid var(--border-dark); padding: 2px;">
+                  <span style="font-size: 0.75rem; color: var(--text-muted-light);">Preview atual</span>
+                </div>
+                <input type="text" id="brand-default-opp-logo-url" class="form-input" value="${data.settings.default_opponent_logo || ''}" placeholder="URL da imagem (ex: assets/... ou https://...)" style="margin-bottom: 6px;">
+                <input type="file" id="brand-default-opp-logo-file" class="form-input" accept="image/*">
+                <span class="upload-hint">Logo padrão usada em partidas quando não houver logo específica.</span>
               </div>
             </div>
 
@@ -2189,6 +2200,7 @@ window.renderAdminPage = async function (container) {
       setupPreview('brand-logo-file', 'brand-logo-url', 'brand-logo-preview');
       setupPreview('brand-header-logo-file', 'brand-header-logo-url', 'brand-header-logo-preview');
       setupPreview('brand-favicon-file', 'brand-favicon-url', 'brand-favicon-preview');
+      setupPreview('brand-default-opp-logo-file', 'brand-default-opp-logo-url', 'brand-default-opp-logo-preview');
 
       formBranding.onsubmit = async (e) => {
         e.preventDefault();
@@ -2226,6 +2238,15 @@ window.renderAdminPage = async function (container) {
             faviconUrl = faviconUrlInp.value.trim();
           }
 
+          const defaultOppLogoFile = container.querySelector('#brand-default-opp-logo-file');
+          const defaultOppLogoUrlInp = container.querySelector('#brand-default-opp-logo-url');
+          let defaultOppLogoUrl = data.settings.default_opponent_logo || 'assets/logo-adversario-padrao.webp';
+          if (defaultOppLogoFile && defaultOppLogoFile.files && defaultOppLogoFile.files[0]) {
+            defaultOppLogoUrl = await window.LykosDB.uploadAsset(defaultOppLogoFile.files[0]);
+          } else if (defaultOppLogoUrlInp && defaultOppLogoUrlInp.value.trim()) {
+            defaultOppLogoUrl = defaultOppLogoUrlInp.value.trim();
+          }
+
           const showTournaments = container.querySelector('#brand-show-tournaments-tab').checked;
 
           const contactSocials = [];
@@ -2247,6 +2268,7 @@ window.renderAdminPage = async function (container) {
             logo_url: logoUrl,
             header_logo_url: headerLogoUrl,
             favicon_url: faviconUrl,
+            default_opponent_logo: defaultOppLogoUrl,
             show_tournaments_tab: showTournaments,
             imgbb_api_key: container.querySelector('#brand-imgbb-key').value.trim(),
             contact_socials_json: contactSocials,

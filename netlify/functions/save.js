@@ -67,16 +67,17 @@ exports.handler = async (event) => {
         sql`ALTER TABLE roster ADD COLUMN IF NOT EXISTS sort_order INT DEFAULT 0;`,
         sql`ALTER TABLE staff ADD COLUMN IF NOT EXISTS sort_order INT DEFAULT 0;`,
         sql`ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS imgbb_api_key TEXT DEFAULT '';`,
+        sql`ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS default_opponent_logo TEXT DEFAULT '';`
       ]).catch(err => console.warn('[Migration Warning from Save API]:', err));
     }
 
     if (entity === 'site_settings') {
       await sql`
-        INSERT INTO site_settings (id, team_name, logo_url, header_logo_url, favicon_url, primary_color, show_tournaments_tab, hero_title, hero_subtitle, discord_url, instagram_url, x_url, facebook_url, contact_socials_json, hero_image_url, imgbb_api_key, updated_at)
-        VALUES (1, ${item.team_name || 'LYKOS'}, ${item.logo_url || ''}, ${item.header_logo_url || ''}, ${item.favicon_url || ''}, ${item.primary_color || '#4d00b5'}, ${item.show_tournaments_tab || false}, ${item.hero_title || ''}, ${item.hero_subtitle || ''}, ${item.discord_url || ''}, ${item.instagram_url || ''}, ${item.x_url || ''}, ${item.facebook_url || ''}, ${JSON.stringify(item.contact_socials_json || [])}, ${item.hero_image_url || ''}, ${item.imgbb_api_key || ''}, NOW())
+        INSERT INTO site_settings (id, team_name, logo_url, header_logo_url, favicon_url, default_opponent_logo, primary_color, show_tournaments_tab, hero_title, hero_subtitle, discord_url, instagram_url, x_url, facebook_url, contact_socials_json, hero_image_url, imgbb_api_key, updated_at)
+        VALUES (1, ${item.team_name || 'LYKOS'}, ${item.logo_url || ''}, ${item.header_logo_url || ''}, ${item.favicon_url || ''}, ${item.default_opponent_logo || ''}, ${item.primary_color || '#4d00b5'}, ${item.show_tournaments_tab || false}, ${item.hero_title || ''}, ${item.hero_subtitle || ''}, ${item.discord_url || ''}, ${item.instagram_url || ''}, ${item.x_url || ''}, ${item.facebook_url || ''}, ${JSON.stringify(item.contact_socials_json || [])}, ${item.hero_image_url || ''}, ${item.imgbb_api_key || ''}, NOW())
         ON CONFLICT (id) DO UPDATE SET
           team_name = EXCLUDED.team_name, logo_url = EXCLUDED.logo_url, header_logo_url = EXCLUDED.header_logo_url,
-          favicon_url = EXCLUDED.favicon_url, primary_color = EXCLUDED.primary_color, show_tournaments_tab = EXCLUDED.show_tournaments_tab,
+          favicon_url = EXCLUDED.favicon_url, default_opponent_logo = EXCLUDED.default_opponent_logo, primary_color = EXCLUDED.primary_color, show_tournaments_tab = EXCLUDED.show_tournaments_tab,
           hero_title = EXCLUDED.hero_title, hero_subtitle = EXCLUDED.hero_subtitle, discord_url = EXCLUDED.discord_url,
           instagram_url = EXCLUDED.instagram_url, x_url = EXCLUDED.x_url, facebook_url = EXCLUDED.facebook_url,
           contact_socials_json = EXCLUDED.contact_socials_json, hero_image_url = EXCLUDED.hero_image_url,

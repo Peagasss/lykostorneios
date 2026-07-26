@@ -126,7 +126,7 @@ window.renderHomePage = async function (container) {
                     <!-- ADVERSÁRIO -->
                     <div style="display: flex; align-items: center; gap: 10px;">
                       <div style="font-family: var(--font-heading); font-size: 1.2rem; font-weight: 800; color: white;">${featuredMatch.opponent_name}</div>
-                      <img src="${featuredMatch.opponent_logo || 'assets/logo-adversario-padrao.webp'}" alt="${featuredMatch.opponent_name}" class="team-logo-img">
+                      <img src="${featuredMatch.opponent_logo || settings.default_opponent_logo || 'assets/logo-adversario-padrao.webp'}" alt="${featuredMatch.opponent_name}" class="team-logo-img">
                     </div>
                   </div>
                 </div>

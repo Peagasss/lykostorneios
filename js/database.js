@@ -18,6 +18,7 @@ const DEFAULT_SETTINGS = {
   logo_url: 'assets/logo.png',
   header_logo_url: 'assets/logo.png',
   favicon_url: 'assets/favicon.png',
+  default_opponent_logo: 'assets/logo-adversario-padrao.webp',
   show_tournaments_tab: false,
   hero_title: 'SANGUE.GARRA.GLÓRIA.',
   hero_subtitle: 'A organização oficial de e-sports de alta performance.',
@@ -552,7 +553,8 @@ window.LykosDB = {
   async saveMatch(match) {
     if (!match.id) match.id = 'm_' + Date.now();
     if (!match.opponent_logo || !match.opponent_logo.trim()) {
-      match.opponent_logo = 'assets/logo-adversario-padrao.webp';
+      const settings = await this.getSettings();
+      match.opponent_logo = settings.default_opponent_logo || 'assets/logo-adversario-padrao.webp';
     }
     await saveToApi('matches', match);
     return match;
