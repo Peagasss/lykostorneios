@@ -25,8 +25,8 @@ window.renderElencoPage = async function (container) {
 
     return filtered.map(player => `
       <div class="glass-card glass-card-interactive player-card float-effect" data-id="${player.id}" style="border: 1px solid var(--border-dark-strong); padding: 0; overflow: hidden; display: flex; flex-direction: column;">
-        <div class="player-image-wrap" style="height: 340px; position: relative; background: radial-gradient(circle at 50% 30%, rgba(168, 85, 247, 0.25) 0%, rgba(10, 8, 20, 0.95) 75%); overflow: hidden;">
-          <span class="game-badge" style="top: 14px; right: 14px; background: rgba(10, 8, 20, 0.85); border: 1px solid var(--border-dark-strong); color: var(--accent-neon); font-family: var(--font-tech); font-size: 0.82rem; font-weight: 700; padding: 4px 12px; border-radius: var(--radius-xs); letter-spacing: 0.08em;">${player.game}</span>
+        <div class="player-image-wrap" style="aspect-ratio: 9 / 16; width: 100%; position: relative; background: radial-gradient(circle at 50% 30%, rgba(168, 85, 247, 0.25) 0%, rgba(10, 8, 20, 0.95) 75%); overflow: hidden;">
+          <span class="game-badge" style="top: 14px; right: 14px; background: rgba(10, 8, 20, 0.85); border: 1px solid var(--border-dark-strong); color: var(--accent-neon); font-family: var(--font-tech); font-size: 0.82rem; font-weight: 700; padding: 4px 12px; border-radius: var(--radius-xs); letter-spacing: 0.08em;">${player.game || 'E-Sports'}</span>
           <img src="${player.photo_url}" alt="${player.nickname}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: var(--transition-smooth); filter: contrast(1.05);">
           
           <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 100px; background: linear-gradient(to top, rgba(6, 5, 12, 1) 0%, transparent 100%);"></div>
@@ -34,7 +34,7 @@ window.renderElencoPage = async function (container) {
 
         <div class="player-info" style="padding: 1.5rem; background: rgba(14, 11, 26, 0.9); flex: 1; display: flex; flex-direction: column; justify-content: space-between; border-top: 1px solid var(--border-dark);">
           <div>
-            <div class="player-role" style="font-family: var(--font-tech); font-size: 0.85rem; font-weight: 700; color: var(--accent-neon); letter-spacing: 0.1em; text-transform: uppercase;">${player.role}</div>
+            <div class="player-role" style="font-family: var(--font-tech); font-size: 0.85rem; font-weight: 700; color: var(--accent-neon); letter-spacing: 0.1em; text-transform: uppercase;">${player.role || 'Player'}</div>
             <div class="player-nickname" style="font-family: var(--font-heading); font-size: 1.8rem; font-weight: 800; color: #ffffff; margin-top: 2px; line-height: 1.1;">${player.nickname}</div>
             <div class="player-fullname" style="font-size: 0.85rem; color: var(--text-muted-light); margin-top: 4px;">${player.name}</div>
             <p class="player-bio" style="font-size: 0.84rem; color: var(--text-muted-light); margin-top: 10px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${player.bio || ''}</p>
@@ -73,7 +73,7 @@ window.renderElencoPage = async function (container) {
           `).join('')}
         </div>
 
-        <div class="roster-grid" id="roster-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 2rem;">
+        <div class="roster-grid" id="roster-container" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.75rem;">
           ${renderRosterGrid('ALL')}
         </div>
 
