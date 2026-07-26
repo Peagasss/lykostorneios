@@ -1076,10 +1076,20 @@ input[type="file"]::-webkit-file-upload-button:hover {
 
 /* COLLAPSED STATE (Smoothly shrinking to pill) */
 .site-header.navbar-collapsed {
-  max-width: 210px !important;
+  max-width: 330px !important;
   background: rgba(8, 6, 18, 0.95) !important;
   border-color: rgba(168, 85, 247, 0.5) !important;
   box-shadow: 0 10px 35px rgba(0, 0, 0, 0.8), 0 0 20px rgba(168, 85, 247, 0.35) !important;
+}
+
+.site-header.navbar-collapsed .brand-wrapper {
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+}
+
+.site-header.navbar-collapsed .btn-live {
+  flex-shrink: 0 !important;
+  display: inline-flex !important;
 }
 
 .site-header.navbar-collapsed .nav-container {
@@ -1142,12 +1152,25 @@ body::after {
   }
 }
 
-/* ADMIN FIXED NAVBAR STRICT ENFORCEMENT */
+/* ADMIN FIXED NAVBAR AT VERY TOP (lykos.games/admin) */
 body.admin-body .site-header {
   position: fixed !important;
-  top: 12px !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  transform: none !important;
+  border-radius: 0 !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none !important;
+  box-shadow: 0 4px 25px rgba(0,0,0,0.7) !important;
   opacity: 1 !important;
   pointer-events: auto !important;
+}
+
+body.admin-body .site-header .nav-container {
+  max-width: 1350px;
+  margin: 0 auto;
 }
