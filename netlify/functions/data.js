@@ -2,30 +2,32 @@ const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
 
-let pool = null;
+function getPool() {
+  if (!pool) {
+    let rawString = process.env.AZURE_POSTGRES_URL || process.env.NEON_URL || process.env.POSTGRES_URL;
+    if (!rawString) throw new Error('Postgres connection string is not configured.');
+    const cleanString = rawString.replace(/([?&])sslmode=[^&]*/gi, '$1').replace(/[?&]$/, '');
+    pool = new Pool({
+      connectionString: cleanString,
+      ssl: { rejectUnauthorized: false }
+    });
+  }
+  return pool;
+}
 
 async function sql(strings, ...values) {
-  if (!pool) {
-    const connectionString = process.env.AZURE_POSTGRES_URL || process.env.NEON_URL || process.env.POSTGRES_URL;
-    if (!connectionString) throw new Error('Postgres connection string is not configured.');
-    pool = new Pool({ connectionString, ssl: { rejectUnauthorized: false } });
-  }
-
+  const p = getPool();
   let queryText = '';
   for (let i = 0; i < strings.length; i++) {
     queryText += strings[i];
     if (i < values.length) queryText += `$${i + 1}`;
   }
-  return pool.query(queryText, values);
+  return p.query(queryText, values);
 }
 
 sql.query = async (text, params) => {
-  if (!pool) {
-    const connectionString = process.env.AZURE_POSTGRES_URL || process.env.NEON_URL || process.env.POSTGRES_URL;
-    if (!connectionString) throw new Error('Postgres connection string is not configured.');
-    pool = new Pool({ connectionString, ssl: { rejectUnauthorized: false } });
-  }
-  return pool.query(text, params);
+  const p = getPool();
+  return p.query(text, params);
 };
 
 const HEADERS = {
