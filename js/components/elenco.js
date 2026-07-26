@@ -25,7 +25,7 @@ window.renderElencoPage = async function (container) {
 
     return filtered.map(player => `
       <div class="glass-card glass-card-interactive player-card float-effect" data-id="${player.id}" style="border: 1px solid var(--border-dark-strong); padding: 0; overflow: hidden; display: flex; flex-direction: column;">
-        <div class="player-image-wrap" style="aspect-ratio: 9 / 16; width: 100%; position: relative; background: radial-gradient(circle at 50% 30%, rgba(168, 85, 247, 0.25) 0%, rgba(10, 8, 20, 0.95) 75%); overflow: hidden;">
+        <div class="player-image-wrap" style="aspect-ratio: 3 / 4; width: 100%; position: relative; background: radial-gradient(circle at 50% 30%, rgba(168, 85, 247, 0.25) 0%, rgba(10, 8, 20, 0.95) 75%); overflow: hidden;">
           <span class="game-badge" style="top: 14px; right: 14px; background: rgba(10, 8, 20, 0.85); border: 1px solid var(--border-dark-strong); color: var(--accent-neon); font-family: var(--font-tech); font-size: 0.82rem; font-weight: 700; padding: 4px 12px; border-radius: var(--radius-xs); letter-spacing: 0.08em;">${player.game || 'E-Sports'}</span>
           <img src="${player.photo_url}" alt="${player.nickname}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: var(--transition-smooth); filter: contrast(1.05);">
           
@@ -87,7 +87,7 @@ window.renderElencoPage = async function (container) {
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.75rem;">
             ${staffMembers && staffMembers.length > 0 ? [...staffMembers].sort((a,b) => (a.sort_order || 0) - (b.sort_order || 0)).map(st => `
               <div class="glass-card glass-card-interactive staff-card" data-id="${st.id}" style="padding: 1.25rem; display: flex; align-items: center; gap: 1.25rem; border: 1px solid var(--border-dark-strong); cursor: pointer;">
-                <img src="${st.photo_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}" alt="${st.name}" style="width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-neon); box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); flex-shrink: 0;">
+                <img src="${st.photo_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}" alt="${st.name}" style="width: 88px; height: 110px; border-radius: var(--radius-xs); object-fit: cover; object-position: top center; border: 2px solid var(--accent-neon); box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); flex-shrink: 0;">
                 <div>
                   <span class="game-badge" style="position: static; font-size: 0.68rem; padding: 2px 8px; font-family: var(--font-tech);">${st.game || 'Staff'}</span>
                   <div style="font-family: var(--font-heading); font-weight: 800; font-size: 1.15rem; color: #ffffff; margin-top: 4px; line-height: 1.2;">${st.nickname ? st.nickname + ' (' + st.name + ')' : st.name}</div>
