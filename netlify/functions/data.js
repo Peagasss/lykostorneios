@@ -2,6 +2,9 @@ const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
 
+// GLOBAL POOL INSTANCE - Reused across invocations
+let pool = null;
+
 function getPool() {
   if (!pool) {
     let rawString = process.env.AZURE_POSTGRES_URL || process.env.NEON_URL || process.env.POSTGRES_URL;
