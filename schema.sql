@@ -45,6 +45,7 @@
     role TEXT NOT NULL,
     bio TEXT DEFAULT '',
     photo_url TEXT DEFAULT '',
+    photo_position TEXT DEFAULT 'top center',
     mouse TEXT DEFAULT '',
     keyboard TEXT DEFAULT '',
     headset TEXT DEFAULT '',
@@ -54,6 +55,7 @@
     social_x TEXT DEFAULT '',
     social_instagram TEXT DEFAULT '',
     sort_order INT DEFAULT 0,
+    is_starter BOOLEAN DEFAULT false,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
   );
 
@@ -65,6 +67,7 @@
     role TEXT NOT NULL,
     game TEXT NOT NULL,
     photo_url TEXT DEFAULT '',
+    photo_position TEXT DEFAULT 'top center',
     sort_order INT DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
   );
