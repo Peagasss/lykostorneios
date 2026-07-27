@@ -532,10 +532,23 @@ window.renderAdminPage = async function (container) {
               </label>
             </div>
 
-            <div class="form-group" style="margin-top: 1rem;">
-              <label class="form-label">Foto do Pro-Player (Upload PC)</label>
-              <input type="file" id="roster-file" class="form-input" accept="image/*">
-              <span class="upload-hint">Tamanho recomendado: 800x800px (Quadrado 1:1, JPG/PNG)</span>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+              <div class="form-group">
+                <label class="form-label">Foto do Pro-Player (Upload PC)</label>
+                <input type="file" id="roster-file" class="form-input" accept="image/*">
+                <span class="upload-hint">Tamanho recomendado: 800x800px (Quadrado 1:1, JPG/PNG)</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Enquadramento / Foco Vertical da Foto</label>
+                <select id="roster-photo-position" class="form-select">
+                  <option value="top center">Topo (Rosto em Destaque - Padrão)</option>
+                  <option value="center 15%">Rosto & Ombros (Alto)</option>
+                  <option value="center 30%">Busto / Peitoral (Médio)</option>
+                  <option value="center center">Centro / Meio</option>
+                  <option value="bottom center">Base / Inferior</option>
+                </select>
+                <span class="upload-hint">Ajuste como a foto do atleta será focada no card.</span>
+              </div>
             </div>
 
             <button type="submit" class="btn-primary">Salvar Novo Jogador &rarr;</button>

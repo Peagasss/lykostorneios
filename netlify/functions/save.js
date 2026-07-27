@@ -65,7 +65,9 @@ exports.handler = async (event) => {
       // Silent column migrations
       await Promise.all([
         sql`ALTER TABLE roster ADD COLUMN IF NOT EXISTS sort_order INT DEFAULT 0;`,
+        sql`ALTER TABLE roster ADD COLUMN IF NOT EXISTS photo_position TEXT DEFAULT 'top center';`,
         sql`ALTER TABLE staff ADD COLUMN IF NOT EXISTS sort_order INT DEFAULT 0;`,
+        sql`ALTER TABLE staff ADD COLUMN IF NOT EXISTS photo_position TEXT DEFAULT 'top center';`,
         sql`ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS imgbb_api_key TEXT DEFAULT '';`,
         sql`ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS default_opponent_logo TEXT DEFAULT '';`
       ]).catch(err => console.warn('[Migration Warning from Save API]:', err));
@@ -93,21 +95,21 @@ exports.handler = async (event) => {
       `;
     } else if (entity === 'roster') {
       await sql`
-        INSERT INTO roster (id, name, nickname, game, role, bio, photo_url, mouse, keyboard, headset, microphone, mousepad, monitor, social_x, social_instagram, sort_order, created_at)
-        VALUES (${String(item.id)}, ${item.name}, ${item.nickname}, ${item.game}, ${item.role}, ${item.bio || ''}, ${item.photo_url || ''}, ${item.mouse || ''}, ${item.keyboard || ''}, ${item.headset || ''}, ${item.microphone || ''}, ${item.mousepad || ''}, ${item.monitor || ''}, ${item.social_x || ''}, ${item.social_instagram || ''}, ${item.sort_order || 0}, NOW())
+        INSERT INTO roster (id, name, nickname, game, role, bio, photo_url, photo_position, mouse, keyboard, headset, microphone, mousepad, monitor, social_x, social_instagram, sort_order, created_at)
+        VALUES (${String(item.id)}, ${item.name}, ${item.nickname}, ${item.game}, ${item.role}, ${item.bio || ''}, ${item.photo_url || ''}, ${item.photo_position || 'top center'}, ${item.mouse || ''}, ${item.keyboard || ''}, ${item.headset || ''}, ${item.microphone || ''}, ${item.mousepad || ''}, ${item.monitor || ''}, ${item.social_x || ''}, ${item.social_instagram || ''}, ${item.sort_order || 0}, NOW())
         ON CONFLICT (id) DO UPDATE SET
           name = EXCLUDED.name, nickname = EXCLUDED.nickname, game = EXCLUDED.game, role = EXCLUDED.role,
-          bio = EXCLUDED.bio, photo_url = EXCLUDED.photo_url, mouse = EXCLUDED.mouse, keyboard = EXCLUDED.keyboard,
+          bio = EXCLUDED.bio, photo_url = EXCLUDED.photo_url, photo_position = EXCLUDED.photo_position, mouse = EXCLUDED.mouse, keyboard = EXCLUDED.keyboard,
           headset = EXCLUDED.headset, microphone = EXCLUDED.microphone, mousepad = EXCLUDED.mousepad, monitor = EXCLUDED.monitor,
           social_x = EXCLUDED.social_x, social_instagram = EXCLUDED.social_instagram, sort_order = EXCLUDED.sort_order;
       `;
     } else if (entity === 'staff') {
       await sql`
-        INSERT INTO staff (id, name, nickname, role, game, photo_url, sort_order, created_at)
-        VALUES (${String(item.id)}, ${item.name}, ${item.nickname}, ${item.role}, ${item.game}, ${item.photo_url || ''}, ${item.sort_order || 0}, NOW())
+        INSERT INTO staff (id, name, nickname, role, game, photo_url, photo_position, sort_order, created_at)
+        VALUES (${String(item.id)}, ${item.name}, ${item.nickname}, ${item.role}, ${item.game}, ${item.photo_url || ''}, ${item.photo_position || 'top center'}, ${item.sort_order || 0}, NOW())
         ON CONFLICT (id) DO UPDATE SET
           name = EXCLUDED.name, nickname = EXCLUDED.nickname, role = EXCLUDED.role,
-          game = EXCLUDED.game, photo_url = EXCLUDED.photo_url, sort_order = EXCLUDED.sort_order;
+          game = EXCLUDED.game, photo_url = EXCLUDED.photo_url, photo_position = EXCLUDED.photo_position, sort_order = EXCLUDED.sort_order;
       `;
     } else if (entity === 'matches') {
       await sql`

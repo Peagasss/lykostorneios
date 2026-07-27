@@ -1174,3 +1174,106 @@ body.admin-body .site-header .nav-container {
   max-width: 1350px;
   margin: 0 auto;
 }
+
+/* ==========================================================================
+   LYKOS E-SPORTS - ADMIN INTERFACE MODAL & FORM STYLING
+   ========================================================================== */
+.admin-layout-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.admin-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg-dark-surface) !important;
+  border-radius: var(--radius-sm);
+  padding: 1.25rem !important;
+}
+
+.admin-nav-item {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted-light);
+  padding: 12px 16px;
+  border-radius: var(--radius-xs);
+  text-align: left;
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.admin-nav-item:hover {
+  background: rgba(168, 85, 247, 0.08);
+  color: white;
+  border-color: rgba(168, 85, 247, 0.25);
+}
+
+.admin-nav-item.active {
+  background: linear-gradient(135deg, var(--primary-purple), var(--accent-neon));
+  color: white;
+  border-color: var(--accent-neon);
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.35);
+}
+
+/* Beautiful Inputs & Textareas */
+.form-group {
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-family: var(--font-heading);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent-neon);
+}
+
+.form-input, .form-select, .form-textarea {
+  background: rgba(10, 8, 20, 0.8) !important;
+  border: 1px solid var(--border-dark-strong) !important;
+  color: #ffffff !important;
+  padding: 12px 16px !important;
+  border-radius: var(--radius-xs) !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  font-family: var(--font-body) !important;
+  font-size: 0.88rem !important;
+  transition: var(--transition-fast) !important;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none !important;
+  border-color: var(--accent-neon) !important;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.3) !important;
+}
+
+.upload-hint {
+  font-size: 0.72rem;
+  color: var(--text-muted-light);
+  margin-top: 4px;
+}
+
+/* Form layout alignment helpers */
+.admin-form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.25rem;
+}
+
+@media (max-width: 992px) {
+  .admin-layout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+

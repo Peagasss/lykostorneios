@@ -47,21 +47,12 @@
   from = "/*"
   to = "/index.html"
   status = 200
-
 # ---------------------------------------------------------------------------
-# Cache Headers
+# Cache Headers - Global anti-cache for all pages, functions and static assets
 # ---------------------------------------------------------------------------
 [[headers]]
-  for = "/index.html"
+  for = "/*"
   [headers.values]
     Cache-Control = "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
-
-[[headers]]
-  for = "/api/*"
-  [headers.values]
-    Cache-Control = "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
-
-[[headers]]
-  for = "/.netlify/functions/*"
-  [headers.values]
-    Cache-Control = "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+    Pragma = "no-cache"
+    Expires = "0"

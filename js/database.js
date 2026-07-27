@@ -248,14 +248,14 @@ function persistCachedBundle() {
 }
 
 async function fetchFullDataBundle(forceFresh = false) {
-  const currentBundle = getOrCreateBundle();
   const now = Date.now();
   
-  if (!forceFresh && _cachedBundle) {
+  // Use memory cache only if it is less than 5 seconds old
+  if (!forceFresh && _cachedBundle && (now - _sharedDataTimestamp < 5000)) {
     return _cachedBundle;
   }
   
-  if (_sharedDataPromise && (now - _sharedDataTimestamp < 2000)) {
+  if (_sharedDataPromise && (now - _sharedDataTimestamp < 5000)) {
     return _sharedDataPromise;
   }
   
@@ -263,7 +263,7 @@ async function fetchFullDataBundle(forceFresh = false) {
   _sharedDataPromise = (async () => {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2500);
+      const timeoutId = setTimeout(() => controller.abort(), 4000); // 4s timeout
 
       const apiRes = await fetch(getApiUrl('/api/data?t=' + now), { signal: controller.signal });
       clearTimeout(timeoutId);
@@ -275,12 +275,13 @@ async function fetchFullDataBundle(forceFresh = false) {
       }
       const data = await apiRes.json();
       if (data) {
-        _cachedBundle = mergeBundles(getOrCreateBundle(), data);
+        // Network first: overwrite local cache with fresh API data
+        _cachedBundle = data;
         persistCachedBundle();
       }
       return _cachedBundle;
     } catch (e) {
-      console.warn('[LykosDB] Fast Fallback / Local Cache Used:', e.message);
+      console.warn('[LykosDB] Network fetch failed, falling back to local cache:', e.message);
       return getOrCreateBundle();
     }
   })();
@@ -421,9 +422,23 @@ function startRealtimePoller() {
   if (_isPollingStarted) return;
   _isPollingStarted = true;
 
+  // Poll every 5 seconds, but skip requests based on tab visibility and admin state
   setInterval(async () => {
+    // 1. Skip if the page/tab is in the background to save Netlify bandwidth
+    if (document.visibilityState !== 'visible') return;
+
+    // 2. Slow down requests: 15s for admin, 60s for public pages to conserve bandwidth
+    const isInsideAdmin = window.location.pathname.startsWith('/admin') || window.location.hash.startsWith('#/admin');
+    const now = Date.now();
+    const minInterval = isInsideAdmin ? 15000 : 60000;
+    
+    if (window._lastPollTime && (now - window._lastPollTime < minInterval)) {
+      return;
+    }
+    window._lastPollTime = now;
+
     try {
-      const res = await fetch(getApiUrl('/api/data?t=' + Date.now())).catch(() => null);
+      const res = await fetch(getApiUrl('/api/data?t=' + now)).catch(() => null);
       if (res && res.ok && (res.headers.get('content-type') || '').includes('application/json')) {
         const bundle = await res.json();
         _cachedBundle = mergeBundles(getOrCreateBundle(), bundle);
@@ -438,8 +453,6 @@ function startRealtimePoller() {
              if (bundle.settings) {
                window.dispatchEvent(new CustomEvent('lykos_branding_updated', { detail: bundle.settings }));
              }
-             // Avoid force re-rendering route if user is inside /admin or reading any open modal/popup
-             const isInsideAdmin = window.location.pathname.startsWith('/admin') || window.location.hash.startsWith('#/admin');
              
              // Universal modal check: checks both style inline display, class active, or offsetParent visibility
              const hasOpenModal = Array.from(document.querySelectorAll('.modal-backdrop, #player-modal, #news-reader-modal, #lightbox-modal')).some(el => {
@@ -454,10 +467,8 @@ function startRealtimePoller() {
         }
       }
     } catch (e) {}
-  }, 4000);
-}
-
-if (typeof window !== 'undefined') {
+  }, 5000);
+}if (typeof window !== 'undefined') {
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', startRealtimePoller);
   } else {

@@ -1,32 +1,10 @@
-const { Pool } = require('pg');
-
-let pool = null;
-
-async function sql(strings, ...values) {
-  if (!pool) {
-    const connectionString = process.env.AZURE_POSTGRES_URL || process.env.NEON_URL || process.env.POSTGRES_URL;
-    if (!connectionString) throw new Error("Postgres connection string is not configured.");
-    pool = new Pool({
-      connectionString,
-      ssl: { rejectUnauthorized: false }
-    });
-  }
-
-  let queryText = '';
-  for (let i = 0; i < strings.length; i++) {
-    queryText += strings[i];
-    if (i < values.length) {
-      queryText += `$${i + 1}`;
-    }
-  }
-
-  return pool.query(queryText, values);
-}
+const { Client } = require('pg');
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -59,8 +37,28 @@ module.exports = async (req, res) => {
   }
 
   // Vercel / Azure Postgres
-  if (process.env.AZURE_POSTGRES_URL || process.env.POSTGRES_URL || process.env.NEON_URL) {
+  const connectionString = process.env.AZURE_POSTGRES_URL || process.env.POSTGRES_URL || process.env.NEON_URL;
+  if (connectionString) {
+    const client = new Client({
+      connectionString,
+      ssl: { rejectUnauthorized: false }
+    });
+    
     try {
+      await client.connect();
+
+      async function sql(strings, ...values) {
+        let queryText = '';
+        for (let i = 0; i < strings.length; i++) {
+          queryText += strings[i];
+          if (i < values.length) {
+            queryText += `$${i + 1}`;
+          }
+        }
+        return client.query(queryText, values);
+      }
+      sql.query = async (text, params) => client.query(text, params);
+
       const result = await sql`SELECT * FROM app_users WHERE LOWER(email) = ${normEmail} LIMIT 1;`;
       const user = result.rows[0];
       if (user && user.password === normPass) {
@@ -71,6 +69,8 @@ module.exports = async (req, res) => {
     } catch (e) {
       console.error('[Vercel Postgres Login Error]:', e);
       return res.status(500).json({ error: e.message });
+    } finally {
+      await client.end();
     }
   }
 

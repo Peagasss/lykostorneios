@@ -1,44 +1,10 @@
-const { Pool } = require('pg');
-
-let pool = null;
-
-async function sql(strings, ...values) {
-  if (!pool) {
-    const connectionString = process.env.AZURE_POSTGRES_URL || process.env.NEON_URL || process.env.POSTGRES_URL;
-    if (!connectionString) throw new Error("Postgres connection string is not configured.");
-    pool = new Pool({
-      connectionString,
-      ssl: { rejectUnauthorized: false }
-    });
-  }
-
-  let queryText = '';
-  for (let i = 0; i < strings.length; i++) {
-    queryText += strings[i];
-    if (i < values.length) {
-      queryText += `$${i + 1}`;
-    }
-  }
-
-  return pool.query(queryText, values);
-}
-
-sql.query = async (text, params) => {
-  if (!pool) {
-    const connectionString = process.env.AZURE_POSTGRES_URL || process.env.NEON_URL || process.env.POSTGRES_URL;
-    if (!connectionString) throw new Error("Postgres connection string is not configured.");
-    pool = new Pool({
-      connectionString,
-      ssl: { rejectUnauthorized: false }
-    });
-  }
-  return pool.query(text, params);
-};
+const { Client } = require('pg');
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -46,7 +12,28 @@ module.exports = async (req, res) => {
   const { entity, item } = req.body || {};
   if (!entity || !item) return res.status(400).json({ error: 'Faltam dados para salvar.' });
 
+  const connectionString = process.env.AZURE_POSTGRES_URL || process.env.NEON_URL || process.env.POSTGRES_URL;
+  if (!connectionString) return res.status(500).json({ error: 'Postgres connection string is not configured.' });
+
+  const client = new Client({
+    connectionString,
+    ssl: { rejectUnauthorized: false }
+  });
+
   try {
+    await client.connect();
+
+    async function sql(strings, ...values) {
+      let queryText = '';
+      for (let i = 0; i < strings.length; i++) {
+        queryText += strings[i];
+        if (i < values.length) {
+          queryText += `$${i + 1}`;
+        }
+      }
+      return client.query(queryText, values);
+    }
+    sql.query = async (text, params) => client.query(text, params);
     // 1. Silent schema migration / initialization if database is empty (self-bootstraps new Neon DBs)
     const dbUrl = process.env.AZURE_POSTGRES_URL || process.env.NEON_URL || process.env.POSTGRES_URL;
     if (dbUrl) {
@@ -66,10 +53,12 @@ module.exports = async (req, res) => {
         console.warn('[Schema Init Warning from Save API]:', schemaErr);
       }
 
-      // 1.1 Silent migration to add sorting and API key columns if they don't exist yet
+      // 1.1 Silent migration to add sorting, framing and API key columns if they don't exist yet
       await Promise.all([
         sql`ALTER TABLE roster ADD COLUMN IF NOT EXISTS sort_order INT DEFAULT 0;`,
+        sql`ALTER TABLE roster ADD COLUMN IF NOT EXISTS photo_position TEXT DEFAULT 'top center';`,
         sql`ALTER TABLE staff ADD COLUMN IF NOT EXISTS sort_order INT DEFAULT 0;`,
+        sql`ALTER TABLE staff ADD COLUMN IF NOT EXISTS photo_position TEXT DEFAULT 'top center';`,
         sql`ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS imgbb_api_key TEXT DEFAULT '';`,
         sql`ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS default_opponent_logo TEXT DEFAULT '';`
       ]).catch(err => console.warn('[Migration Warning from Save API]:', err));
@@ -112,20 +101,20 @@ module.exports = async (req, res) => {
       `;
     } else if (entity === 'roster') {
       await sql`
-        INSERT INTO roster (id, name, nickname, game, role, bio, photo_url, mouse, keyboard, headset, microphone, mousepad, monitor, social_x, social_instagram, sort_order, created_at)
-        VALUES (${String(item.id)}, ${item.name}, ${item.nickname}, ${item.game}, ${item.role}, ${item.bio || ''}, ${item.photo_url || ''}, ${item.mouse || ''}, ${item.keyboard || ''}, ${item.headset || ''}, ${item.microphone || ''}, ${item.mousepad || ''}, ${item.monitor || ''}, ${item.social_x || ''}, ${item.social_instagram || ''}, ${item.sort_order || 0}, NOW())
+        INSERT INTO roster (id, name, nickname, game, role, bio, photo_url, photo_position, mouse, keyboard, headset, microphone, mousepad, monitor, social_x, social_instagram, sort_order, created_at)
+        VALUES (${String(item.id)}, ${item.name}, ${item.nickname}, ${item.game}, ${item.role}, ${item.bio || ''}, ${item.photo_url || ''}, ${item.photo_position || 'top center'}, ${item.mouse || ''}, ${item.keyboard || ''}, ${item.headset || ''}, ${item.microphone || ''}, ${item.mousepad || ''}, ${item.monitor || ''}, ${item.social_x || ''}, ${item.social_instagram || ''}, ${item.sort_order || 0}, NOW())
         ON CONFLICT (id) DO UPDATE SET
           name = EXCLUDED.name, nickname = EXCLUDED.nickname, game = EXCLUDED.game, role = EXCLUDED.role,
-          bio = EXCLUDED.bio, photo_url = EXCLUDED.photo_url, mouse = EXCLUDED.mouse, keyboard = EXCLUDED.keyboard,
+          bio = EXCLUDED.bio, photo_url = EXCLUDED.photo_url, photo_position = EXCLUDED.photo_position, mouse = EXCLUDED.mouse, keyboard = EXCLUDED.keyboard,
           headset = EXCLUDED.headset, microphone = EXCLUDED.microphone, mousepad = EXCLUDED.mousepad, monitor = EXCLUDED.monitor,
           social_x = EXCLUDED.social_x, social_instagram = EXCLUDED.social_instagram, sort_order = EXCLUDED.sort_order;
       `;
     } else if (entity === 'staff') {
       await sql`
-        INSERT INTO staff (id, name, nickname, role, game, photo_url, sort_order, created_at)
-        VALUES (${String(item.id)}, ${item.name}, ${item.nickname}, ${item.role}, ${item.game}, ${item.photo_url || ''}, ${item.sort_order || 0}, NOW())
+        INSERT INTO staff (id, name, nickname, role, game, photo_url, photo_position, sort_order, created_at)
+        VALUES (${String(item.id)}, ${item.name}, ${item.nickname}, ${item.role}, ${item.game}, ${item.photo_url || ''}, ${item.photo_position || 'top center'}, ${item.sort_order || 0}, NOW())
         ON CONFLICT (id) DO UPDATE SET
-          name = EXCLUDED.name, nickname = EXCLUDED.nickname, role = EXCLUDED.role, game = EXCLUDED.game, photo_url = EXCLUDED.photo_url, sort_order = EXCLUDED.sort_order;
+          name = EXCLUDED.name, nickname = EXCLUDED.nickname, role = EXCLUDED.role, game = EXCLUDED.game, photo_url = EXCLUDED.photo_url, photo_position = EXCLUDED.photo_position, sort_order = EXCLUDED.sort_order;
       `;
     } else if (entity === 'matches') {
       await sql`
@@ -201,5 +190,7 @@ module.exports = async (req, res) => {
   } catch (err) {
     console.error('[Save API Error]:', err);
     return res.status(500).json({ error: err.message });
+  } finally {
+    await client.end();
   }
 };

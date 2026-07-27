@@ -1,32 +1,10 @@
-const { Pool } = require('pg');
-
-let pool = null;
-
-async function sql(strings, ...values) {
-  if (!pool) {
-    const connectionString = process.env.AZURE_POSTGRES_URL || process.env.NEON_URL || process.env.POSTGRES_URL;
-    if (!connectionString) throw new Error("Postgres connection string is not configured.");
-    pool = new Pool({
-      connectionString,
-      ssl: { rejectUnauthorized: false }
-    });
-  }
-
-  let queryText = '';
-  for (let i = 0; i < strings.length; i++) {
-    queryText += strings[i];
-    if (i < values.length) {
-      queryText += `$${i + 1}`;
-    }
-  }
-
-  return pool.query(queryText, values);
-}
+const { Client } = require('pg');
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -34,7 +12,28 @@ module.exports = async (req, res) => {
   const { entity, id } = req.body || {};
   if (!entity || !id) return res.status(400).json({ error: 'Falta entidade ou ID para excluir.' });
 
+  const connectionString = process.env.AZURE_POSTGRES_URL || process.env.NEON_URL || process.env.POSTGRES_URL;
+  if (!connectionString) return res.status(500).json({ error: 'Postgres connection string is not configured.' });
+
+  const client = new Client({
+    connectionString,
+    ssl: { rejectUnauthorized: false }
+  });
+
   try {
+    await client.connect();
+
+    async function sql(strings, ...values) {
+      let queryText = '';
+      for (let i = 0; i < strings.length; i++) {
+        queryText += strings[i];
+        if (i < values.length) {
+          queryText += `$${i + 1}`;
+        }
+      }
+      return client.query(queryText, values);
+    }
+    sql.query = async (text, params) => client.query(text, params);
     const validTables = [
       'roster', 'staff', 'matches', 'trophies', 'modalities',
       'gallery', 'social_feeds', 'recent_tournaments',
@@ -60,5 +59,7 @@ module.exports = async (req, res) => {
   } catch (err) {
     console.error('[Delete API Error]:', err);
     return res.status(500).json({ error: err.message });
+  } finally {
+    await client.end();
   }
 };
