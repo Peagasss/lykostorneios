@@ -2,7 +2,6 @@ const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
 
-// GLOBAL POOL INSTANCE - Reused across invocations
 let pool = null;
 
 function getPool() {

@@ -185,10 +185,11 @@ function mergeArrayById(localArr, apiArr) {
   if (!Array.isArray(apiArr)) return localArr;
 
   const map = new Map();
-  apiArr.forEach(item => {
+  // Add local items first, then overwrite with fresh API/server items
+  localArr.forEach(item => {
     if (item && item.id !== undefined) map.set(String(item.id), item);
   });
-  localArr.forEach(item => {
+  apiArr.forEach(item => {
     if (item && item.id !== undefined) map.set(String(item.id), item);
   });
   return Array.from(map.values());
@@ -199,8 +200,9 @@ function mergeBundles(local, api) {
   if (!local) return api;
 
   return {
-    settings: { ...(api.settings || {}), ...(local.settings || {}) },
-    about: { ...(api.about || {}), ...(local.about || {}) },
+    // API/server settings and details must overwrite local settings/details
+    settings: { ...(local.settings || {}), ...(api.settings || {}) },
+    about: { ...(local.about || {}), ...(api.about || {}) },
     modalities: mergeArrayById(local.modalities, api.modalities),
     roster: mergeArrayById(local.roster, api.roster),
     staff: mergeArrayById(local.staff, api.staff),
@@ -452,7 +454,8 @@ function startRealtimePoller() {
       }).catch(() => null);
       if (res && res.ok && (res.headers.get('content-type') || '').includes('application/json')) {
         const bundle = await res.json();
-        _cachedBundle = mergeBundles(getOrCreateBundle(), bundle);
+        // Server response is the absolute single source of truth - overwrite local cache entirely
+        _cachedBundle = bundle;
         persistCachedBundle();
         const currentJson = JSON.stringify(_cachedBundle);
 
