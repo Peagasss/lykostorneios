@@ -2,6 +2,9 @@ const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
 
+// GLOBAL POOL INSTANCE - Reused across invocations
+let pool = null;
+
 function getPool() {
   if (!pool) {
     let rawString = process.env.AZURE_POSTGRES_URL || process.env.NEON_URL || process.env.POSTGRES_URL;
@@ -95,13 +98,13 @@ exports.handler = async (event) => {
       `;
     } else if (entity === 'roster') {
       await sql`
-        INSERT INTO roster (id, name, nickname, game, role, bio, photo_url, photo_position, mouse, keyboard, headset, microphone, mousepad, monitor, social_x, social_instagram, sort_order, created_at)
-        VALUES (${String(item.id)}, ${item.name}, ${item.nickname}, ${item.game}, ${item.role}, ${item.bio || ''}, ${item.photo_url || ''}, ${item.photo_position || 'top center'}, ${item.mouse || ''}, ${item.keyboard || ''}, ${item.headset || ''}, ${item.microphone || ''}, ${item.mousepad || ''}, ${item.monitor || ''}, ${item.social_x || ''}, ${item.social_instagram || ''}, ${item.sort_order || 0}, NOW())
+        INSERT INTO roster (id, name, nickname, game, role, bio, photo_url, photo_position, mouse, keyboard, headset, microphone, mousepad, monitor, social_x, social_instagram, sort_order, created_at, is_starter)
+        VALUES (${String(item.id)}, ${item.name}, ${item.nickname}, ${item.game}, ${item.role}, ${item.bio || ''}, ${item.photo_url || ''}, ${item.photo_position || 'top center'}, ${item.mouse || ''}, ${item.keyboard || ''}, ${item.headset || ''}, ${item.microphone || ''}, ${item.mousepad || ''}, ${item.monitor || ''}, ${item.social_x || ''}, ${item.social_instagram || ''}, ${item.sort_order || 0}, NOW(), ${item.is_starter || false})
         ON CONFLICT (id) DO UPDATE SET
           name = EXCLUDED.name, nickname = EXCLUDED.nickname, game = EXCLUDED.game, role = EXCLUDED.role,
           bio = EXCLUDED.bio, photo_url = EXCLUDED.photo_url, photo_position = EXCLUDED.photo_position, mouse = EXCLUDED.mouse, keyboard = EXCLUDED.keyboard,
           headset = EXCLUDED.headset, microphone = EXCLUDED.microphone, mousepad = EXCLUDED.mousepad, monitor = EXCLUDED.monitor,
-          social_x = EXCLUDED.social_x, social_instagram = EXCLUDED.social_instagram, sort_order = EXCLUDED.sort_order;
+          social_x = EXCLUDED.social_x, social_instagram = EXCLUDED.social_instagram, sort_order = EXCLUDED.sort_order, is_starter = EXCLUDED.is_starter;
       `;
     } else if (entity === 'staff') {
       await sql`
