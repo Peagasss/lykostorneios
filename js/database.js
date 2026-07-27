@@ -265,7 +265,13 @@ async function fetchFullDataBundle(forceFresh = false) {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 4000); // 4s timeout
 
-      const apiRes = await fetch(getApiUrl('/api/data?t=' + now), { signal: controller.signal });
+      const apiRes = await fetch(getApiUrl('/api/data?t=' + now), { 
+        signal: controller.signal,
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+          'Pragma': 'no-cache'
+        }
+      });
       clearTimeout(timeoutId);
 
       if (!apiRes.ok) throw new Error(`Erro HTTP ${apiRes.status}`);
@@ -438,7 +444,12 @@ function startRealtimePoller() {
     window._lastPollTime = now;
 
     try {
-      const res = await fetch(getApiUrl('/api/data?t=' + now)).catch(() => null);
+      const res = await fetch(getApiUrl('/api/data?t=' + now), {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+          'Pragma': 'no-cache'
+        }
+      }).catch(() => null);
       if (res && res.ok && (res.headers.get('content-type') || '').includes('application/json')) {
         const bundle = await res.json();
         _cachedBundle = mergeBundles(getOrCreateBundle(), bundle);
