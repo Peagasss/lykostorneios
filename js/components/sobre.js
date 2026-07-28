@@ -3,12 +3,17 @@
    ========================================================================== */
 
 window.renderSobrePage = async function (container) {
-  const [settings, aboutSettings, trophies, recentTournaments] = await Promise.all([
+  const [settings, aboutSettings, trophies, recentTournaments, communityTournaments] = await Promise.all([
     window.LykosDB.getSettings(),
     window.LykosDB.getAboutSettings(),
     window.LykosDB.getTrophies(),
-    window.LykosDB.getRecentTournaments()
+    window.LykosDB.getRecentTournaments(),
+    window.LykosDB.getCommunityTournaments().catch(() => [])
   ]);
+
+  const activeTournaments = communityTournaments.filter(t => (t.status || '').toLowerCase().includes('andamento'));
+  const openTournaments = communityTournaments.filter(t => (t.status || '').toLowerCase().includes('aberta') || (t.status || '').toLowerCase().includes('inscriç'));
+  const featuredTournaments = activeTournaments.length > 0 ? activeTournaments : openTournaments;
 
   container.innerHTML = `
     <section class="section-dark-1" style="padding-top: 130px; text-align: center; position: relative; overflow: hidden;">
@@ -55,6 +60,50 @@ window.renderSobrePage = async function (container) {
       </div>
     </section>
 
+    <!-- TORNEIOS EM ANDAMENTO / ATIVOS -->
+    ${featuredTournaments && featuredTournaments.length > 0 ? `
+      <section class="section-dark-1" style="border-top: 1px solid var(--border-dark); border-bottom: 1px solid var(--border-dark); padding: 3.5rem 0;">
+        <div class="container">
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <h2 class="section-heading" style="font-size: 2rem; margin-bottom: 0.25rem;">
+                <span style="color: #ff4d4d; animation: pulse 1.5s infinite;">🔴</span> Torneios <span>em Andamento</span>
+              </h2>
+              <p class="section-subtitle" style="margin: 0;">Competições ativas e circuitos abertos que a LYKOS está participando.</p>
+            </div>
+            <a href="/torneios" class="btn-primary" style="padding: 8px 18px; font-size: 0.82rem;">Ver Todos os Torneios &rarr;</a>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+            ${featuredTournaments.map(t => `
+              <div class="glass-card glass-card-interactive" style="overflow: hidden; display: flex; flex-direction: column; border: 1px solid rgba(168, 85, 247, 0.4);">
+                <div style="height: 150px; background-image: url('${t.banner_url || t.image_url || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80'}'); background-size: cover; background-position: center; position: relative;">
+                  <span class="game-badge" style="top: 12px; left: 12px;">${t.game || 'Geral'}</span>
+                  <span class="match-status-pill ${activeTournaments.length > 0 ? 'status-live' : 'status-open'}" style="position: absolute; top: 12px; right: 12px;">
+                    ${activeTournaments.length > 0 ? '🔴 EM ANDAMENTO' : (t.status || 'Inscrições Abertas')}
+                  </span>
+                </div>
+                <div style="padding: 1.25rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div>
+                    <h3 style="font-family: var(--font-heading); font-size: 1.2rem; color: white; margin-bottom: 6px;">${t.title || t.name || 'Torneio'}</h3>
+                    <p style="font-size: 0.83rem; color: var(--text-muted-light); line-height: 1.5; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${t.description || 'Sem descrição cadastrada.'}</p>
+                  </div>
+                  
+                  <div style="border-top: 1px solid var(--border-dark); padding-top: 0.85rem; margin-top: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                      <div style="font-size: 0.72rem; color: var(--text-muted-light);">Premiação</div>
+                      <div style="font-weight: 700; color: var(--accent-neon); font-size: 0.9rem;">${t.prize_pool || 'A definir'}</div>
+                    </div>
+                    <a href="/torneios" class="btn-secondary" style="padding: 6px 14px; font-size: 0.78rem;">Detalhes &rarr;</a>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </section>
+    ` : ''}
+
     <!-- TROPHY CABINET -->
     <section class="section-dark-1">
       <div class="container">
@@ -64,7 +113,7 @@ window.renderSobrePage = async function (container) {
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 3.5rem;">
           ${trophies.map(t => `
             <div class="trophy-card" data-id="${t.id}">
-              <span class="game-badge" style="position: static; margin-bottom: 6px; display: inline-block;">${t.game} • ${t.year}</span>
+              <span class="game-badge" style="position: static; margin-bottom: 6px; display: inline-block;">${t.game || 'Geral'} • ${t.year}</span>
               <h3 style="font-size: 1.2rem; margin-bottom: 6px; color: white;">${t.title}</h3>
               <p style="font-size: 0.82rem; color: var(--text-muted-light); line-height: 1.5;">${(t.description || '').substring(0, 85)}${(t.description || '').length > 85 ? '...' : ''}</p>
             </div>
@@ -90,7 +139,7 @@ window.renderSobrePage = async function (container) {
               ${recentTournaments.map(rec => `
                 <tr>
                   <td><strong>${rec.name}</strong></td>
-                  <td><span class="game-badge" style="position: static; font-size: 0.68rem;">${rec.game}</span></td>
+                  <td><span class="game-badge" style="position: static; font-size: 0.68rem;">${rec.game || 'Geral'}</span></td>
                   <td>${rec.year}</td>
                   <td><strong style="color: var(--accent-neon);">${rec.placement}</strong></td>
                   <td>${rec.prize}</td>
