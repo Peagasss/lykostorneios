@@ -457,7 +457,9 @@ function startRealtimePoller() {
         // Server response is the absolute single source of truth - overwrite local cache entirely
         _cachedBundle = bundle;
         persistCachedBundle();
-        const currentJson = JSON.stringify(_cachedBundle);
+        const bundleForComparison = { ..._cachedBundle };
+        delete bundleForComparison.updatedAt;
+        const currentJson = JSON.stringify(bundleForComparison);
 
         if (currentJson !== _lastBundleJson) {
            const isFirst = _lastBundleJson === '{}';

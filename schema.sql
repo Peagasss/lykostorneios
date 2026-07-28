@@ -54,6 +54,7 @@
     social_x TEXT DEFAULT '',
     social_instagram TEXT DEFAULT '',
     sort_order INT DEFAULT 0,
+    is_starter BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
   );
 
