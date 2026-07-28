@@ -27,7 +27,7 @@ window.renderTorneiosPage = async function (container) {
                 </div>
                 <div style="padding: 1.25rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
                   <div>
-                    <h3 style="font-family: var(--font-heading); font-size: 1.25rem; color: white; margin-bottom: 6px;">${t.title}</h3>
+                    <h3 style="font-family: var(--font-heading); font-size: 1.25rem; color: white; margin-bottom: 6px;">${t.title || t.name || 'Torneio'}</h3>
                     <p style="font-size: 0.85rem; color: var(--text-muted-light); line-height: 1.5; margin-bottom: 1rem;">${t.description || 'Sem descrição cadastrada.'}</p>
                   </div>
                   
@@ -36,8 +36,8 @@ window.renderTorneiosPage = async function (container) {
                       <div style="font-size: 0.75rem; color: var(--text-muted-light);">Premiação</div>
                       <div style="font-weight: 700; color: var(--accent-neon); font-size: 0.95rem;">${t.prize_pool || 'A definir'}</div>
                     </div>
-                    ${t.registration_url ? `
-                      <a href="${t.registration_url}" target="_blank" class="btn-primary" style="padding: 6px 14px; font-size: 0.78rem;">
+                    ${(t.registration_url || t.rules_url) ? `
+                      <a href="${t.registration_url || t.rules_url}" target="_blank" class="btn-primary" style="padding: 6px 14px; font-size: 0.78rem;">
                         Inscrever-se &rarr;
                       </a>
                     ` : ''}

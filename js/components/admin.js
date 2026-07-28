@@ -477,11 +477,11 @@ window.renderAdminPage = async function (container) {
           ${data.communityTournaments && data.communityTournaments.length > 0 ? data.communityTournaments.map(ct => `
             <div style="background: var(--bg-dark-surface); border: 1px solid var(--border-dark); border-radius: var(--radius-xs); padding: 1.25rem;">
               <span class="game-badge" style="position: static; margin-bottom: 6px; display: inline-block;">${ct.game} • ${ct.status}</span>
-              <h4 style="color: white; font-size: 1.1rem; margin-top: 4px;">${ct.title}</h4>
+              <h4 style="color: white; font-size: 1.1rem; margin-top: 4px;">${ct.title || ct.name || 'Torneio'}</h4>
               <div style="font-size: 0.8rem; color: var(--accent-neon); margin-top: 4px; font-weight: 700;">Premiação: ${ct.prize_pool || 'N/A'}</div>
               <div style="display: flex; gap: 6px; margin-top: 12px;">
                 <button class="btn-edit pop-edit-comm-tourn-btn" data-id="${ct.id}">Editar</button>
-                <button class="btn-danger delete-comm-tourn-btn" data-id="${ct.id}" data-title="${ct.title}">Excluir</button>
+                <button class="btn-danger delete-comm-tourn-btn" data-id="${ct.id}" data-title="${ct.title || ct.name || 'Torneio'}">Excluir</button>
               </div>
             </div>
           `).join('') : `
@@ -1906,12 +1906,14 @@ window.renderAdminPage = async function (container) {
         }
 
         const tournTitle = container.querySelector('#comm-tourn-title').value.trim();
+        const tournUrl = container.querySelector('#comm-tourn-url').value.trim();
         await window.LykosDB.saveCommunityTournament({
           name: tournTitle,
           title: tournTitle,
           game: container.querySelector('#comm-tourn-game').value,
           prize_pool: container.querySelector('#comm-tourn-prize').value,
-          registration_url: container.querySelector('#comm-tourn-url').value,
+          registration_url: tournUrl,
+          rules_url: tournUrl,
           status: container.querySelector('#comm-tourn-status').value,
           description: container.querySelector('#comm-tourn-desc').value,
           banner_url: bannerUrl
@@ -1929,11 +1931,11 @@ window.renderAdminPage = async function (container) {
         const html = `
           <form>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-              <div class="form-group"><label class="form-label">Título</label><input type="text" id="pop-ct-title" class="form-input" value="${ct.title}" required></div>
+              <div class="form-group"><label class="form-label">Título</label><input type="text" id="pop-ct-title" class="form-input" value="${ct.title || ct.name || ''}" required></div>
               <div class="form-group"><label class="form-label">Premiação</label><input type="text" id="pop-ct-prize" class="form-input" value="${ct.prize_pool || ''}" required></div>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-              <div class="form-group"><label class="form-label">URL de Inscrição</label><input type="url" id="pop-ct-url" class="form-input" value="${ct.registration_url || ''}"></div>
+              <div class="form-group"><label class="form-label">URL de Inscrição</label><input type="url" id="pop-ct-url" class="form-input" value="${ct.registration_url || ct.rules_url || ''}"></div>
               <div class="form-group">
                 <label class="form-label">Status</label>
                 <select id="pop-ct-status" class="form-select">
@@ -1960,12 +1962,14 @@ window.renderAdminPage = async function (container) {
           }
 
           const editTitle = form.querySelector('#pop-ct-title').value.trim();
+          const editUrl = form.querySelector('#pop-ct-url').value.trim();
           await window.LykosDB.saveCommunityTournament({
             ...ct,
             name: editTitle,
             title: editTitle,
             prize_pool: form.querySelector('#pop-ct-prize').value,
-            registration_url: form.querySelector('#pop-ct-url').value,
+            registration_url: editUrl,
+            rules_url: editUrl,
             status: form.querySelector('#pop-ct-status').value,
             description: form.querySelector('#pop-ct-desc').value,
             banner_url: bannerUrl

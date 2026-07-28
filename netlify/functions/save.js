@@ -73,7 +73,9 @@ exports.handler = async (event) => {
         sql`ALTER TABLE staff ADD COLUMN IF NOT EXISTS sort_order INT DEFAULT 0;`,
         sql`ALTER TABLE staff ADD COLUMN IF NOT EXISTS photo_position TEXT DEFAULT 'top center';`,
         sql`ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS imgbb_api_key TEXT DEFAULT '';`,
-        sql`ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS default_opponent_logo TEXT DEFAULT '';`
+        sql`ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS default_opponent_logo TEXT DEFAULT '';`,
+        sql`ALTER TABLE community_tournaments ADD COLUMN IF NOT EXISTS title TEXT DEFAULT '';`,
+        sql`ALTER TABLE community_tournaments ADD COLUMN IF NOT EXISTS registration_url TEXT DEFAULT '';`
       ]).catch(err => console.warn('[Migration Warning from Save API]:', err));
     }
 
@@ -163,13 +165,14 @@ exports.handler = async (event) => {
       `;
     } else if (entity === 'community_tournaments') {
       const tournName = item.name || item.title || 'Torneio';
+      const tournRegUrl = item.registration_url || item.rules_url || '';
       await sql`
-        INSERT INTO community_tournaments (id, name, game, date, prize_pool, max_teams, registered_teams, description, rules_url, registration_open, created_at)
-        VALUES (${String(item.id)}, ${tournName}, ${item.game || ''}, ${item.date || ''}, ${item.prize_pool || ''}, ${item.max_teams || 16}, ${item.registered_teams || 0}, ${item.description || ''}, ${item.rules_url || ''}, ${item.registration_open !== false}, NOW())
+        INSERT INTO community_tournaments (id, name, title, game, date, prize_pool, max_teams, registered_teams, description, rules_url, registration_url, registration_open, created_at)
+        VALUES (${String(item.id)}, ${tournName}, ${tournName}, ${item.game || ''}, ${item.date || ''}, ${item.prize_pool || ''}, ${item.max_teams || 16}, ${item.registered_teams || 0}, ${item.description || ''}, ${tournRegUrl}, ${tournRegUrl}, ${item.registration_open !== false}, NOW())
         ON CONFLICT (id) DO UPDATE SET
-          name = EXCLUDED.name, game = EXCLUDED.game, date = EXCLUDED.date, prize_pool = EXCLUDED.prize_pool,
+          name = EXCLUDED.name, title = EXCLUDED.title, game = EXCLUDED.game, date = EXCLUDED.date, prize_pool = EXCLUDED.prize_pool,
           max_teams = EXCLUDED.max_teams, registered_teams = EXCLUDED.registered_teams, description = EXCLUDED.description,
-          rules_url = EXCLUDED.rules_url, registration_open = EXCLUDED.registration_open;
+          rules_url = EXCLUDED.rules_url, registration_url = EXCLUDED.registration_url, registration_open = EXCLUDED.registration_open;
       `;
     } else if (entity === 'app_users') {
       await sql`
