@@ -2,6 +2,8 @@ const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
 
+let pool = null;
+
 function getPool() {
   if (!pool) {
     let rawString = process.env.AZURE_POSTGRES_URL || process.env.NEON_URL || process.env.POSTGRES_URL;

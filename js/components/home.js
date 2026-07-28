@@ -52,8 +52,9 @@ window.renderHomePage = async function (container) {
     }
   }
 
-  // Filter ONLY players who have is_starter marked
-  const starterPlayers = roster.filter(p => p.is_starter === true || String(p.is_starter) === 'true');
+  // Filter players marked as starter (supporting boolean, string 't', 'true', 1)
+  const markedStarters = roster.filter(p => p.is_starter === true || String(p.is_starter).toLowerCase() === 'true' || String(p.is_starter).toLowerCase() === 't' || p.is_starter === 1);
+  const starterPlayers = markedStarters.length > 0 ? markedStarters : roster.slice(0, 5);
 
   container.innerHTML = `
     <!-- MAIN HOME WRAPPER (FULL WIDTH - EDGE TO EDGE WITH ELEGANT TOP SPACING) -->

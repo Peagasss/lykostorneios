@@ -331,8 +331,26 @@ async function fetchFromApi(tableName, fallbackDefault) {
   return fallbackDefault;
 }
 
-// STRICT SAVE TO CLOUD WITH LOCAL FALLBACK CACHE
+// STRICT CLOUD SAVE: Sends data to server first; only updates local cache on 200 OK
 async function saveToApi(tableName, singleItem, eventName = null) {
+  const apiRes = await fetch(getApiUrl('/api/save'), {
+    method: 'POST',
+    headers: { 
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store, no-cache, must-revalidate',
+      'Pragma': 'no-cache'
+    },
+    body: JSON.stringify({ entity: tableName, item: singleItem })
+  });
+
+  if (!apiRes.ok) {
+    const errData = await apiRes.json().catch(() => ({}));
+    const errMsg = errData.error || `HTTP ${apiRes.status}`;
+    console.error(`[LykosDB] API Save Failed (${apiRes.status}):`, errMsg);
+    throw new Error(`Falha ao salvar no banco Azure: ${errMsg}`);
+  }
+
+  // Update memory & local cache ONLY after Cloud confirmed 200 OK
   const bundle = getOrCreateBundle();
   const keyMap = {
     site_settings: 'settings',
@@ -364,31 +382,30 @@ async function saveToApi(tableName, singleItem, eventName = null) {
     persistCachedBundle();
   }
 
-  window._lastLykosSaveError = null;
-  try {
-    const apiRes = await fetch(getApiUrl('/api/save'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ entity: tableName, item: singleItem })
-    });
-
-    if (!apiRes.ok) {
-      const errData = await apiRes.json().catch(() => ({}));
-      const errMsg = errData.error || `HTTP ${apiRes.status}`;
-      console.warn(`[LykosDB] Notice from API save (${apiRes.status}):`, errMsg);
-      window._lastLykosSaveError = errMsg;
-    }
-  } catch (err) {
-    console.warn(`[LykosDB] API save fallback to local cache:`, err.message);
-    window._lastLykosSaveError = err.message;
-  }
-
   if (eventName) {
     window.dispatchEvent(new CustomEvent(eventName, { detail: singleItem }));
   }
 }
 
+// STRICT CLOUD DELETE: Sends delete request to server first; throws error on failure
 async function deleteFromApi(tableName, itemId) {
+  const apiRes = await fetch(getApiUrl('/api/delete'), {
+    method: 'POST',
+    headers: { 
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store, no-cache, must-revalidate',
+      'Pragma': 'no-cache'
+    },
+    body: JSON.stringify({ entity: tableName, id: itemId })
+  });
+
+  if (!apiRes.ok) {
+    const errData = await apiRes.json().catch(() => ({}));
+    const errMsg = errData.error || `HTTP ${apiRes.status}`;
+    console.error(`[LykosDB] API Delete Failed (${apiRes.status}):`, errMsg);
+    throw new Error(`Falha ao excluir no banco Azure: ${errMsg}`);
+  }
+
   const bundle = getOrCreateBundle();
   const keyMap = {
     modalities: 'modalities',
@@ -406,20 +423,6 @@ async function deleteFromApi(tableName, itemId) {
   if (mappedKey && Array.isArray(bundle[mappedKey])) {
     bundle[mappedKey] = bundle[mappedKey].filter(i => String(i.id) !== String(itemId));
     persistCachedBundle();
-  }
-
-  try {
-    const apiRes = await fetch(getApiUrl('/api/delete'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ entity: tableName, id: itemId })
-    });
-
-    if (!apiRes.ok) {
-      console.warn(`[LykosDB] API delete notice: deleted locally.`);
-    }
-  } catch (err) {
-    console.warn(`[LykosDB] API delete fallback to local cache:`, err.message);
   }
 }
 
