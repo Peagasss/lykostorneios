@@ -77,7 +77,8 @@ exports.handler = async (event) => {
         sql`ALTER TABLE community_tournaments ADD COLUMN IF NOT EXISTS title TEXT DEFAULT '';`,
         sql`ALTER TABLE community_tournaments ADD COLUMN IF NOT EXISTS registration_url TEXT DEFAULT '';`,
         sql`ALTER TABLE roster ADD COLUMN IF NOT EXISTS social_youtube TEXT DEFAULT '';`,
-        sql`ALTER TABLE roster ADD COLUMN IF NOT EXISTS social_twitch TEXT DEFAULT '';`
+        sql`ALTER TABLE roster ADD COLUMN IF NOT EXISTS social_twitch TEXT DEFAULT '';`,
+        sql`ALTER TABLE recent_tournaments ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'Encerrado';`
       ]).catch(err => console.warn('[Migration Warning from Save API]:', err));
     }
 
@@ -160,10 +161,10 @@ exports.handler = async (event) => {
       `;
     } else if (entity === 'recent_tournaments') {
       await sql`
-        INSERT INTO recent_tournaments (id, name, year, placement, prize, game, created_at)
-        VALUES (${String(item.id)}, ${item.name}, ${item.year || ''}, ${item.placement || ''}, ${item.prize || ''}, ${item.game || ''}, NOW())
+        INSERT INTO recent_tournaments (id, name, year, placement, prize, game, status, created_at)
+        VALUES (${String(item.id)}, ${item.name}, ${item.year || ''}, ${item.placement || ''}, ${item.prize || ''}, ${item.game || ''}, ${item.status || 'Encerrado'}, NOW())
         ON CONFLICT (id) DO UPDATE SET
-          name = EXCLUDED.name, year = EXCLUDED.year, placement = EXCLUDED.placement, prize = EXCLUDED.prize, game = EXCLUDED.game;
+          name = EXCLUDED.name, year = EXCLUDED.year, placement = EXCLUDED.placement, prize = EXCLUDED.prize, game = EXCLUDED.game, status = EXCLUDED.status;
       `;
     } else if (entity === 'community_tournaments') {
       const tournName = item.name || item.title || 'Torneio';

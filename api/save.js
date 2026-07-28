@@ -157,10 +157,10 @@ module.exports = async (req, res) => {
       `;
     } else if (entity === 'recent_tournaments') {
       await sql`
-        INSERT INTO recent_tournaments (id, name, year, placement, prize, game, created_at)
-        VALUES (${String(item.id)}, ${item.name}, ${item.year || ''}, ${item.placement || ''}, ${item.prize || ''}, ${item.game || ''}, NOW())
+        INSERT INTO recent_tournaments (id, name, year, placement, prize, game, status, created_at)
+        VALUES (${String(item.id)}, ${item.name}, ${item.year || ''}, ${item.placement || ''}, ${item.prize || ''}, ${item.game || ''}, ${item.status || 'Encerrado'}, NOW())
         ON CONFLICT (id) DO UPDATE SET
-          name = EXCLUDED.name, year = EXCLUDED.year, placement = EXCLUDED.placement, prize = EXCLUDED.prize, game = EXCLUDED.game;
+          name = EXCLUDED.name, year = EXCLUDED.year, placement = EXCLUDED.placement, prize = EXCLUDED.prize, game = EXCLUDED.game, status = EXCLUDED.status;
       `;
     } else if (entity === 'community_tournaments') {
       const tournName = item.name || item.title || 'Torneio';

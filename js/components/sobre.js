@@ -131,16 +131,22 @@ window.renderSobrePage = async function (container) {
                 <th>Campeonato / Torneio</th>
                 <th>Modalidade</th>
                 <th>Ano</th>
+                <th>Status</th>
                 <th>Colocação Final</th>
                 <th>Premiação</th>
               </tr>
             </thead>
             <tbody>
               ${recentTournaments.map(rec => `
-                <tr>
+                <tr style="${rec.status === 'Em Andamento' ? 'background: rgba(230, 57, 70, 0.08);' : ''}">
                   <td><strong>${rec.name}</strong></td>
                   <td><span class="game-badge" style="position: static; font-size: 0.68rem;">${rec.game || 'Geral'}</span></td>
                   <td>${rec.year}</td>
+                  <td>
+                    ${rec.status === 'Em Andamento' 
+                      ? `<span class="match-status-pill status-live" style="font-size: 0.7rem; padding: 2px 8px;">🔴 EM ANDAMENTO</span>` 
+                      : `<span style="color: var(--text-muted-light); font-size: 0.8rem;">Encerrado</span>`}
+                  </td>
                   <td><strong style="color: var(--accent-neon);">${rec.placement}</strong></td>
                   <td>${rec.prize}</td>
                 </tr>

@@ -146,6 +146,7 @@
     placement TEXT DEFAULT '',
     prize TEXT DEFAULT '',
     game TEXT DEFAULT '',
+    status TEXT DEFAULT 'Encerrado',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
   );
 

@@ -727,7 +727,7 @@ window.renderAdminPage = async function (container) {
         <div style="background: var(--bg-dark-surface); border: 1px solid var(--border-dark); border-radius: var(--radius-sm); padding: 1.75rem; margin-bottom: 2rem;">
           <h3 style="margin-bottom: 1.25rem; font-size: 1.15rem;">Cadastrar Campeonato Recente</h3>
           <form id="form-recent-tournament">
-            <div style="display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr; gap: 1rem;">
+            <div style="display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr 1fr; gap: 1rem;">
               <div class="form-group"><label class="form-label">Nome do Campeonato</label><input type="text" id="rec-tourn-name" class="form-input" placeholder="Ex: VCT Americas Stage 2" required></div>
               <div class="form-group">
                 <label class="form-label">Modalidade</label>
@@ -738,6 +738,13 @@ window.renderAdminPage = async function (container) {
               <div class="form-group"><label class="form-label">Ano</label><input type="text" id="rec-tourn-year" class="form-input" value="2026" required></div>
               <div class="form-group"><label class="form-label">Colocação</label><input type="text" id="rec-tourn-placement" class="form-input" placeholder="Ex: 1º Lugar (Campeão)" required></div>
               <div class="form-group"><label class="form-label">Premiação</label><input type="text" id="rec-tourn-prize" class="form-input" placeholder="Ex: $250.000" required></div>
+              <div class="form-group">
+                <label class="form-label">Status</label>
+                <select id="rec-tourn-status" class="form-select">
+                  <option value="Encerrado">Encerrado</option>
+                  <option value="Em Andamento">Em Andamento</option>
+                </select>
+              </div>
             </div>
             <button type="submit" class="btn-primary">Salvar Campeonato Recente &rarr;</button>
           </form>
@@ -749,6 +756,7 @@ window.renderAdminPage = async function (container) {
             <div style="background: var(--bg-dark-surface); border: 1px solid var(--border-dark); padding: 10px 14px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
               <div>
                 <strong>${rt.name} (${rt.year})</strong> — <span style="color: var(--accent-neon); font-weight: 700;">${rt.placement}</span>
+                <span class="game-badge" style="position: static; margin-left: 8px; font-size: 0.7rem;">${rt.status === 'Em Andamento' ? '🔴 Em Andamento' : 'Encerrado'}</span>
               </div>
               <div style="display: flex; gap: 6px;">
                 <button class="btn-edit pop-edit-recent-tourn-btn" data-id="${rt.id}">Editar</button>
@@ -1862,7 +1870,8 @@ window.renderAdminPage = async function (container) {
           game: container.querySelector('#rec-tourn-game').value,
           year: container.querySelector('#rec-tourn-year').value,
           placement: container.querySelector('#rec-tourn-placement').value,
-          prize: container.querySelector('#rec-tourn-prize').value
+          prize: container.querySelector('#rec-tourn-prize').value,
+          status: container.querySelector('#rec-tourn-status').value
         });
         renderDashboard();
       };
@@ -1883,9 +1892,16 @@ window.renderAdminPage = async function (container) {
               </div>
               <div class="form-group"><label class="form-label">Ano</label><input type="text" id="pop-rt-year" class="form-input" value="${rt.year}" required></div>
             </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
               <div class="form-group"><label class="form-label">Colocação</label><input type="text" id="pop-rt-placement" class="form-input" value="${rt.placement}" required></div>
               <div class="form-group"><label class="form-label">Premiação / Detalhe</label><input type="text" id="pop-rt-prize" class="form-input" value="${rt.prize || ''}"></div>
+              <div class="form-group">
+                <label class="form-label">Status</label>
+                <select id="pop-rt-status" class="form-select">
+                  <option value="Encerrado" ${rt.status !== 'Em Andamento' ? 'selected' : ''}>Encerrado</option>
+                  <option value="Em Andamento" ${rt.status === 'Em Andamento' ? 'selected' : ''}>Em Andamento</option>
+                </select>
+              </div>
             </div>
             <div style="display: flex; gap: 10px; margin-top: 1rem;">
               <button type="submit" class="btn-primary" style="flex: 1;">Atualizar Campeonato &rarr;</button>
@@ -1901,7 +1917,8 @@ window.renderAdminPage = async function (container) {
             game: form.querySelector('#pop-rt-game').value,
             year: form.querySelector('#pop-rt-year').value,
             placement: form.querySelector('#pop-rt-placement').value,
-            prize: form.querySelector('#pop-rt-prize').value
+            prize: form.querySelector('#pop-rt-prize').value,
+            status: form.querySelector('#pop-rt-status').value
           });
         });
       };
