@@ -18,7 +18,7 @@ window.renderHeader = async function () {
   const hasLiveMatch = matches.some(m => (m.status || '').toUpperCase() === 'LIVE');
 
   headerContainer.innerHTML = `
-    <header class="site-header" style="position: fixed; top: 12px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 1240px; border-radius: 20px; z-index: 1000; background: rgba(10, 8, 20, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(168, 85, 247, 0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+    <header class="site-header ${hasLiveMatch ? '' : 'no-live-match'}" style="position: fixed; top: 12px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 1240px; border-radius: 20px; z-index: 1000; background: rgba(10, 8, 20, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(168, 85, 247, 0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
       <div class="container nav-container" style="display: flex; align-items: center; justify-content: space-between; height: 68px; padding: 0 1.5rem;">
         <div class="brand-wrapper" style="display: flex; align-items: center; gap: 8px; flex-shrink: 0; white-space: nowrap;">
           <a href="/" class="brand-logo" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; flex-shrink: 0; white-space: nowrap;">

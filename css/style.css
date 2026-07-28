@@ -1076,10 +1076,14 @@ input[type="file"]::-webkit-file-upload-button:hover {
 
 /* COLLAPSED STATE (Smoothly shrinking to pill) */
 .site-header.navbar-collapsed {
-  max-width: fit-content !important;
+  max-width: 320px !important;
   background: rgba(8, 6, 18, 0.95) !important;
   border-color: rgba(168, 85, 247, 0.5) !important;
   box-shadow: 0 10px 35px rgba(0, 0, 0, 0.8), 0 0 20px rgba(168, 85, 247, 0.35) !important;
+}
+
+.site-header.navbar-collapsed.no-live-match {
+  max-width: 235px !important;
 }
 
 .site-header.navbar-collapsed .brand-wrapper {

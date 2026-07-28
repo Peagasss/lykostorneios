@@ -1905,8 +1905,10 @@ window.renderAdminPage = async function (container) {
           bannerUrl = await window.LykosDB.uploadAsset(fileInput.files[0]);
         }
 
+        const tournTitle = container.querySelector('#comm-tourn-title').value.trim();
         await window.LykosDB.saveCommunityTournament({
-          title: container.querySelector('#comm-tourn-title').value,
+          name: tournTitle,
+          title: tournTitle,
           game: container.querySelector('#comm-tourn-game').value,
           prize_pool: container.querySelector('#comm-tourn-prize').value,
           registration_url: container.querySelector('#comm-tourn-url').value,
@@ -1957,9 +1959,11 @@ window.renderAdminPage = async function (container) {
             bannerUrl = await window.LykosDB.uploadAsset(ctFile.files[0]);
           }
 
+          const editTitle = form.querySelector('#pop-ct-title').value.trim();
           await window.LykosDB.saveCommunityTournament({
             ...ct,
-            title: form.querySelector('#pop-ct-title').value,
+            name: editTitle,
+            title: editTitle,
             prize_pool: form.querySelector('#pop-ct-prize').value,
             registration_url: form.querySelector('#pop-ct-url').value,
             status: form.querySelector('#pop-ct-status').value,

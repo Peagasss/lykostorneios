@@ -163,9 +163,10 @@ module.exports = async (req, res) => {
           name = EXCLUDED.name, year = EXCLUDED.year, placement = EXCLUDED.placement, prize = EXCLUDED.prize, game = EXCLUDED.game;
       `;
     } else if (entity === 'community_tournaments') {
+      const tournName = item.name || item.title || 'Torneio';
       await sql`
         INSERT INTO community_tournaments (id, name, game, date, prize_pool, max_teams, registered_teams, description, rules_url, registration_open, created_at)
-        VALUES (${String(item.id)}, ${item.name}, ${item.game || ''}, ${item.date || ''}, ${item.prize_pool || ''}, ${item.max_teams || 16}, ${item.registered_teams || 0}, ${item.description || ''}, ${item.rules_url || ''}, ${item.registration_open !== false}, NOW())
+        VALUES (${String(item.id)}, ${tournName}, ${item.game || ''}, ${item.date || ''}, ${item.prize_pool || ''}, ${item.max_teams || 16}, ${item.registered_teams || 0}, ${item.description || ''}, ${item.rules_url || ''}, ${item.registration_open !== false}, NOW())
         ON CONFLICT (id) DO UPDATE SET
           name = EXCLUDED.name, game = EXCLUDED.game, date = EXCLUDED.date, prize_pool = EXCLUDED.prize_pool,
           max_teams = EXCLUDED.max_teams, registered_teams = EXCLUDED.registered_teams, description = EXCLUDED.description,
