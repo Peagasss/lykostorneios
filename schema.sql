@@ -53,6 +53,8 @@
     monitor TEXT DEFAULT '',
     social_x TEXT DEFAULT '',
     social_instagram TEXT DEFAULT '',
+    social_youtube TEXT DEFAULT '',
+    social_twitch TEXT DEFAULT '',
     sort_order INT DEFAULT 0,
     is_starter BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL

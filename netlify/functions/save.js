@@ -75,7 +75,9 @@ exports.handler = async (event) => {
         sql`ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS imgbb_api_key TEXT DEFAULT '';`,
         sql`ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS default_opponent_logo TEXT DEFAULT '';`,
         sql`ALTER TABLE community_tournaments ADD COLUMN IF NOT EXISTS title TEXT DEFAULT '';`,
-        sql`ALTER TABLE community_tournaments ADD COLUMN IF NOT EXISTS registration_url TEXT DEFAULT '';`
+        sql`ALTER TABLE community_tournaments ADD COLUMN IF NOT EXISTS registration_url TEXT DEFAULT '';`,
+        sql`ALTER TABLE roster ADD COLUMN IF NOT EXISTS social_youtube TEXT DEFAULT '';`,
+        sql`ALTER TABLE roster ADD COLUMN IF NOT EXISTS social_twitch TEXT DEFAULT '';`
       ]).catch(err => console.warn('[Migration Warning from Save API]:', err));
     }
 
@@ -101,13 +103,13 @@ exports.handler = async (event) => {
       `;
     } else if (entity === 'roster') {
       await sql`
-        INSERT INTO roster (id, name, nickname, game, role, bio, photo_url, photo_position, mouse, keyboard, headset, microphone, mousepad, monitor, social_x, social_instagram, sort_order, is_starter, created_at)
-        VALUES (${String(item.id)}, ${item.name}, ${item.nickname}, ${item.game}, ${item.role}, ${item.bio || ''}, ${item.photo_url || ''}, ${item.photo_position || 'top center'}, ${item.mouse || ''}, ${item.keyboard || ''}, ${item.headset || ''}, ${item.microphone || ''}, ${item.mousepad || ''}, ${item.monitor || ''}, ${item.social_x || ''}, ${item.social_instagram || ''}, ${item.sort_order || 0}, ${item.is_starter || false}, NOW())
+        INSERT INTO roster (id, name, nickname, game, role, bio, photo_url, photo_position, mouse, keyboard, headset, microphone, mousepad, monitor, social_x, social_instagram, social_youtube, social_twitch, sort_order, is_starter, created_at)
+        VALUES (${String(item.id)}, ${item.name}, ${item.nickname}, ${item.game}, ${item.role}, ${item.bio || ''}, ${item.photo_url || ''}, ${item.photo_position || 'top center'}, ${item.mouse || ''}, ${item.keyboard || ''}, ${item.headset || ''}, ${item.microphone || ''}, ${item.mousepad || ''}, ${item.monitor || ''}, ${item.social_x || ''}, ${item.social_instagram || ''}, ${item.social_youtube || ''}, ${item.social_twitch || ''}, ${item.sort_order || 0}, ${item.is_starter || false}, NOW())
         ON CONFLICT (id) DO UPDATE SET
           name = EXCLUDED.name, nickname = EXCLUDED.nickname, game = EXCLUDED.game, role = EXCLUDED.role,
           bio = EXCLUDED.bio, photo_url = EXCLUDED.photo_url, photo_position = EXCLUDED.photo_position, mouse = EXCLUDED.mouse, keyboard = EXCLUDED.keyboard,
           headset = EXCLUDED.headset, microphone = EXCLUDED.microphone, mousepad = EXCLUDED.mousepad, monitor = EXCLUDED.monitor,
-          social_x = EXCLUDED.social_x, social_instagram = EXCLUDED.social_instagram, sort_order = EXCLUDED.sort_order, is_starter = EXCLUDED.is_starter;
+          social_x = EXCLUDED.social_x, social_instagram = EXCLUDED.social_instagram, social_youtube = EXCLUDED.social_youtube, social_twitch = EXCLUDED.social_twitch, sort_order = EXCLUDED.sort_order, is_starter = EXCLUDED.is_starter;
       `;
     } else if (entity === 'staff') {
       await sql`

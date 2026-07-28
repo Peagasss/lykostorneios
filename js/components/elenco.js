@@ -170,9 +170,11 @@ window.renderElencoPage = async function (container) {
             </div>
           </div>
 
-          <div style="display: flex; gap: 12px; border-top: 1px solid var(--border-dark); padding-top: 1rem;">
+          <div style="display: flex; gap: 10px; border-top: 1px solid var(--border-dark); padding-top: 1rem; flex-wrap: wrap;">
             ${player.social_x ? `<a href="${player.social_x}" target="_blank" class="btn-secondary" style="padding: 6px 14px; font-size: 0.75rem;">Perfil no X</a>` : ''}
             ${player.social_instagram ? `<a href="${player.social_instagram}" target="_blank" class="btn-secondary" style="padding: 6px 14px; font-size: 0.75rem;">Instagram</a>` : ''}
+            ${player.social_youtube ? `<a href="${player.social_youtube}" target="_blank" class="btn-secondary" style="padding: 6px 14px; font-size: 0.75rem;">Canal YouTube</a>` : ''}
+            ${player.social_twitch ? `<a href="${player.social_twitch}" target="_blank" class="btn-secondary" style="padding: 6px 14px; font-size: 0.75rem;">TwitchTV</a>` : ''}
           </div>
         `;
 

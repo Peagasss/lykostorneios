@@ -508,9 +508,11 @@ window.renderAdminPage = async function (container) {
               <div class="form-group"><label class="form-label">Função / Role</label><input type="text" id="roster-role" class="form-input" placeholder="Ex: Duelist" required></div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.5rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem; margin-top: 0.5rem;">
               <div class="form-group"><label class="form-label">Link X (Twitter)</label><input type="url" id="roster-social-x" class="form-input" placeholder="https://x.com/..."></div>
               <div class="form-group"><label class="form-label">Link Instagram</label><input type="url" id="roster-social-insta" class="form-input" placeholder="https://instagram.com/..."></div>
+              <div class="form-group"><label class="form-label">Canal YouTube</label><input type="url" id="roster-social-yt" class="form-input" placeholder="https://youtube.com/..."></div>
+              <div class="form-group"><label class="form-label">Canal TwitchTV</label><input type="url" id="roster-social-twitch" class="form-input" placeholder="https://twitch.tv/..."></div>
             </div>
 
             <div class="form-group"><label class="form-label">Biografia do Pro-Player</label><textarea id="roster-bio" class="form-textarea" rows="2" placeholder="Trajetória e conquistas do atleta..."></textarea></div>
@@ -725,11 +727,17 @@ window.renderAdminPage = async function (container) {
         <div style="background: var(--bg-dark-surface); border: 1px solid var(--border-dark); border-radius: var(--radius-sm); padding: 1.75rem; margin-bottom: 2rem;">
           <h3 style="margin-bottom: 1.25rem; font-size: 1.15rem;">Cadastrar Campeonato Recente</h3>
           <form id="form-recent-tournament">
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem;">
+            <div style="display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr; gap: 1rem;">
               <div class="form-group"><label class="form-label">Nome do Campeonato</label><input type="text" id="rec-tourn-name" class="form-input" placeholder="Ex: VCT Americas Stage 2" required></div>
+              <div class="form-group">
+                <label class="form-label">Modalidade</label>
+                <select id="rec-tourn-game" class="form-select" required>
+                  ${(data.modalities && data.modalities.length > 0) ? data.modalities.map(m => `<option value="${m.name}">${m.name}</option>`).join('') : '<option value="Valorant">Valorant</option><option value="CS2">CS2</option>'}
+                </select>
+              </div>
               <div class="form-group"><label class="form-label">Ano</label><input type="text" id="rec-tourn-year" class="form-input" value="2026" required></div>
               <div class="form-group"><label class="form-label">Colocação</label><input type="text" id="rec-tourn-placement" class="form-input" placeholder="Ex: 1º Lugar (Campeão)" required></div>
-              <div class="form-group"><label class="form-label">Premiação / Modalidade</label><input type="text" id="rec-tourn-prize" class="form-input" placeholder="Ex: $250.000" required></div>
+              <div class="form-group"><label class="form-label">Premiação</label><input type="text" id="rec-tourn-prize" class="form-input" placeholder="Ex: $250.000" required></div>
             </div>
             <button type="submit" class="btn-primary">Salvar Campeonato Recente &rarr;</button>
           </form>
@@ -1463,6 +1471,8 @@ window.renderAdminPage = async function (container) {
             role: roleEl ? roleEl.value.trim() : 'Player',
             social_x: (container.querySelector('#roster-social-x') || {}).value || '',
             social_instagram: (container.querySelector('#roster-social-insta') || {}).value || '',
+            social_youtube: (container.querySelector('#roster-social-yt') || {}).value || '',
+            social_twitch: (container.querySelector('#roster-social-twitch') || {}).value || '',
             bio: (container.querySelector('#roster-bio') || {}).value || '',
             is_starter: container.querySelector('#roster-is-starter') ? container.querySelector('#roster-is-starter').checked : false,
             mouse: (container.querySelector('#roster-mouse') || {}).value || '',
@@ -1522,9 +1532,11 @@ window.renderAdminPage = async function (container) {
               <div class="form-group"><label class="form-label">Função / Role</label><input type="text" id="pop-p-role" class="form-input" value="${player.role || ''}" required></div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.5rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem; margin-top: 0.5rem;">
               <div class="form-group"><label class="form-label">Link X (Twitter)</label><input type="url" id="pop-p-x" class="form-input" value="${player.social_x || ''}"></div>
               <div class="form-group"><label class="form-label">Link Instagram</label><input type="url" id="pop-p-insta" class="form-input" value="${player.social_instagram || ''}"></div>
+              <div class="form-group"><label class="form-label">Canal YouTube</label><input type="url" id="pop-p-yt" class="form-input" value="${player.social_youtube || ''}"></div>
+              <div class="form-group"><label class="form-label">Canal TwitchTV</label><input type="url" id="pop-p-twitch" class="form-input" value="${player.social_twitch || ''}"></div>
             </div>
 
             <div class="form-group"><label class="form-label">Biografia do Pro-Player</label><textarea id="pop-p-bio" class="form-textarea" rows="2">${player.bio || ''}</textarea></div>
@@ -1573,6 +1585,8 @@ window.renderAdminPage = async function (container) {
             role: form.querySelector('#pop-p-role').value,
             social_x: form.querySelector('#pop-p-x') ? form.querySelector('#pop-p-x').value : '',
             social_instagram: form.querySelector('#pop-p-insta') ? form.querySelector('#pop-p-insta').value : '',
+            social_youtube: form.querySelector('#pop-p-yt') ? form.querySelector('#pop-p-yt').value : '',
+            social_twitch: form.querySelector('#pop-p-twitch') ? form.querySelector('#pop-p-twitch').value : '',
             bio: form.querySelector('#pop-p-bio') ? form.querySelector('#pop-p-bio').value : '',
             is_starter: form.querySelector('#pop-p-starter') ? form.querySelector('#pop-p-starter').checked : false,
             mouse: form.querySelector('#pop-p-mouse').value,
@@ -1845,6 +1859,7 @@ window.renderAdminPage = async function (container) {
         e.preventDefault();
         await window.LykosDB.saveRecentTournament({
           name: container.querySelector('#rec-tourn-name').value,
+          game: container.querySelector('#rec-tourn-game').value,
           year: container.querySelector('#rec-tourn-year').value,
           placement: container.querySelector('#rec-tourn-placement').value,
           prize: container.querySelector('#rec-tourn-prize').value
@@ -1860,8 +1875,12 @@ window.renderAdminPage = async function (container) {
 
         const html = `
           <form>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div style="display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 1rem;">
               <div class="form-group"><label class="form-label">Nome do Campeonato</label><input type="text" id="pop-rt-name" class="form-input" value="${rt.name}" required></div>
+              <div class="form-group">
+                <label class="form-label">Modalidade</label>
+                <select id="pop-rt-game" class="form-select">${data.modalities.map(m => `<option value="${m.name}" ${rt.game === m.name ? 'selected' : ''}>${m.name}</option>`).join('')}</select>
+              </div>
               <div class="form-group"><label class="form-label">Ano</label><input type="text" id="pop-rt-year" class="form-input" value="${rt.year}" required></div>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -1879,6 +1898,7 @@ window.renderAdminPage = async function (container) {
           await window.LykosDB.saveRecentTournament({
             ...rt,
             name: form.querySelector('#pop-rt-name').value,
+            game: form.querySelector('#pop-rt-game').value,
             year: form.querySelector('#pop-rt-year').value,
             placement: form.querySelector('#pop-rt-placement').value,
             prize: form.querySelector('#pop-rt-prize').value
